@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Verifies that a key name is correctly generated from an identity name by appending a unique key identifier, ensuring it extends the expected "KEY" prefix and that the original identity can be accurately extracted from the key name.
 func TestKeyName(t *testing.T) {
 	tu.SetT(t)
 
@@ -23,6 +24,7 @@ func TestKeyName(t *testing.T) {
 	require.Equal(t, id, id2)
 }
 
+// Extracts the identity name from a key name by removing the "/KEY/<kid>" suffix and returns an error if the input name does not conform to the expected key name structure.
 func TestGetIdentityFromKeyName(t *testing.T) {
 	tu.SetT(t)
 
@@ -40,6 +42,7 @@ func TestGetIdentityFromKeyName(t *testing.T) {
 	require.Error(t, err)
 }
 
+// Constructs a certificate name by appending a certificate component and version to a valid key name, ensuring the key name contains a 'KEY' component.
 func TestMakeCertName(t *testing.T) {
 	tu.SetT(t)
 
@@ -54,6 +57,7 @@ func TestMakeCertName(t *testing.T) {
 	require.Error(t, err)
 }
 
+// Extracts the key name from a certificate name by truncating at the key ID component, validating that the certificate name follows the expected format (KEY-based structure with optional version/digest components).
 func TestGetKeyNameFromCertName(t *testing.T) {
 	tu.SetT(t)
 

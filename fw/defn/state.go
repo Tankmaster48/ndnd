@@ -19,6 +19,7 @@ const (
 	AdminDown State = iota
 )
 
+// Returns a string representation of the State, such as "Up", "Down", or "AdminDown", and "Unknown" for unrecognized states.
 func (s State) String() string {
 	switch s {
 	case Up:

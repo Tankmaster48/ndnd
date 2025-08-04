@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Constructs an SvMap with entries for /ndn/alice and /ndn/bob, associating each name with specific sequence numbers and uint64 values.
 func makeSvMap() ndn_sync.SvMap[uint64] {
 	m := ndn_sync.NewSvMap[uint64](0)
 	m.Set("/ndn/alice", 100, 1)
@@ -17,6 +18,7 @@ func makeSvMap() ndn_sync.SvMap[uint64] {
 	return m
 }
 
+// Constructs and tests an SvMap (NDN name-to-value mapping) with basic operations including value retrieval, insertion, and direct modification.
 func TestSvMapBasic(t *testing.T) {
 	tu.SetT(t)
 
@@ -40,6 +42,7 @@ func TestSvMapBasic(t *testing.T) {
 	require.Equal(t, uint64(138), m.Get("/ndn/alice", 100))
 }
 
+// Tests the SvMap's Set method for adding, updating, and ordering entries under NDN names, verifying correct value storage and sequence maintenance based on Boot values for ordered state tracking.
 func TestSvMapSet(t *testing.T) {
 	tu.SetT(t)
 
@@ -62,6 +65,7 @@ func TestSvMapSet(t *testing.T) {
 	}
 }
 
+// Tests the `IsNewerThan` method of an SvMap by comparing two version maps under various scenarios involving differing sequence numbers and entry existence, using custom comparison functions to determine ordering and existence criteria.
 func TestSvMapNewer(t *testing.T) {
 	tu.SetT(t)
 
@@ -97,6 +101,7 @@ func TestSvMapNewer(t *testing.T) {
 	require.False(t, m1.IsNewerThan(m2, exist))
 }
 
+// "Tests encoding of an SvMap with multiple entries, verifying that names are ordered according to NDN canonical order and bootstrap times are sorted in ascending order within each name."
 func TestSvMapTLV(t *testing.T) {
 	tu.SetT(t)
 

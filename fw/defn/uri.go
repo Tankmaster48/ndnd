@@ -160,6 +160,7 @@ func MakeQuicFaceURI(addr netip.AddrPort) *URI {
 	}
 }
 
+// Parses a URI string into a URI object, determining its type (e.g., UDP, TCP, WebSocket) and extracting scheme, host, port, path, and zone information for Named Data Networking (NDN) face configuration.
 func DecodeURIString(str string) *URI {
 	ret := &URI{
 		uriType: unknownURI,
@@ -407,6 +408,7 @@ func (u *URI) Scope() Scope {
 	return Local
 }
 
+// Returns a string representation of the URI by combining its scheme, path, and port (if applicable) according to the specific URI type (e.g., "dev://", "udp://host:port").
 func (u *URI) String() string {
 	switch u.uriType {
 	case devURI:

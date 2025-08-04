@@ -19,6 +19,7 @@ type StrategyEncoder struct {
 type StrategyParsingContext struct {
 }
 
+// Initializes the StrategyEncoder by calculating the total encoded length of the strategy, including the cumulative length of its name components and associated TLV overhead.
 func (encoder *StrategyEncoder) Init(value *Strategy) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -37,10 +38,12 @@ func (encoder *StrategyEncoder) Init(value *Strategy) {
 
 }
 
+// Initializes the StrategyParsingContext, preparing it for parsing strategy information in Named-Data Networking operations.
 func (context *StrategyParsingContext) Init() {
 
 }
 
+// Encodes the Name field of a Strategy into the provided byte buffer using TLV (Type-Length-Value) format, writing type code 7 followed by length and component encodings if the Name is non-nil.
 func (encoder *StrategyEncoder) EncodeInto(value *Strategy, buf []byte) {
 
 	pos := uint(0)
@@ -55,6 +58,7 @@ func (encoder *StrategyEncoder) EncodeInto(value *Strategy, buf []byte) {
 	}
 }
 
+// Encodes a Strategy value into a byte slice using the encoder's pre-determined length, returning it as a single-element Wire slice.
 func (encoder *StrategyEncoder) Encode(value *Strategy) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -65,6 +69,7 @@ func (encoder *StrategyEncoder) Encode(value *Strategy) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded strategy, extracting the Name field (type 7) and handling critical fields based on the ignoreCritical flag.
 func (context *StrategyParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Strategy, error) {
 
 	var handled_Name bool = false
@@ -130,22 +135,26 @@ func (context *StrategyParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the Strategy into a wire-format representation using the StrategyEncoder.
 func (value *Strategy) Encode() enc.Wire {
 	encoder := StrategyEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte slice of the strategy by joining its components.
 func (value *Strategy) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a Strategy from the given WireView, optionally ignoring critical TLV elements if ignoreCritical is true.
 func ParseStrategy(reader enc.WireView, ignoreCritical bool) (*Strategy, error) {
 	context := StrategyParsingContext{}
 	context.Init()
 	return context.Parse(reader, ignoreCritical)
 }
 
+// Returns a dictionary representation of the Strategy, including the Name field if it is non-nil.
 func (value *Strategy) ToDict() map[string]any {
 	dict := map[string]any{}
 	if value.Name != nil {
@@ -154,6 +163,7 @@ func (value *Strategy) ToDict() map[string]any {
 	return dict
 }
 
+// Constructs a Strategy object from a dictionary, validating and assigning the "Name" field if present and correctly typed.
 func DictToStrategy(dict map[string]any) (*Strategy, error) {
 	value := &Strategy{}
 	var err error = nil
@@ -184,6 +194,7 @@ type ControlArgsParsingContext struct {
 	Strategy_context StrategyParsingContext
 }
 
+// Calculates the total encoded length of a ControlArgs structure by summing the TLV-encoded sizes of all present fields, including nested strategy encodings and optional parameters.
 func (encoder *ControlArgsEncoder) Init(value *ControlArgs) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -269,12 +280,14 @@ func (encoder *ControlArgsEncoder) Init(value *ControlArgs) {
 
 }
 
+// Initializes the Strategy_context field of the ControlArgsParsingContext.
 func (context *ControlArgsParsingContext) Init() {
 
 	context.Strategy_context.Init()
 
 }
 
+// Encodes a ControlArgs structure into a binary TLV (Type-Length-Value) format suitable for NDN control messages by serializing its fields (e.g., Name, FaceId, Uri) into the provided byte buffer according to their respective TLV type codes and encoding rules.
 func (encoder *ControlArgsEncoder) EncodeInto(value *ControlArgs, buf []byte) {
 
 	pos := uint(0)
@@ -408,6 +421,7 @@ func (encoder *ControlArgsEncoder) EncodeInto(value *ControlArgs, buf []byte) {
 	}
 }
 
+// Encodes the provided ControlArgs into a byte slice using the precomputed length of the encoder, returning a wire-formatted structure suitable for transmission.
 func (encoder *ControlArgsEncoder) Encode(value *ControlArgs) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -418,6 +432,7 @@ func (encoder *ControlArgsEncoder) Encode(value *ControlArgs) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded ControlArgs structure from the provided reader, handling each field according to its type and constructing a ControlArgs object with parsed values, while respecting critical field handling based on the ignoreCritical flag.
 func (context *ControlArgsParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ControlArgs, error) {
 
 	var handled_Name bool = false
@@ -849,22 +864,26 @@ func (context *ControlArgsParsingContext) Parse(reader enc.WireView, ignoreCriti
 	return value, nil
 }
 
+// Encodes the ControlArgs into a wire format for transmission or storage.
 func (value *ControlArgs) Encode() enc.Wire {
 	encoder := ControlArgsEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the ControlArgs by encoding its components and concatenating them into a single slice.
 func (value *ControlArgs) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses control arguments from encoded data using the provided WireView, returning a ControlArgs structure and an error, with an option to ignore critical fields that cannot be processed.
 func ParseControlArgs(reader enc.WireView, ignoreCritical bool) (*ControlArgs, error) {
 	context := ControlArgsParsingContext{}
 	context.Init()
 	return context.Parse(reader, ignoreCritical)
 }
 
+// Converts the ControlArgs struct into a map[string]any dictionary, including only non-nil fields and optional values that are present, with nested Strategy fields recursively converted to dictionaries.
 func (value *ControlArgs) ToDict() map[string]any {
 	dict := map[string]any{}
 	if value.Name != nil {
@@ -918,6 +937,7 @@ func (value *ControlArgs) ToDict() map[string]any {
 	return dict
 }
 
+// Constructs a ControlArgs object from a dictionary map, validating each field's type and handling optional parameters with presence/absence semantics.
 func DictToControlArgs(dict map[string]any) (*ControlArgs, error) {
 	value := &ControlArgs{}
 	var err error = nil
@@ -1126,6 +1146,7 @@ type ControlResponseValParsingContext struct {
 	Params_context ControlArgsParsingContext
 }
 
+// Initializes the ControlResponseValEncoder with the given value, calculating its total encoded length by summing the TLV-encoded lengths of the StatusCode, StatusText, and optional Params fields.
 func (encoder *ControlResponseValEncoder) Init(value *ControlResponseVal) {
 
 	if value.Params != nil {
@@ -1147,11 +1168,13 @@ func (encoder *ControlResponseValEncoder) Init(value *ControlResponseVal) {
 
 }
 
+// Initializes the internal `Params_context` field of the `ControlResponseValParsingContext` to prepare it for use.
 func (context *ControlResponseValParsingContext) Init() {
 
 	context.Params_context.Init()
 }
 
+// Encodes a ControlResponseVal struct into a binary TLV (Type-Length-Value) format in the provided buffer, including StatusCode (type 102), StatusText (type 103), and optional Params (type 104) fields.
 func (encoder *ControlResponseValEncoder) EncodeInto(value *ControlResponseVal, buf []byte) {
 
 	pos := uint(0)
@@ -1177,6 +1200,7 @@ func (encoder *ControlResponseValEncoder) EncodeInto(value *ControlResponseVal, 
 	}
 }
 
+// Encodes a ControlResponseVal into a byte slice of the length specified by the encoder and wraps it in a Wire structure.
 func (encoder *ControlResponseValEncoder) Encode(value *ControlResponseVal) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1187,6 +1211,7 @@ func (encoder *ControlResponseValEncoder) Encode(value *ControlResponseVal) enc.
 	return wire
 }
 
+// Parses a binary-encoded ControlResponseVal from the given WireView, handling required fields (StatusCode, StatusText), optional Params, and skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *ControlResponseValParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ControlResponseVal, error) {
 
 	var handled_StatusCode bool = false
@@ -1290,22 +1315,26 @@ func (context *ControlResponseValParsingContext) Parse(reader enc.WireView, igno
 	return value, nil
 }
 
+// Encodes the control response value into a wire format using a ControlResponseValEncoder.
 func (value *ControlResponseVal) Encode() enc.Wire {
 	encoder := ControlResponseValEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the concatenated bytes of the encoded `ControlResponseVal`.
 func (value *ControlResponseVal) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a ControlResponseVal structure from wire-encoded data, with an option to ignore critical parsing errors.
 func ParseControlResponseVal(reader enc.WireView, ignoreCritical bool) (*ControlResponseVal, error) {
 	context := ControlResponseValParsingContext{}
 	context.Init()
 	return context.Parse(reader, ignoreCritical)
 }
 
+// Returns a map representing the ControlResponseVal with StatusCode, StatusText, and Params (if present) converted to a dictionary.
 func (value *ControlResponseVal) ToDict() map[string]any {
 	dict := map[string]any{}
 	dict["StatusCode"] = value.StatusCode
@@ -1316,6 +1345,7 @@ func (value *ControlResponseVal) ToDict() map[string]any {
 	return dict
 }
 
+// Converts a map[string]any to a ControlResponseVal struct, validating required fields (StatusCode, StatusText) and optional Params, returning errors for missing or incompatible types.
 func DictToControlResponseVal(dict map[string]any) (*ControlResponseVal, error) {
 	value := &ControlResponseVal{}
 	var err error = nil
@@ -1368,6 +1398,7 @@ type ControlParametersParsingContext struct {
 	Val_context ControlArgsParsingContext
 }
 
+// Initializes the ControlParametersEncoder with the provided ControlParameters, computing the total encoded length including the optional Val field's type-length-value encoding if present.
 func (encoder *ControlParametersEncoder) Init(value *ControlParameters) {
 	if value.Val != nil {
 		encoder.Val_encoder.Init(value.Val)
@@ -1383,10 +1414,12 @@ func (encoder *ControlParametersEncoder) Init(value *ControlParameters) {
 
 }
 
+// Initializes the validation context within the ControlParameters parsing context by calling its Init method.
 func (context *ControlParametersParsingContext) Init() {
 	context.Val_context.Init()
 }
 
+// Encodes the `Val` field of the provided `ControlParameters` into the given byte buffer using a TLV (Type-Length-Value) format, starting with type byte 104 ("h"), followed by the length and encoded value.
 func (encoder *ControlParametersEncoder) EncodeInto(value *ControlParameters, buf []byte) {
 
 	pos := uint(0)
@@ -1402,6 +1435,7 @@ func (encoder *ControlParametersEncoder) EncodeInto(value *ControlParameters, bu
 	}
 }
 
+// Encodes the given ControlParameters into a wire-encoded byte slice using the encoder's pre-determined buffer size.
 func (encoder *ControlParametersEncoder) Encode(value *ControlParameters) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1412,6 +1446,7 @@ func (encoder *ControlParametersEncoder) Encode(value *ControlParameters) enc.Wi
 	return wire
 }
 
+// Parses binary wire-encoded ControlParameters, extracting the Val field using Val_context and handling critical/uncritical fields based on the ignoreCritical flag.
 func (context *ControlParametersParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ControlParameters, error) {
 
 	var handled_Val bool = false
@@ -1476,16 +1511,19 @@ func (context *ControlParametersParsingContext) Parse(reader enc.WireView, ignor
 	return value, nil
 }
 
+// Encodes the ControlParameters into a wire-encoded format for use in NDN network communication.
 func (value *ControlParameters) Encode() enc.Wire {
 	encoder := ControlParametersEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns a byte slice representation of the ControlParameters by encoding them into their wire format and joining the results.
 func (value *ControlParameters) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a ControlParameters object from encoded data using the provided WireView reader, with an option to ignore critical parameters if specified.
 func ParseControlParameters(reader enc.WireView, ignoreCritical bool) (*ControlParameters, error) {
 	context := ControlParametersParsingContext{}
 	context.Init()
@@ -1502,6 +1540,7 @@ type ControlResponseParsingContext struct {
 	Val_context ControlResponseValParsingContext
 }
 
+// Initializes the ControlResponseEncoder with the provided ControlResponse value, setting up the Val field encoder if present and calculating the total encoded length including TLV overhead for the Val component.
 func (encoder *ControlResponseEncoder) Init(value *ControlResponse) {
 	if value.Val != nil {
 		encoder.Val_encoder.Init(value.Val)
@@ -1517,10 +1556,12 @@ func (encoder *ControlResponseEncoder) Init(value *ControlResponse) {
 
 }
 
+// Initializes the internal validation context (`Val_context`) within the ControlResponseParsingContext to prepare it for parsing operations.
 func (context *ControlResponseParsingContext) Init() {
 	context.Val_context.Init()
 }
 
+// Encodes a ControlResponse object into a byte buffer, writing the TLV-encoded "Val" field (with type 101) if present, including its length and value.
 func (encoder *ControlResponseEncoder) EncodeInto(value *ControlResponse, buf []byte) {
 
 	pos := uint(0)
@@ -1536,6 +1577,7 @@ func (encoder *ControlResponseEncoder) EncodeInto(value *ControlResponse, buf []
 	}
 }
 
+// Encodes a ControlResponse into a pre-allocated byte slice sized according to the encoder's Length field and returns it as a Wire slice.
 func (encoder *ControlResponseEncoder) Encode(value *ControlResponse) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1546,6 +1588,7 @@ func (encoder *ControlResponseEncoder) Encode(value *ControlResponse) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded ControlResponse from the provided WireView reader, handling the 'Val' field with the Val_context parser and skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *ControlResponseParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ControlResponse, error) {
 
 	var handled_Val bool = false
@@ -1610,16 +1653,19 @@ func (context *ControlResponseParsingContext) Parse(reader enc.WireView, ignoreC
 	return value, nil
 }
 
+// Encodes the ControlResponse into a wire-format representation using a ControlResponseEncoder.
 func (value *ControlResponse) Encode() enc.Wire {
 	encoder := ControlResponseEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded bytes of the ControlResponse as a single byte slice.
 func (value *ControlResponse) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded ControlResponse from the given reader, constructing a ControlResponse object and optionally ignoring critical fields if specified.
 func ParseControlResponse(reader enc.WireView, ignoreCritical bool) (*ControlResponse, error) {
 	context := ControlResponseParsingContext{}
 	context.Init()
@@ -1633,6 +1679,7 @@ type FaceEventNotificationValueEncoder struct {
 type FaceEventNotificationValueParsingContext struct {
 }
 
+// Calculates and sets the total encoded length of a FaceEventNotificationValue structure by summing the TLV-encoded sizes of its fields (FaceEventKind, FaceId, Uri, LocalUri, FaceScope, FacePersistency, LinkType, and Flags).
 func (encoder *FaceEventNotificationValueEncoder) Init(value *FaceEventNotificationValue) {
 
 	l := uint(0)
@@ -1658,10 +1705,12 @@ func (encoder *FaceEventNotificationValueEncoder) Init(value *FaceEventNotificat
 
 }
 
+// Initializes the FaceEventNotificationValueParsingContext for parsing FaceEventNotification values.
 func (context *FaceEventNotificationValueParsingContext) Init() {
 
 }
 
+// Encodes a FaceEventNotificationValue struct into a binary TLV (Type-Length-Value) format in the provided byte buffer, including fields like FaceEventKind, FaceId, URIs, scope, persistency, link type, and flags.
 func (encoder *FaceEventNotificationValueEncoder) EncodeInto(value *FaceEventNotificationValue, buf []byte) {
 
 	pos := uint(0)
@@ -1708,6 +1757,7 @@ func (encoder *FaceEventNotificationValueEncoder) EncodeInto(value *FaceEventNot
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes the given FaceEventNotificationValue into a wire-format byte slice using the encoder's pre-determined buffer length.
 func (encoder *FaceEventNotificationValueEncoder) Encode(value *FaceEventNotificationValue) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1718,6 +1768,7 @@ func (encoder *FaceEventNotificationValueEncoder) Encode(value *FaceEventNotific
 	return wire
 }
 
+// Parses a TLV-encoded FaceEventNotificationValue from the provided WireView, extracting required fields such as FaceEventKind, FaceId, Uri, and others, while handling critical and non-critical TLV elements according to NDN specifications.
 func (context *FaceEventNotificationValueParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FaceEventNotificationValue, error) {
 
 	var handled_FaceEventKind bool = false
@@ -1942,16 +1993,19 @@ func (context *FaceEventNotificationValueParsingContext) Parse(reader enc.WireVi
 	return value, nil
 }
 
+// Encodes the FaceEventNotificationValue into a wire-encoded format suitable for transmission or storage.
 func (value *FaceEventNotificationValue) Encode() enc.Wire {
 	encoder := FaceEventNotificationValueEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the FaceEventNotificationValue into a byte slice by serializing its TLV components.
 func (value *FaceEventNotificationValue) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded FaceEventNotificationValue from the given reader, constructing a FaceEventNotificationValue object while optionally ignoring critical unrecognized elements.
 func ParseFaceEventNotificationValue(reader enc.WireView, ignoreCritical bool) (*FaceEventNotificationValue, error) {
 	context := FaceEventNotificationValueParsingContext{}
 	context.Init()
@@ -1968,6 +2022,7 @@ type FaceEventNotificationParsingContext struct {
 	Val_context FaceEventNotificationValueParsingContext
 }
 
+// Initializes the FaceEventNotificationEncoder with the provided value, calculates its encoded length by including the optional Val field's presence flag, nested TLV encoding length, and the actual Val data size.
 func (encoder *FaceEventNotificationEncoder) Init(value *FaceEventNotification) {
 	if value.Val != nil {
 		encoder.Val_encoder.Init(value.Val)
@@ -1983,10 +2038,12 @@ func (encoder *FaceEventNotificationEncoder) Init(value *FaceEventNotification) 
 
 }
 
+// Initializes the Val_context component of the FaceEventNotification parsing context.
 func (context *FaceEventNotificationParsingContext) Init() {
 	context.Val_context.Init()
 }
 
+// Encodes a FaceEventNotification into a binary buffer using TLV format, writing the Val field (if present) with its associated type and length.
 func (encoder *FaceEventNotificationEncoder) EncodeInto(value *FaceEventNotification, buf []byte) {
 
 	pos := uint(0)
@@ -2002,6 +2059,7 @@ func (encoder *FaceEventNotificationEncoder) EncodeInto(value *FaceEventNotifica
 	}
 }
 
+// Encodes a FaceEventNotification into a wire-format byte slice for transmission.
 func (encoder *FaceEventNotificationEncoder) Encode(value *FaceEventNotification) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2012,6 +2070,7 @@ func (encoder *FaceEventNotificationEncoder) Encode(value *FaceEventNotification
 	return wire
 }
 
+// Parses a TLV-encoded FaceEventNotification from the provided wire format reader, handling the 'Val' field with a dedicated context and skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *FaceEventNotificationParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FaceEventNotification, error) {
 
 	var handled_Val bool = false
@@ -2076,16 +2135,19 @@ func (context *FaceEventNotificationParsingContext) Parse(reader enc.WireView, i
 	return value, nil
 }
 
+// Encodes the FaceEventNotification into a wire format for network transmission.
 func (value *FaceEventNotification) Encode() enc.Wire {
 	encoder := FaceEventNotificationEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the FaceEventNotification by encoding its fields and concatenating the resulting byte slices.
 func (value *FaceEventNotification) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a FaceEventNotification object from wire-encoded data, using a parsing context and optionally ignoring critical field errors.
 func ParseFaceEventNotification(reader enc.WireView, ignoreCritical bool) (*FaceEventNotification, error) {
 	context := FaceEventNotificationParsingContext{}
 	context.Init()
@@ -2099,6 +2161,7 @@ type GeneralStatusEncoder struct {
 type GeneralStatusParsingContext struct {
 }
 
+// Calculates the total encoded length of a GeneralStatus object by summing the bytes required for each mandatory and optional TLV-encoded field (including type markers, lengths, and values) and storing the result in the encoder's Length property.
 func (encoder *GeneralStatusEncoder) Init(value *GeneralStatus) {
 
 	l := uint(0)
@@ -2175,10 +2238,12 @@ func (encoder *GeneralStatusEncoder) Init(value *GeneralStatus) {
 
 }
 
+// Initializes the GeneralStatusParsingContext, preparing it for parsing status information with default or required initial settings.
 func (context *GeneralStatusParsingContext) Init() {
 
 }
 
+// Serializes a GeneralStatus object into a binary TLV (Type-Length-Value) format in the provided buffer, encoding mandatory fields with fixed type codes and optional fields conditionally with their respective type codes.
 func (encoder *GeneralStatusEncoder) EncodeInto(value *GeneralStatus, buf []byte) {
 
 	pos := uint(0)
@@ -2337,6 +2402,7 @@ func (encoder *GeneralStatusEncoder) EncodeInto(value *GeneralStatus, buf []byte
 	}
 }
 
+// Encodes a GeneralStatus object into a binary wire format using a pre-allocated buffer of the encoder's specified length and returns it as a single-element byte slice.
 func (encoder *GeneralStatusEncoder) Encode(value *GeneralStatus) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2347,6 +2413,7 @@ func (encoder *GeneralStatusEncoder) Encode(value *GeneralStatus) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded GeneralStatus structure from the provided wire reader, handling required and optional fields according to their type numbers and ensuring all mandatory fields are present.
 func (context *GeneralStatusParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*GeneralStatus, error) {
 
 	var handled_NfdVersion bool = false
@@ -3013,16 +3080,19 @@ func (context *GeneralStatusParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the GeneralStatus object into its wire format representation using the GeneralStatusEncoder.
 func (value *GeneralStatus) Encode() enc.Wire {
 	encoder := GeneralStatusEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the GeneralStatus by encoding its components and concatenating them into a single byte slice.
 func (value *GeneralStatus) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a GeneralStatus structure from the provided WireView, using a parsing context and optionally ignoring critical errors based on the ignoreCritical flag.
 func ParseGeneralStatus(reader enc.WireView, ignoreCritical bool) (*GeneralStatus, error) {
 	context := GeneralStatusParsingContext{}
 	context.Init()
@@ -3036,6 +3106,7 @@ type FaceStatusEncoder struct {
 type FaceStatusParsingContext struct {
 }
 
+// Calculates the total encoded length of a FaceStatus object using TLV (Type-Length-Value) encoding, accounting for all required and optional fields, and sets the result in the encoder's Length field.
 func (encoder *FaceStatusEncoder) Init(value *FaceStatus) {
 
 	l := uint(0)
@@ -3091,10 +3162,12 @@ func (encoder *FaceStatusEncoder) Init(value *FaceStatus) {
 
 }
 
+// Initializes the FaceStatusParsingContext for parsing FaceStatus data.
 func (context *FaceStatusParsingContext) Init() {
 
 }
 
+// Encodes a FaceStatus object into a TLV (Type-Length-Value)-formatted binary buffer, serializing all mandatory fields (e.g., Face ID, URIs, counters) and including optional fields if present.
 func (encoder *FaceStatusEncoder) EncodeInto(value *FaceStatus, buf []byte) {
 
 	pos := uint(0)
@@ -3208,6 +3281,7 @@ func (encoder *FaceStatusEncoder) EncodeInto(value *FaceStatus, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes a FaceStatus object into a byte buffer using the encoder's configuration and returns it as a wire structure.
 func (encoder *FaceStatusEncoder) Encode(value *FaceStatus) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -3218,6 +3292,7 @@ func (encoder *FaceStatusEncoder) Encode(value *FaceStatus) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded FaceStatus data from a wire format reader into a FaceStatus struct, handling required and optional fields while enforcing critical field validation unless ignored.
 func (context *FaceStatusParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FaceStatus, error) {
 
 	var handled_FaceId bool = false
@@ -3711,16 +3786,19 @@ func (context *FaceStatusParsingContext) Parse(reader enc.WireView, ignoreCritic
 	return value, nil
 }
 
+// Encodes the FaceStatus object into its corresponding wire format representation using the FaceStatusEncoder.
 func (value *FaceStatus) Encode() enc.Wire {
 	encoder := FaceStatusEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns a byte slice representation of the FaceStatus by encoding its data and concatenating the resulting segments.
 func (value *FaceStatus) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded FaceStatus object into a structured FaceStatus, using a parsing context and optionally ignoring critical TLV elements if specified.
 func ParseFaceStatus(reader enc.WireView, ignoreCritical bool) (*FaceStatus, error) {
 	context := FaceStatusParsingContext{}
 	context.Init()
@@ -3739,6 +3817,7 @@ type FaceStatusMsgParsingContext struct {
 	Vals_context FaceStatusParsingContext
 }
 
+// Initializes the FaceStatusMsg encoder with the provided message, setting up sub-encoders for each FaceStatus in the Vals array and computing the total encoded length including TLV header overhead.
 func (encoder *FaceStatusMsgEncoder) Init(value *FaceStatusMsg) {
 	{
 		Vals_l := len(value.Vals)
@@ -3790,10 +3869,12 @@ func (encoder *FaceStatusMsgEncoder) Init(value *FaceStatusMsg) {
 
 }
 
+// Initializes the FaceStatusMsgParsingContext by initializing its internal values context.
 func (context *FaceStatusMsgParsingContext) Init() {
 	context.Vals_context.Init()
 }
 
+// Encodes a FaceStatusMsg structure into a binary TLV format in the provided buffer, serializing each element of the Vals slice using corresponding sub-encoders.
 func (encoder *FaceStatusMsgEncoder) EncodeInto(value *FaceStatusMsg, buf []byte) {
 
 	pos := uint(0)
@@ -3825,6 +3906,7 @@ func (encoder *FaceStatusMsgEncoder) EncodeInto(value *FaceStatusMsg, buf []byte
 	}
 }
 
+// Encodes a FaceStatusMsg into a byte buffer of the size specified by the encoder's Length field, returning the serialized data as a Wire structure.
 func (encoder *FaceStatusMsgEncoder) Encode(value *FaceStatusMsg) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -3835,6 +3917,7 @@ func (encoder *FaceStatusMsgEncoder) Encode(value *FaceStatusMsg) enc.Wire {
 	return wire
 }
 
+// Parses a FaceStatusMsg from TLV-encoded wire format data, extracting a list of FaceStatus entries using the provided context and handling critical fields according to the ignoreCritical flag.
 func (context *FaceStatusMsgParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FaceStatusMsg, error) {
 
 	var handled_Vals bool = false
@@ -3913,16 +3996,19 @@ func (context *FaceStatusMsgParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the FaceStatusMsg into its wire format representation using the FaceStatusMsgEncoder.
 func (value *FaceStatusMsg) Encode() enc.Wire {
 	encoder := FaceStatusMsgEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Serializes the FaceStatus message into a byte slice by encoding and joining its components.
 func (value *FaceStatusMsg) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded FaceStatusMsg into a FaceStatusMsg object using a parsing context, with an option to ignore critical parsing errors.
 func ParseFaceStatusMsg(reader enc.WireView, ignoreCritical bool) (*FaceStatusMsg, error) {
 	context := FaceStatusMsgParsingContext{}
 	context.Init()
@@ -3936,6 +4022,7 @@ type FaceQueryFilterValueEncoder struct {
 type FaceQueryFilterValueParsingContext struct {
 }
 
+// Calculates the total encoded length of a FaceQueryFilterValue by summing the TLV-encoded sizes of its optional fields (FaceId, UriScheme, Uri, etc.) and stores the result in the encoder's Length field.
 func (encoder *FaceQueryFilterValueEncoder) Init(value *FaceQueryFilterValue) {
 
 	l := uint(0)
@@ -3974,10 +4061,12 @@ func (encoder *FaceQueryFilterValueEncoder) Init(value *FaceQueryFilterValue) {
 
 }
 
+// Initializes the FaceQueryFilterValueParsingContext for parsing face query filter values.
 func (context *FaceQueryFilterValueParsingContext) Init() {
 
 }
 
+// Encodes the optional fields of a FaceQueryFilterValue into a binary buffer using TLV (Type-Length-Value) format, with each field's type specified by a unique byte and values serialized in a compact variable-length encoding.
 func (encoder *FaceQueryFilterValueEncoder) EncodeInto(value *FaceQueryFilterValue, buf []byte) {
 
 	pos := uint(0)
@@ -4037,6 +4126,7 @@ func (encoder *FaceQueryFilterValueEncoder) EncodeInto(value *FaceQueryFilterVal
 	}
 }
 
+// Serializes the given FaceQueryFilterValue into a byte slice of length determined by the encoder and returns it as a wire-encoded structure.
 func (encoder *FaceQueryFilterValueEncoder) Encode(value *FaceQueryFilterValue) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -4047,6 +4137,7 @@ func (encoder *FaceQueryFilterValueEncoder) Encode(value *FaceQueryFilterValue) 
 	return wire
 }
 
+// Parses a TLV-encoded FaceQueryFilterValue from the provided WireView reader, handling specific fields (FaceId, UriScheme, Uri, LocalUri, FaceScope, FacePersistency, LinkType) and optionally ignoring critical unrecognized fields based on the ignoreCritical flag.
 func (context *FaceQueryFilterValueParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FaceQueryFilterValue, error) {
 
 	var handled_FaceId bool = false
@@ -4257,16 +4348,19 @@ func (context *FaceQueryFilterValueParsingContext) Parse(reader enc.WireView, ig
 	return value, nil
 }
 
+// Encodes the FaceQueryFilterValue into a wire format using the FaceQueryFilterValueEncoder for network transmission.
 func (value *FaceQueryFilterValue) Encode() enc.Wire {
 	encoder := FaceQueryFilterValueEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the FaceQueryFilterValue by encoding its components and joining them into a single byte slice.
 func (value *FaceQueryFilterValue) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a FaceQueryFilterValue from wire-encoded data using a parsing context, optionally ignoring critical errors during decoding.
 func ParseFaceQueryFilterValue(reader enc.WireView, ignoreCritical bool) (*FaceQueryFilterValue, error) {
 	context := FaceQueryFilterValueParsingContext{}
 	context.Init()
@@ -4283,6 +4377,7 @@ type FaceQueryFilterParsingContext struct {
 	Val_context FaceQueryFilterValueParsingContext
 }
 
+// Initializes the FaceQueryFilter encoder with the provided value, computes the total encoded length by accounting for the presence and size of the nested Val field along with its TLV encoding overhead.
 func (encoder *FaceQueryFilterEncoder) Init(value *FaceQueryFilter) {
 	if value.Val != nil {
 		encoder.Val_encoder.Init(value.Val)
@@ -4298,10 +4393,12 @@ func (encoder *FaceQueryFilterEncoder) Init(value *FaceQueryFilter) {
 
 }
 
+// Initializes the internal Val_context field of the FaceQueryFilterParsingContext.
 func (context *FaceQueryFilterParsingContext) Init() {
 	context.Val_context.Init()
 }
 
+// Encodes a FaceQueryFilter into a byte buffer using TLV format, writing a type byte (150), encoded length, and value when the Val field is non-nil.
 func (encoder *FaceQueryFilterEncoder) EncodeInto(value *FaceQueryFilter, buf []byte) {
 
 	pos := uint(0)
@@ -4317,6 +4414,7 @@ func (encoder *FaceQueryFilterEncoder) EncodeInto(value *FaceQueryFilter, buf []
 	}
 }
 
+// Encodes the given FaceQueryFilter into its wire format representation, returning a byte slice structured as an enc.Wire.
 func (encoder *FaceQueryFilterEncoder) Encode(value *FaceQueryFilter) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -4327,6 +4425,7 @@ func (encoder *FaceQueryFilterEncoder) Encode(value *FaceQueryFilter) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded face query filter data into a FaceQueryFilter structure, using a provided parsing context for the 'Val' field and handling unrecognized critical fields according to the ignoreCritical flag.
 func (context *FaceQueryFilterParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FaceQueryFilter, error) {
 
 	var handled_Val bool = false
@@ -4391,16 +4490,19 @@ func (context *FaceQueryFilterParsingContext) Parse(reader enc.WireView, ignoreC
 	return value, nil
 }
 
+// Encodes the FaceQueryFilter into its wire format representation using the FaceQueryFilterEncoder.
 func (value *FaceQueryFilter) Encode() enc.Wire {
 	encoder := FaceQueryFilterEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Serializes the FaceQueryFilter into a byte slice by encoding its components and concatenating them.
 func (value *FaceQueryFilter) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a FaceQueryFilter from encoded wire-format data, with an option to ignore critical unrecognized fields.
 func ParseFaceQueryFilter(reader enc.WireView, ignoreCritical bool) (*FaceQueryFilter, error) {
 	context := FaceQueryFilterParsingContext{}
 	context.Init()
@@ -4414,6 +4516,7 @@ type RouteEncoder struct {
 type RouteParsingContext struct {
 }
 
+// Calculates and sets the total encoded length of a Route object by summing fixed-size headers and variable-length encoded fields (FaceId, Origin, Cost, Flags, and optional ExpirationPeriod) for TLV-based serialization.
 func (encoder *RouteEncoder) Init(value *Route) {
 
 	l := uint(0)
@@ -4433,10 +4536,12 @@ func (encoder *RouteEncoder) Init(value *Route) {
 
 }
 
+// Initializes the RouteParsingContext, preparing it for subsequent route parsing operations.
 func (context *RouteParsingContext) Init() {
 
 }
 
+// Encodes a Route object into a TLV-encoded byte slice, including optional ExpirationPeriod if present.
 func (encoder *RouteEncoder) EncodeInto(value *Route, buf []byte) {
 
 	pos := uint(0)
@@ -4471,6 +4576,7 @@ func (encoder *RouteEncoder) EncodeInto(value *Route, buf []byte) {
 	}
 }
 
+// Encodes a Route object into a binary wire format using the encoder's specified length, returning it as a slice of byte slices.
 func (encoder *RouteEncoder) Encode(value *Route) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -4481,6 +4587,7 @@ func (encoder *RouteEncoder) Encode(value *Route) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded Route structure from a wire format, validating required fields (FaceId, Origin, Cost, Flags) and handling optional fields like ExpirationPeriod, with critical type checking controlled by ignoreCritical.
 func (context *RouteParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Route, error) {
 
 	var handled_FaceId bool = false
@@ -4654,16 +4761,19 @@ func (context *RouteParsingContext) Parse(reader enc.WireView, ignoreCritical bo
 	return value, nil
 }
 
+// Encodes the Route into its wire format representation using a RouteEncoder.
 func (value *Route) Encode() enc.Wire {
 	encoder := RouteEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the Route into its canonical byte representation by serializing its components and concatenating them into a single byte slice.
 func (value *Route) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a Route from the provided WireView, optionally ignoring critical parsing errors.
 func ParseRoute(reader enc.WireView, ignoreCritical bool) (*Route, error) {
 	context := RouteParsingContext{}
 	context.Init()
@@ -4683,6 +4793,7 @@ type RibEntryParsingContext struct {
 	Routes_context RouteParsingContext
 }
 
+// Initializes the RIB entry encoder with the provided RIB entry, calculating the total encoded length by summing the encoded sizes of the name components and all associated routes.
 func (encoder *RibEntryEncoder) Init(value *RibEntry) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -4745,11 +4856,13 @@ func (encoder *RibEntryEncoder) Init(value *RibEntry) {
 
 }
 
+// Initializes the internal routing context within the RIB entry parsing context by calling its `Init()` method.
 func (context *RibEntryParsingContext) Init() {
 
 	context.Routes_context.Init()
 }
 
+// Encodes a RIB entry containing a name and a sequence of routes into a TLV-formatted byte slice.
 func (encoder *RibEntryEncoder) EncodeInto(value *RibEntry, buf []byte) {
 
 	pos := uint(0)
@@ -4789,6 +4902,7 @@ func (encoder *RibEntryEncoder) EncodeInto(value *RibEntry, buf []byte) {
 	}
 }
 
+// Encodes a RIB entry into a binary wire format using the encoder's precomputed length.
 func (encoder *RibEntryEncoder) Encode(value *RibEntry) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -4799,6 +4913,7 @@ func (encoder *RibEntryEncoder) Encode(value *RibEntry) enc.Wire {
 	return wire
 }
 
+// Parses a RIB entry from TLV-encoded data, extracting a Name component and a list of Routes using a nested parsing context, while handling critical fields according to the ignoreCritical flag.
 func (context *RibEntryParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*RibEntry, error) {
 
 	var handled_Name bool = false
@@ -4888,16 +5003,19 @@ func (context *RibEntryParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the RIB entry into a wire format for network transmission.
 func (value *RibEntry) Encode() enc.Wire {
 	encoder := RibEntryEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the RIB entry into a byte slice by serializing its components and concatenating them.
 func (value *RibEntry) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded RIB entry into a RibEntry object, optionally ignoring unrecognized critical TLV elements based on the ignoreCritical flag.
 func ParseRibEntry(reader enc.WireView, ignoreCritical bool) (*RibEntry, error) {
 	context := RibEntryParsingContext{}
 	context.Init()
@@ -4916,6 +5034,7 @@ type RibStatusParsingContext struct {
 	Entries_context RibEntryParsingContext
 }
 
+// Initializes the RIB status encoder with the provided RIB status data, setting up sub-encoders for each entry and calculating the total encoded length including TLV overhead.
 func (encoder *RibStatusEncoder) Init(value *RibStatus) {
 	{
 		Entries_l := len(value.Entries)
@@ -4967,10 +5086,12 @@ func (encoder *RibStatusEncoder) Init(value *RibStatus) {
 
 }
 
+// Initializes the internal entries parsing context within the RibStatus parsing context.
 func (context *RibStatusParsingContext) Init() {
 	context.Entries_context.Init()
 }
 
+// Encodes the RIB status information (specifically its entries) into a binary TLV format in the provided buffer, using sub-encoders for each entry's structure.
 func (encoder *RibStatusEncoder) EncodeInto(value *RibStatus, buf []byte) {
 
 	pos := uint(0)
@@ -5002,6 +5123,9 @@ func (encoder *RibStatusEncoder) EncodeInto(value *RibStatus, buf []byte) {
 	}
 }
 
+// Encodes a RIB status object into a binary wire format using the encoder's specified length for the output buffer.  
+
+Example: *Encodes a RIB status object into a byte slice of size determined by the encoder's Length field.*
 func (encoder *RibStatusEncoder) Encode(value *RibStatus) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -5012,6 +5136,7 @@ func (encoder *RibStatusEncoder) Encode(value *RibStatus) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded RibStatus object from the provided WireView reader, using the Entries_context to parse RibEntry components and handling critical fields according to the ignoreCritical flag.
 func (context *RibStatusParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*RibStatus, error) {
 
 	var handled_Entries bool = false
@@ -5090,16 +5215,19 @@ func (context *RibStatusParsingContext) Parse(reader enc.WireView, ignoreCritica
 	return value, nil
 }
 
+// Encodes the RibStatus value into a wire format for network transmission using the RibStatusEncoder.
 func (value *RibStatus) Encode() enc.Wire {
 	encoder := RibStatusEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the RibStatus by encoding its value and joining any resulting segments into a single byte slice.
 func (value *RibStatus) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a RibStatus structure from wire-encoded data, optionally ignoring critical parsing errors.
 func ParseRibStatus(reader enc.WireView, ignoreCritical bool) (*RibStatus, error) {
 	context := RibStatusParsingContext{}
 	context.Init()
@@ -5113,6 +5241,7 @@ type NextHopRecordEncoder struct {
 type NextHopRecordParsingContext struct {
 }
 
+// Initializes the encoder by calculating the total length required to encode the NextHopRecord, including fixed overhead and variable-length fields for face ID and cost.
 func (encoder *NextHopRecordEncoder) Init(value *NextHopRecord) {
 
 	l := uint(0)
@@ -5124,10 +5253,12 @@ func (encoder *NextHopRecordEncoder) Init(value *NextHopRecord) {
 
 }
 
+// Initializes the parsing context for a new NextHop record.
 func (context *NextHopRecordParsingContext) Init() {
 
 }
 
+// Encodes a NextHopRecord into a binary buffer using TLV format, with FaceId and Cost fields represented as type 105 and 106 TLV elements respectively, using variable-length natural number encoding.
 func (encoder *NextHopRecordEncoder) EncodeInto(value *NextHopRecord, buf []byte) {
 
 	pos := uint(0)
@@ -5144,6 +5275,7 @@ func (encoder *NextHopRecordEncoder) EncodeInto(value *NextHopRecord, buf []byte
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes a NextHopRecord into its binary wire format representation using the encoder's specified length.
 func (encoder *NextHopRecordEncoder) Encode(value *NextHopRecord) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -5154,6 +5286,7 @@ func (encoder *NextHopRecordEncoder) Encode(value *NextHopRecord) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded NextHopRecord from the provided wire format, extracting required FaceId and Cost fields while handling or skipping other fields based on the ignoreCritical flag.
 func (context *NextHopRecordParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*NextHopRecord, error) {
 
 	var handled_FaceId bool = false
@@ -5254,16 +5387,19 @@ func (context *NextHopRecordParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the NextHopRecord into its wire format representation using the NextHopRecordEncoder.
 func (value *NextHopRecord) Encode() enc.Wire {
 	encoder := NextHopRecordEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// "Encodes the NextHopRecord into its wire format components and concatenates them into a single byte slice."
 func (value *NextHopRecord) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a NextHopRecord from wire-format data, using the provided parsing context and optionally ignoring critical TLV elements.
 func ParseNextHopRecord(reader enc.WireView, ignoreCritical bool) (*NextHopRecord, error) {
 	context := NextHopRecordParsingContext{}
 	context.Init()
@@ -5283,6 +5419,7 @@ type FibEntryParsingContext struct {
 	NextHopRecords_context NextHopRecordParsingContext
 }
 
+// Initializes the FibEntryEncoder by computing the total encoded length of the Forwarding Information Base (FIB) entry, including the length of its name components and all associated next-hop records.
 func (encoder *FibEntryEncoder) Init(value *FibEntry) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -5345,11 +5482,13 @@ func (encoder *FibEntryEncoder) Init(value *FibEntry) {
 
 }
 
+// Initializes the NextHopRecords context within the FIB entry parsing context to prepare for parsing next hop records.
 func (context *FibEntryParsingContext) Init() {
 
 	context.NextHopRecords_context.Init()
 }
 
+// Encodes a FibEntry into a TLV (Type-Length-Value) binary format in the provided buffer, including optional Name and NextHopRecords fields with their respective nested encodings.
 func (encoder *FibEntryEncoder) EncodeInto(value *FibEntry, buf []byte) {
 
 	pos := uint(0)
@@ -5389,6 +5528,7 @@ func (encoder *FibEntryEncoder) EncodeInto(value *FibEntry, buf []byte) {
 	}
 }
 
+// Encodes a FibEntry into a binary wire format as a single byte slice using the pre-determined length of the encoder.
 func (encoder *FibEntryEncoder) Encode(value *FibEntry) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -5399,6 +5539,7 @@ func (encoder *FibEntryEncoder) Encode(value *FibEntry) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded FibEntry, extracting the Name component and NextHopRecords while handling critical fields based on the ignoreCritical flag.
 func (context *FibEntryParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FibEntry, error) {
 
 	var handled_Name bool = false
@@ -5488,16 +5629,19 @@ func (context *FibEntryParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes a FibEntry into its wire format representation using the FibEntryEncoder.
 func (value *FibEntry) Encode() enc.Wire {
 	encoder := FibEntryEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the wire format of the FibEntry as a single byte slice by encoding its components and concatenating them.
 func (value *FibEntry) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a Forwarding Information Base (FIB) entry from encoded wire format data, optionally ignoring critical parsing errors.
 func ParseFibEntry(reader enc.WireView, ignoreCritical bool) (*FibEntry, error) {
 	context := FibEntryParsingContext{}
 	context.Init()
@@ -5516,6 +5660,7 @@ type FibStatusParsingContext struct {
 	Entries_context FibEntryParsingContext
 }
 
+// Initializes the FibStatus encoder with the provided FibStatus data, initializing sub-encoders for each FibEntry and calculating the total encoded length including TLV header overhead for entries.
 func (encoder *FibStatusEncoder) Init(value *FibStatus) {
 	{
 		Entries_l := len(value.Entries)
@@ -5567,10 +5712,12 @@ func (encoder *FibStatusEncoder) Init(value *FibStatus) {
 
 }
 
+// Initializes the internal entries context of the FibStatusParsingContext.
 func (context *FibStatusParsingContext) Init() {
 	context.Entries_context.Init()
 }
 
+// Encodes a FibStatus structure into a TLV-format byte slice, writing type markers (e.g., 0x81 for entries), encoded lengths, and serialized FibEntry values sequentially into the provided buffer.
 func (encoder *FibStatusEncoder) EncodeInto(value *FibStatus, buf []byte) {
 
 	pos := uint(0)
@@ -5602,6 +5749,7 @@ func (encoder *FibStatusEncoder) EncodeInto(value *FibStatus, buf []byte) {
 	}
 }
 
+// Encodes a FibStatus object into a byte slice using the encoder's configured length and returns it as a single-element Wire.
 func (encoder *FibStatusEncoder) Encode(value *FibStatus) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -5612,6 +5760,7 @@ func (encoder *FibStatusEncoder) Encode(value *FibStatus) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded FibStatus object, extracting FibEntry entries and handling critical or unrecognized fields according to the ignoreCritical flag.
 func (context *FibStatusParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FibStatus, error) {
 
 	var handled_Entries bool = false
@@ -5690,16 +5839,19 @@ func (context *FibStatusParsingContext) Parse(reader enc.WireView, ignoreCritica
 	return value, nil
 }
 
+// Encodes the FibStatus value into a wire format using the FibStatusEncoder for transmission or storage.
 func (value *FibStatus) Encode() enc.Wire {
 	encoder := FibStatusEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the FibStatus by encoding its value and joining the resulting components into a single byte slice.
 func (value *FibStatus) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses encoded FIB status information from a `WireView` into a `FibStatus` object, allowing optional suppression of critical element errors with `ignoreCritical`.
 func ParseFibStatus(reader enc.WireView, ignoreCritical bool) (*FibStatus, error) {
 	context := FibStatusParsingContext{}
 	context.Init()
@@ -5717,6 +5869,7 @@ type StrategyChoiceParsingContext struct {
 	Strategy_context StrategyParsingContext
 }
 
+// Initializes the StrategyChoiceEncoder with the total encoded length of the provided StrategyChoice, including TLV overhead for its Name components and Strategy.
 func (encoder *StrategyChoiceEncoder) Init(value *StrategyChoice) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -5743,11 +5896,13 @@ func (encoder *StrategyChoiceEncoder) Init(value *StrategyChoice) {
 
 }
 
+// Initializes the embedded Strategy_context field of the StrategyChoiceParsingContext.
 func (context *StrategyChoiceParsingContext) Init() {
 
 	context.Strategy_context.Init()
 }
 
+// Encodes a StrategyChoice structure into a TLV format in the provided buffer, including the Name field (type 7) with its components and the Strategy field (type 107) using the configured encoder.
 func (encoder *StrategyChoiceEncoder) EncodeInto(value *StrategyChoice, buf []byte) {
 
 	pos := uint(0)
@@ -5771,6 +5926,7 @@ func (encoder *StrategyChoiceEncoder) EncodeInto(value *StrategyChoice, buf []by
 	}
 }
 
+// Encodes a StrategyChoice into a wire format by allocating a buffer of the encoder's specified length and populating it with the encoded value.
 func (encoder *StrategyChoiceEncoder) Encode(value *StrategyChoice) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -5781,6 +5937,7 @@ func (encoder *StrategyChoiceEncoder) Encode(value *StrategyChoice) enc.Wire {
 	return wire
 }
 
+// Parses a StrategyChoice structure from TLV-encoded input, extracting the associated Name and Strategy fields while handling critical and non-critical elements according to the ignoreCritical flag.
 func (context *StrategyChoiceParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*StrategyChoice, error) {
 
 	var handled_Name bool = false
@@ -5856,16 +6013,19 @@ func (context *StrategyChoiceParsingContext) Parse(reader enc.WireView, ignoreCr
 	return value, nil
 }
 
+// Encodes the StrategyChoice into a wire format for network transmission.
 func (value *StrategyChoice) Encode() enc.Wire {
 	encoder := StrategyChoiceEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte slice of the StrategyChoice by joining its encoded components.
 func (value *StrategyChoice) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a StrategyChoice from wire-encoded data, using the provided parsing context and optionally ignoring critical unrecognized elements.
 func ParseStrategyChoice(reader enc.WireView, ignoreCritical bool) (*StrategyChoice, error) {
 	context := StrategyChoiceParsingContext{}
 	context.Init()
@@ -5884,6 +6044,7 @@ type StrategyChoiceMsgParsingContext struct {
 	StrategyChoices_context StrategyChoiceParsingContext
 }
 
+// Initializes a StrategyChoiceMsg encoder by setting up sub-encoders for each StrategyChoice and calculating the total encoded length of the message.
 func (encoder *StrategyChoiceMsgEncoder) Init(value *StrategyChoiceMsg) {
 	{
 		StrategyChoices_l := len(value.StrategyChoices)
@@ -5935,10 +6096,12 @@ func (encoder *StrategyChoiceMsgEncoder) Init(value *StrategyChoiceMsg) {
 
 }
 
+// Initializes the embedded `StrategyChoices_context` within the `StrategyChoiceMsgParsingContext` to prepare it for parsing strategy choice messages.
 func (context *StrategyChoiceMsgParsingContext) Init() {
 	context.StrategyChoices_context.Init()
 }
 
+// Encodes a StrategyChoice message into a TLV-encoded byte slice, writing each StrategyChoice entry sequentially with type markers and length prefixes.
 func (encoder *StrategyChoiceMsgEncoder) EncodeInto(value *StrategyChoiceMsg, buf []byte) {
 
 	pos := uint(0)
@@ -5970,6 +6133,7 @@ func (encoder *StrategyChoiceMsgEncoder) EncodeInto(value *StrategyChoiceMsg, bu
 	}
 }
 
+// Encodes a StrategyChoice message into a wire format by serializing its contents into a byte slice of the length specified by the encoder.
 func (encoder *StrategyChoiceMsgEncoder) Encode(value *StrategyChoiceMsg) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -5980,6 +6144,7 @@ func (encoder *StrategyChoiceMsgEncoder) Encode(value *StrategyChoiceMsg) enc.Wi
 	return wire
 }
 
+// Parses a binary-encoded StrategyChoice message from a wire format reader, extracting strategy choices and handling critical or unrecognized fields according to the ignoreCritical flag.
 func (context *StrategyChoiceMsgParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*StrategyChoiceMsg, error) {
 
 	var handled_StrategyChoices bool = false
@@ -6058,16 +6223,19 @@ func (context *StrategyChoiceMsgParsingContext) Parse(reader enc.WireView, ignor
 	return value, nil
 }
 
+// Encodes the StrategyChoiceMsg into its wire format representation using the StrategyChoiceMsgEncoder.
 func (value *StrategyChoiceMsg) Encode() enc.Wire {
 	encoder := StrategyChoiceMsgEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the StrategyChoiceMsg into a byte slice suitable for network transmission.
 func (value *StrategyChoiceMsg) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-format StrategyChoice message into a structured object using a parsing context, with an option to ignore critical unrecognized fields.
 func ParseStrategyChoiceMsg(reader enc.WireView, ignoreCritical bool) (*StrategyChoiceMsg, error) {
 	context := StrategyChoiceMsgParsingContext{}
 	context.Init()
@@ -6081,6 +6249,7 @@ type CsInfoEncoder struct {
 type CsInfoParsingContext struct {
 }
 
+// Initializes the encoder's length by calculating the total size required to encode the CsInfo fields (Capacity, Flags, NCsEntries, NHits, NMisses), accounting for each field's type byte and variable-length encoded value.
 func (encoder *CsInfoEncoder) Init(value *CsInfo) {
 
 	l := uint(0)
@@ -6098,10 +6267,12 @@ func (encoder *CsInfoEncoder) Init(value *CsInfo) {
 
 }
 
+// Initializes the parsing context for processing CS (Content Store) information, typically resetting internal state before parsing begins.
 func (context *CsInfoParsingContext) Init() {
 
 }
 
+// Encodes a `CsInfo` struct into a TLV (Type-Length-Value) binary format using variable-length natural number encoding for its fields (Capacity, Flags, NCsEntries, NHits, NMisses).
 func (encoder *CsInfoEncoder) EncodeInto(value *CsInfo, buf []byte) {
 
 	pos := uint(0)
@@ -6133,6 +6304,7 @@ func (encoder *CsInfoEncoder) EncodeInto(value *CsInfo, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes a CsInfo object into a byte slice using the pre-determined length of the encoder, returning it as a single-element wire format structure.
 func (encoder *CsInfoEncoder) Encode(value *CsInfo) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -6143,6 +6315,7 @@ func (encoder *CsInfoEncoder) Encode(value *CsInfo) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded wire format into a CsInfo structure containing cache statistics (capacity, flags, entry counts, hit/miss counts), enforcing required fields and handling critical/unrecognized TLV types according to the ignoreCritical flag.
 func (context *CsInfoParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*CsInfo, error) {
 
 	var handled_Capacity bool = false
@@ -6312,16 +6485,19 @@ func (context *CsInfoParsingContext) Parse(reader enc.WireView, ignoreCritical b
 	return value, nil
 }
 
+// Encodes the CsInfo object into the NDN wire encoding format for network transmission.
 func (value *CsInfo) Encode() enc.Wire {
 	encoder := CsInfoEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte representation of the Content Store information.
 func (value *CsInfo) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses TLV-encoded Content Store information from a wire format reader into a CsInfo structure, with an option to ignore critical TLV elements not recognized during parsing.
 func ParseCsInfo(reader enc.WireView, ignoreCritical bool) (*CsInfo, error) {
 	context := CsInfoParsingContext{}
 	context.Init()
@@ -6338,6 +6514,7 @@ type CsInfoMsgParsingContext struct {
 	CsInfo_context CsInfoParsingContext
 }
 
+// Initializes the encoder with the provided CsInfoMsg value, computes the total encoded length including TL encoding overhead for the CsInfo field, and sets the encoder's Length property.
 func (encoder *CsInfoMsgEncoder) Init(value *CsInfoMsg) {
 	if value.CsInfo != nil {
 		encoder.CsInfo_encoder.Init(value.CsInfo)
@@ -6353,10 +6530,12 @@ func (encoder *CsInfoMsgEncoder) Init(value *CsInfoMsg) {
 
 }
 
+// Initializes the internal `CsInfo_context` of the `CsInfoMsgParsingContext` by calling its `Init` method, preparing it for parsing operations.
 func (context *CsInfoMsgParsingContext) Init() {
 	context.CsInfo_context.Init()
 }
 
+// Encodes a CsInfo message into the provided buffer using TLV format, writing a type byte (128), length, and encoded CsInfo value if non-nil.
 func (encoder *CsInfoMsgEncoder) EncodeInto(value *CsInfoMsg, buf []byte) {
 
 	pos := uint(0)
@@ -6372,6 +6551,7 @@ func (encoder *CsInfoMsgEncoder) EncodeInto(value *CsInfoMsg, buf []byte) {
 	}
 }
 
+// Serializes the CsInfoMsg value into a byte slice of the encoder's pre-determined length, returning it as a wire-encoded message.
 func (encoder *CsInfoMsgEncoder) Encode(value *CsInfoMsg) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -6382,6 +6562,7 @@ func (encoder *CsInfoMsgEncoder) Encode(value *CsInfoMsg) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded CsInfo message into a CsInfoMsg structure, handling the critical CsInfo field (type 128) and skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *CsInfoMsgParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*CsInfoMsg, error) {
 
 	var handled_CsInfo bool = false
@@ -6446,16 +6627,19 @@ func (context *CsInfoMsgParsingContext) Parse(reader enc.WireView, ignoreCritica
 	return value, nil
 }
 
+// Encodes the CsInfoMsg into a wire format for transmission or storage.
 func (value *CsInfoMsg) Encode() enc.Wire {
 	encoder := CsInfoMsgEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the serialized byte representation of the CsInfoMsg by encoding its components and concatenating the resulting byte slices.
 func (value *CsInfoMsg) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-format message into a CsInfoMsg structure using a parsing context, with an option to ignore critical fields that cannot be processed.
 func ParseCsInfoMsg(reader enc.WireView, ignoreCritical bool) (*CsInfoMsg, error) {
 	context := CsInfoMsgParsingContext{}
 	context.Init()

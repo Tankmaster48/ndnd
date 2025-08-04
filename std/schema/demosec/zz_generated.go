@@ -18,6 +18,7 @@ type EncryptedContentEncoder struct {
 type EncryptedContentParsingContext struct {
 }
 
+// Initializes the EncryptedContentEncoder with calculated total encoded length and a wire plan specifying offsets for each TLV-encoded component of the encrypted content data structure.
 func (encoder *EncryptedContentEncoder) Init(value *EncryptedContent) {
 
 	if value.CipherText != nil {
@@ -77,10 +78,12 @@ func (encoder *EncryptedContentEncoder) Init(value *EncryptedContent) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the encrypted content parsing context, preparing it for parsing operations by setting up necessary internal state.
 func (context *EncryptedContentParsingContext) Init() {
 
 }
 
+// Encodes an `EncryptedContent` object into a TLV (Type-Length-Value) wire format, serializing fields like KeyId, IV, content length, and cipher text into a structured byte representation for transmission or storage.
 func (encoder *EncryptedContentEncoder) EncodeInto(value *EncryptedContent, wire enc.Wire) {
 
 	wireIdx := 0
@@ -131,6 +134,8 @@ func (encoder *EncryptedContentEncoder) EncodeInto(value *EncryptedContent, wire
 	}
 }
 
+// **Function Description:**  
+Serializes an `EncryptedContent` value into a pre-allocated wire format buffer, dividing the buffer into segments according to the encoder's `wirePlan` and populating each segment with the corresponding encoded data.
 func (encoder *EncryptedContentEncoder) Encode(value *EncryptedContent) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -150,6 +155,7 @@ func (encoder *EncryptedContentEncoder) Encode(value *EncryptedContent) enc.Wire
 	return wire
 }
 
+// Parses encrypted content from a binary wire format into an `EncryptedContent` struct, extracting key ID, initialization vector (IV), content length (required), and ciphertext, while handling critical fields based on the `ignoreCritical` flag.
 func (context *EncryptedContentParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*EncryptedContent, error) {
 
 	var handled_KeyId bool = false
@@ -259,16 +265,19 @@ func (context *EncryptedContentParsingContext) Parse(reader enc.WireView, ignore
 	return value, nil
 }
 
+// Encodes the encrypted content into its wire format representation for network transmission.
 func (value *EncryptedContent) Encode() enc.Wire {
 	encoder := EncryptedContentEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte slice representing the encrypted content by concatenating its encoded components.
 func (value *EncryptedContent) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses encrypted content from a wire-format input, optionally ignoring unrecognized critical fields during decoding.
 func ParseEncryptedContent(reader enc.WireView, ignoreCritical bool) (*EncryptedContent, error) {
 	context := EncryptedContentParsingContext{}
 	context.Init()

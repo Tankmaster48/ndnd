@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// "Tests the BadgerStore implementation by creating a temporary instance, executing basic storage operations, range removal, and transaction tests, then cleaning up the test directory."
 func TestBadgerStore(t *testing.T) {
 	tu.SetT(t)
 	dir := "badger-test"

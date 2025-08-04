@@ -19,6 +19,7 @@ type baseFace struct {
 	onDnHndl int
 }
 
+// Constructs a baseFace with the specified local flag and initializes empty sync.Map instances for onUp and onDown event handlers.
 func newBaseFace(local bool) baseFace {
 	return baseFace{
 		local:  local,
@@ -27,22 +28,27 @@ func newBaseFace(local bool) baseFace {
 	}
 }
 
+// Returns true if the face is currently running.
 func (f *baseFace) IsRunning() bool {
 	return f.running.Load()
 }
 
+// Returns true if the face is local (e.g., connected to a local NDN daemon).
 func (f *baseFace) IsLocal() bool {
 	return f.local
 }
 
+// Sets the callback function to be invoked when a packet is received on this face, passing the raw packet data as a byte slice.
 func (f *baseFace) OnPacket(onPkt func(frame []byte)) {
 	f.onPkt = onPkt
 }
 
+// Sets the error handler function to be called when an error occurs on this face, passing the error as an argument.
 func (f *baseFace) OnError(onError func(err error)) {
 	f.onError = onError
 }
 
+// Registers a callback to be invoked when the face becomes active and returns a function to cancel the registration.
 func (f *baseFace) OnUp(onUp func()) (cancel func()) {
 	hndl := f.onUpHndl
 	f.onUp.Store(hndl, onUp)
@@ -50,6 +56,7 @@ func (f *baseFace) OnUp(onUp func()) (cancel func()) {
 	return func() { f.onUp.Delete(hndl) }
 }
 
+// Registers a callback to be invoked when the face becomes unreachable and returns a function to cancel the callback registration.
 func (f *baseFace) OnDown(onDown func()) (cancel func()) {
 	hndl := f.onDnHndl
 	f.onDown.Store(hndl, onDown)

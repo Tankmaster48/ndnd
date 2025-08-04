@@ -43,6 +43,7 @@ type PingClient struct {
 	rttAvg time.Duration
 }
 
+// Constructs a CLI command for sending NDN Interest packets to a specified prefix with configurable interval, timeout, count, and starting sequence number to measure network latency.
 func CmdPingClient() *cobra.Command {
 	pc := PingClient{}
 
@@ -64,10 +65,12 @@ The numbers in the Interests are randomly generated`,
 	return cmd
 }
 
+// Returns the string representation of the PingClient as "ping", used for identification in logging or debugging contexts.
 func (pc *PingClient) String() string {
 	return "ping"
 }
 
+// Sends an Interest with a sequence-numbered name, tracks round-trip time and packet outcomes (NACK, timeout, success) for network performance monitoring.
 func (pc *PingClient) send(seq uint64) {
 	name := pc.name.Append(enc.NewSequenceNumComponent(seq))
 
@@ -120,6 +123,7 @@ func (pc *PingClient) send(seq uint64) {
 	}
 }
 
+// Prints ping statistics including transmitted/received packets, packet loss percentage, and round-trip time (min/avg/max) in milliseconds for a Named Data Networking ping client.
 func (pc *PingClient) stats() {
 	if pc.totalCount == 0 {
 		fmt.Printf("No interests transmitted\n")
@@ -135,6 +139,7 @@ func (pc *PingClient) stats() {
 		float64(pc.rttMax.Microseconds())/1000.0)
 }
 
+// Sends periodic NDN Interest packets with incrementing sequence numbers to a specified prefix, tracks statistics, and terminates on signal or after reaching a specified ping count.
 func (pc *PingClient) run(_ *cobra.Command, args []string) {
 	prefix, err := enc.NameFromStr(args[0])
 	if err != nil {

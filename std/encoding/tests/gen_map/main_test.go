@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// "Tests the correct serialization and deserialization of a StringMap, ensuring that parameter key-value pairs are accurately preserved when converted to and from byte representations."
 func TestStringMap(t *testing.T) {
 	tu.SetT(t)
 
@@ -36,6 +37,7 @@ func TestStringMap(t *testing.T) {
 	require.Equal(t, 0, len(f2.Params))
 }
 
+// This function tests the serialization and deserialization of an `IntStructMap` structure, ensuring that a map of unsigned integers to `Inner` objects can be correctly encoded to and decoded from bytes, including handling empty maps.
 func TestIntStructMap(t *testing.T) {
 	tu.SetT(t)
 

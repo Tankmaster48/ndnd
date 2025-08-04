@@ -37,6 +37,7 @@ qEa4Xg1H5/+zKy2mdI82/AcbsQJslRxC32g0ZfmDPKs=
 
 var RSA_KEY_NAME, _ = enc.NameFromStr("/ndn/alice/KEY/e%9A%F2%15%21%FF2%F1")
 
+// Verifies that marshaling an RSA signer's secret produces a correctly formatted Data packet with the expected name, SigningKey content type, and original secret content.
 func TestMarshalSecret(t *testing.T) {
 	tu.SetT(t)
 
@@ -55,6 +56,8 @@ func TestMarshalSecret(t *testing.T) {
 	require.Equal(t, secret, data.Content().Join())
 }
 
+// **Description:**  
+Tests the `UnmarshalSecret` function by decoding a base64-encoded RSA key, parsing its structure, and verifying the resulting signer's signature type and key name.
 func TestUnmarshalSecret(t *testing.T) {
 	tu.SetT(t)
 

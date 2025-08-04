@@ -26,6 +26,7 @@ type Repo struct {
 	mutex     sync.Mutex
 }
 
+// Constructs a new Repo instance with the provided configuration, initializing an empty map for storing groups services.
 func NewRepo(config *Config) *Repo {
 	return &Repo{
 		config:    config,
@@ -33,10 +34,12 @@ func NewRepo(config *Config) *Repo {
 	}
 }
 
+// "Returns the string 'repo' when the Repo is converted to a string."
 func (r *Repo) String() string {
 	return "repo"
 }
 
+// Initializes and starts the NDN Data Repository by setting up storage, creating an NDN engine, configuring trust management, and launching a client to handle data and management interests under the repository's prefix.
 func (r *Repo) Start() (err error) {
 	log.Info(r, "Starting NDN Data Repository", "dir", r.config.StorageDir)
 
@@ -95,6 +98,7 @@ func (r *Repo) Start() (err error) {
 	return nil
 }
 
+// Stops the NDN Data Repository by halting all services, detaching command handlers, and terminating the client and engine in an orderly shutdown.
 func (r *Repo) Stop() error {
 	log.Info(r, "Stopping NDN Data Repository")
 

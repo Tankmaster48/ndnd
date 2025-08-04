@@ -9,6 +9,7 @@ type TimeField struct {
 	opt bool
 }
 
+// Constructs a TimeField with the given name, type number, and optional status based on whether the annotation is "optional".
 func NewTimeField(name string, typeNum uint64, annotation string, _ *TlvModel) (TlvField, error) {
 	return &TimeField{
 		BaseTlvField: BaseTlvField{
@@ -19,6 +20,7 @@ func NewTimeField(name string, typeNum uint64, annotation string, _ *TlvModel) (
 	}, nil
 }
 
+// Generates code to compute the TLV encoding length for a time field, handling optional fields and converting the time value to milliseconds as a natural number.
 func (f *TimeField) GenEncodingLength() (string, error) {
 	g := strErrBuf{}
 	if f.opt {
@@ -33,10 +35,12 @@ func (f *TimeField) GenEncodingLength() (string, error) {
 	return g.output()
 }
 
+// Generates the wire encoding plan for a TimeField by returning its encoded length as a string.
 func (f *TimeField) GenEncodingWirePlan() (string, error) {
 	return f.GenEncodingLength()
 }
 
+// Generates code to encode a time field as a natural number of milliseconds, handling optional fields by checking their presence before encoding.
 func (f *TimeField) GenEncodeInto() (string, error) {
 	g := strErrBuf{}
 	if f.opt {
@@ -51,6 +55,7 @@ func (f *TimeField) GenEncodeInto() (string, error) {
 	return g.output()
 }
 
+// Generates Go code to decode a time field from input, converting a uint64 value to a time.Duration in milliseconds and assigning it to the target struct field (using `Set` for optional fields).
 func (f *TimeField) GenReadFrom() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("{")
@@ -66,6 +71,7 @@ func (f *TimeField) GenReadFrom() (string, error) {
 	return g.output()
 }
 
+// Generates code to unset an optional time field or return an error for a required time field when skipping during encoding.
 func (f *TimeField) GenSkipProcess() (string, error) {
 	if f.opt {
 		return fmt.Sprintf("value.%s.Unset()", f.name), nil

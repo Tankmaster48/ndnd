@@ -21,6 +21,7 @@ type PacketParsingContext struct {
 	PrefixOpList_context  PrefixOpListParsingContext
 }
 
+// Initializes the packet's Advertisement and PrefixOpList encoders and calculates the total encoded length of the packet by summing the TLV header sizes and encoded lengths of each component.
 func (encoder *PacketEncoder) Init(value *Packet) {
 	if value.Advertisement != nil {
 		encoder.Advertisement_encoder.Init(value.Advertisement)
@@ -44,11 +45,13 @@ func (encoder *PacketEncoder) Init(value *Packet) {
 
 }
 
+// Initializes the Advertisement and PrefixOpList contexts within the PacketParsingContext.
 func (context *PacketParsingContext) Init() {
 	context.Advertisement_context.Init()
 	context.PrefixOpList_context.Init()
 }
 
+// Encodes a Packet structure into a byte buffer using TLV (Type-Length-Value) format, serializing non-nil fields like Advertisement (type 201) and PrefixOpList (type 301) with their respective type identifiers and lengths.
 func (encoder *PacketEncoder) EncodeInto(value *Packet, buf []byte) {
 
 	pos := uint(0)
@@ -74,6 +77,7 @@ func (encoder *PacketEncoder) EncodeInto(value *Packet, buf []byte) {
 	}
 }
 
+// Encodes the provided Packet into a byte slice of the pre-determined length specified by the encoder and returns it wrapped in a Wire structure.
 func (encoder *PacketEncoder) Encode(value *Packet) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -84,6 +88,7 @@ func (encoder *PacketEncoder) Encode(value *Packet) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded packet into a Packet structure, handling Advertisement (type 201) and PrefixOpList (type 301) components while skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *PacketParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Packet, error) {
 
 	var handled_Advertisement bool = false
@@ -158,16 +163,19 @@ func (context *PacketParsingContext) Parse(reader enc.WireView, ignoreCritical b
 	return value, nil
 }
 
+// Encodes the packet into its wire format representation.
 func (value *Packet) Encode() enc.Wire {
 	encoder := PacketEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte representation of the packet.
 func (value *Packet) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a binary-encoded NDN packet from the provided `WireView` reader, constructing a `Packet` object and optionally ignoring critical TLV elements if `ignoreCritical` is true.
 func ParsePacket(reader enc.WireView, ignoreCritical bool) (*Packet, error) {
 	context := PacketParsingContext{}
 	context.Init()
@@ -186,6 +194,7 @@ type AdvertisementParsingContext struct {
 	Entries_context AdvEntryParsingContext
 }
 
+// Initializes the AdvertisementEncoder with the provided Advertisement, setting up sub-encoders for each entry and calculating the total encoded length required for TLV-encoded serialization.
 func (encoder *AdvertisementEncoder) Init(value *Advertisement) {
 	{
 		Entries_l := len(value.Entries)
@@ -237,10 +246,12 @@ func (encoder *AdvertisementEncoder) Init(value *Advertisement) {
 
 }
 
+// Initializes the advertisement parsing context by initializing its internal entries context.
 func (context *AdvertisementParsingContext) Init() {
 	context.Entries_context.Init()
 }
 
+// Encodes the entries of an Advertisement into a binary TLV format in the provided buffer, using type code 202 for each entry with its corresponding sub-encoder.
 func (encoder *AdvertisementEncoder) EncodeInto(value *Advertisement, buf []byte) {
 
 	pos := uint(0)
@@ -272,6 +283,7 @@ func (encoder *AdvertisementEncoder) EncodeInto(value *Advertisement, buf []byte
 	}
 }
 
+// Encodes an Advertisement into a wire-format TLV block as a single byte slice for transmission.
 func (encoder *AdvertisementEncoder) Encode(value *Advertisement) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -282,6 +294,7 @@ func (encoder *AdvertisementEncoder) Encode(value *Advertisement) enc.Wire {
 	return wire
 }
 
+// Parses a binary-encoded Advertisement from a wire format reader, extracting entries and handling critical/unrecognized fields according to the ignoreCritical flag.
 func (context *AdvertisementParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Advertisement, error) {
 
 	var handled_Entries bool = false
@@ -360,16 +373,19 @@ func (context *AdvertisementParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the Advertisement into its wire format representation using an AdvertisementEncoder.
 func (value *Advertisement) Encode() enc.Wire {
 	encoder := AdvertisementEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte slice representation of the Advertisement by encoding and concatenating its components.
 func (value *Advertisement) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a TLV-encoded Advertisement from the provided wire format reader, optionally ignoring unknown critical elements.
 func ParseAdvertisement(reader enc.WireView, ignoreCritical bool) (*Advertisement, error) {
 	context := AdvertisementParsingContext{}
 	context.Init()
@@ -388,6 +404,7 @@ type AdvEntryParsingContext struct {
 	NextHop_context     DestinationParsingContext
 }
 
+// Initializes the encoder with the provided AdvEntry and calculates the total encoded length, including optional fields (Destination, NextHop) and their TLV encoding overhead.
 func (encoder *AdvEntryEncoder) Init(value *AdvEntry) {
 	if value.Destination != nil {
 		encoder.Destination_encoder.Init(value.Destination)
@@ -415,12 +432,14 @@ func (encoder *AdvEntryEncoder) Init(value *AdvEntry) {
 
 }
 
+// Initializes the destination and next hop parsing contexts within the AdvEntryParsingContext, preparing them for data parsing operations.
 func (context *AdvEntryParsingContext) Init() {
 	context.Destination_context.Init()
 	context.NextHop_context.Init()
 
 }
 
+// Encodes an AdvEntry object into a TLV (Type-Length-Value)-formatted binary buffer, serializing its Destination, NextHop, Cost, and OtherCost fields according to the specified encoders.
 func (encoder *AdvEntryEncoder) EncodeInto(value *AdvEntry, buf []byte) {
 
 	pos := uint(0)
@@ -455,6 +474,7 @@ func (encoder *AdvEntryEncoder) EncodeInto(value *AdvEntry, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes an AdvEntry into a byte slice using the AdvEntryEncoder's specified length and returns it as a Wire (a slice containing a single byte slice).
 func (encoder *AdvEntryEncoder) Encode(value *AdvEntry) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -465,6 +485,7 @@ func (encoder *AdvEntryEncoder) Encode(value *AdvEntry) enc.Wire {
 	return wire
 }
 
+// Parses a binary-encoded Advertisement Entry (AdvEntry) from a TLV-encoded wire format, validating required fields (Cost, OtherCost) and handling critical/optional components based on the provided context and ignoreCritical flag.
 func (context *AdvEntryParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*AdvEntry, error) {
 
 	var handled_Destination bool = false
@@ -585,16 +606,19 @@ func (context *AdvEntryParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the AdvEntry into a wire-format representation using AdvEntryEncoder for transmission or storage.
 func (value *AdvEntry) Encode() enc.Wire {
 	encoder := AdvEntryEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded AdvEntry as a single byte slice by joining its encoded components.
 func (value *AdvEntry) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses an AdvEntry from encoded wire data using the provided parsing context, with an option to ignore critical parsing errors.
 func ParseAdvEntry(reader enc.WireView, ignoreCritical bool) (*AdvEntry, error) {
 	context := AdvEntryParsingContext{}
 	context.Init()
@@ -610,6 +634,7 @@ type DestinationEncoder struct {
 type DestinationParsingContext struct {
 }
 
+// Initializes the encoder with the given Destination, computing the total encoded length of the name field including TLV encoding overhead for length and type fields.
 func (encoder *DestinationEncoder) Init(value *Destination) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -628,10 +653,12 @@ func (encoder *DestinationEncoder) Init(value *Destination) {
 
 }
 
+// Initializes the destination parsing context, preparing it for subsequent operations related to destination information parsing.
 func (context *DestinationParsingContext) Init() {
 
 }
 
+// Encodes the Name component of a Destination structure into a binary buffer using TLV encoding, where type 7 signifies the Name field, followed by length and value sub-elements.
 func (encoder *DestinationEncoder) EncodeInto(value *Destination, buf []byte) {
 
 	pos := uint(0)
@@ -646,6 +673,7 @@ func (encoder *DestinationEncoder) EncodeInto(value *Destination, buf []byte) {
 	}
 }
 
+// Encodes a Destination object into a wire-format byte slice using the encoder's predefined length.
 func (encoder *DestinationEncoder) Encode(value *Destination) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -656,6 +684,7 @@ func (encoder *DestinationEncoder) Encode(value *Destination) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded Destination structure, extracting the Name field (type 7) and handling unrecognized critical fields according to the ignoreCritical flag.
 func (context *DestinationParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Destination, error) {
 
 	var handled_Name bool = false
@@ -721,16 +750,20 @@ func (context *DestinationParsingContext) Parse(reader enc.WireView, ignoreCriti
 	return value, nil
 }
 
+// Encodes the Destination object into a wire format representation using the DestinationEncoder.
 func (value *Destination) Encode() enc.Wire {
 	encoder := DestinationEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// **Function Description:**  
+Returns the byte slice representation of the encoded `Destination` value by joining its encoded components.
 func (value *Destination) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a Destination object from wire-encoded data, optionally ignoring critical TLV elements not recognized by the parser.
 func ParseDestination(reader enc.WireView, ignoreCritical bool) (*Destination, error) {
 	context := DestinationParsingContext{}
 	context.Init()
@@ -757,6 +790,7 @@ type PrefixOpListParsingContext struct {
 	PrefixOpRemoves_context PrefixOpRemoveParsingContext
 }
 
+// Initializes a `PrefixOpListEncoder` by setting up sub-encoders for `ExitRouter`, `PrefixOpAdds`, and `PrefixOpRemoves` fields and calculating the total encoded length of the `PrefixOpList` structure.
 func (encoder *PrefixOpListEncoder) Init(value *PrefixOpList) {
 	if value.ExitRouter != nil {
 		encoder.ExitRouter_encoder.Init(value.ExitRouter)
@@ -865,6 +899,7 @@ func (encoder *PrefixOpListEncoder) Init(value *PrefixOpList) {
 
 }
 
+// Initializes all sub-contexts (ExitRouter, PrefixOpAdds, and PrefixOpRemoves) within the PrefixOpListParsingContext to reset or prepare them for parsing operations.
 func (context *PrefixOpListParsingContext) Init() {
 	context.ExitRouter_context.Init()
 
@@ -872,6 +907,7 @@ func (context *PrefixOpListParsingContext) Init() {
 	context.PrefixOpRemoves_context.Init()
 }
 
+// Encodes a PrefixOpList structure (containing operations like exit router settings, prefix additions, and removals) into a TLV-encoded binary buffer for Named Data Networking.
 func (encoder *PrefixOpListEncoder) EncodeInto(value *PrefixOpList, buf []byte) {
 
 	pos := uint(0)
@@ -946,6 +982,7 @@ func (encoder *PrefixOpListEncoder) EncodeInto(value *PrefixOpList, buf []byte) 
 	}
 }
 
+// Encodes a PrefixOpList into a wire-formatted byte slice using the allocated buffer size specified by the encoder.
 func (encoder *PrefixOpListEncoder) Encode(value *PrefixOpList) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -956,6 +993,7 @@ func (encoder *PrefixOpListEncoder) Encode(value *PrefixOpList) enc.Wire {
 	return wire
 }
 
+// Parses a binary wire-encoded PrefixOpList, extracting exit router information, prefix operation reset flags, and lists of prefix add/remove operations according to NDN TLV encoding rules.
 func (context *PrefixOpListParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*PrefixOpList, error) {
 
 	var handled_ExitRouter bool = false
@@ -1079,16 +1117,20 @@ func (context *PrefixOpListParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the PrefixOpList value into its wire representation using a PrefixOpListEncoder.
 func (value *PrefixOpList) Encode() enc.Wire {
 	encoder := PrefixOpListEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// **Description:**  
+Encodes the PrefixOpList into a single byte slice by joining its encoded components.
 func (value *PrefixOpList) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a PrefixOpList from wire-encoded data, with an option to ignore critical TLV elements during decoding.
 func ParsePrefixOpList(reader enc.WireView, ignoreCritical bool) (*PrefixOpList, error) {
 	context := PrefixOpListParsingContext{}
 	context.Init()
@@ -1104,6 +1146,7 @@ type PrefixOpAddEncoder struct {
 type PrefixOpAddParsingContext struct {
 }
 
+// Initializes the PrefixOpAddEncoder's Length field by calculating the total encoded size of the provided PrefixOpAdd value, including TLV overhead for name components and cost.
 func (encoder *PrefixOpAddEncoder) Init(value *PrefixOpAdd) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -1124,10 +1167,12 @@ func (encoder *PrefixOpAddEncoder) Init(value *PrefixOpAdd) {
 
 }
 
+// Initializes the parsing context for processing a PrefixOpAdd operation.
 func (context *PrefixOpAddParsingContext) Init() {
 
 }
 
+// Encodes a PrefixOpAdd control command into a TLV-encoded byte slice, including an optional Name component (type 7) and a Cost value (type 0xD0) representing the prefix addition parameters.
 func (encoder *PrefixOpAddEncoder) EncodeInto(value *PrefixOpAdd, buf []byte) {
 
 	pos := uint(0)
@@ -1147,6 +1192,7 @@ func (encoder *PrefixOpAddEncoder) EncodeInto(value *PrefixOpAdd, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes a PrefixOpAdd value into a byte slice of length determined by the encoder and returns it as a wire structure.
 func (encoder *PrefixOpAddEncoder) Encode(value *PrefixOpAdd) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1157,6 +1203,7 @@ func (encoder *PrefixOpAddEncoder) Encode(value *PrefixOpAdd) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded `PrefixOpAdd` object, reading a `Name` (type 7) and required `Cost` (type 208) fields, while handling unrecognized critical fields according to the `ignoreCritical` flag.
 func (context *PrefixOpAddParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*PrefixOpAdd, error) {
 
 	var handled_Name bool = false
@@ -1245,16 +1292,19 @@ func (context *PrefixOpAddParsingContext) Parse(reader enc.WireView, ignoreCriti
 	return value, nil
 }
 
+// Encodes the PrefixOpAdd data structure into a wire format using the associated PrefixOpAddEncoder.
 func (value *PrefixOpAdd) Encode() enc.Wire {
 	encoder := PrefixOpAddEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte representation of the PrefixOpAdd value by joining its encoded components into a single byte slice.
 func (value *PrefixOpAdd) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded PrefixOpAdd structure from the given reader, optionally ignoring critical unrecognized elements.
 func ParsePrefixOpAdd(reader enc.WireView, ignoreCritical bool) (*PrefixOpAdd, error) {
 	context := PrefixOpAddParsingContext{}
 	context.Init()
@@ -1270,6 +1320,7 @@ type PrefixOpRemoveEncoder struct {
 type PrefixOpRemoveParsingContext struct {
 }
 
+// Initializes the encoder's length calculation based on the Name component of the PrefixOpRemove value, accounting for TLV encoding overhead and component lengths.
 func (encoder *PrefixOpRemoveEncoder) Init(value *PrefixOpRemove) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -1288,10 +1339,12 @@ func (encoder *PrefixOpRemoveEncoder) Init(value *PrefixOpRemove) {
 
 }
 
+// Initializes the parsing context for a prefix removal operation.
 func (context *PrefixOpRemoveParsingContext) Init() {
 
 }
 
+// Encodes the Name field of a PrefixOpRemove structure into the provided byte buffer using NDN TLV encoding, starting with type 7 (NAME) and including each component's encoded value.
 func (encoder *PrefixOpRemoveEncoder) EncodeInto(value *PrefixOpRemove, buf []byte) {
 
 	pos := uint(0)
@@ -1306,6 +1359,7 @@ func (encoder *PrefixOpRemoveEncoder) EncodeInto(value *PrefixOpRemove, buf []by
 	}
 }
 
+// Encodes a PrefixOpRemove value into a TLV wire format by allocating a byte buffer of the encoder's specified length and populating it with the encoded data.
 func (encoder *PrefixOpRemoveEncoder) Encode(value *PrefixOpRemove) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1316,6 +1370,7 @@ func (encoder *PrefixOpRemoveEncoder) Encode(value *PrefixOpRemove) enc.Wire {
 	return wire
 }
 
+// Parses a binary-encoded PrefixOpRemove object from the provided WireView reader, extracting the optional Name field and handling critical/non-critical TLV elements according to the ignoreCritical flag.
 func (context *PrefixOpRemoveParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*PrefixOpRemove, error) {
 
 	var handled_Name bool = false
@@ -1381,16 +1436,19 @@ func (context *PrefixOpRemoveParsingContext) Parse(reader enc.WireView, ignoreCr
 	return value, nil
 }
 
+// Encodes the PrefixOpRemove operation into a wire format for transmission or storage.
 func (value *PrefixOpRemove) Encode() enc.Wire {
 	encoder := PrefixOpRemoveEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte-encoded representation of the PrefixOpRemove operation, combining all encoded components into a single byte slice for transmission or storage.
 func (value *PrefixOpRemove) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a PrefixOpRemove TLV structure from encoded data, using a parsing context and optionally ignoring critical elements.
 func ParsePrefixOpRemove(reader enc.WireView, ignoreCritical bool) (*PrefixOpRemove, error) {
 	context := PrefixOpRemoveParsingContext{}
 	context.Init()
@@ -1409,6 +1467,7 @@ type StatusParsingContext struct {
 	RouterName_context  DestinationParsingContext
 }
 
+// Initializes the StatusEncoder with the provided Status value, calculating the total encoded length by summing the TLV-encoded sizes of all fields, including optional sub-encoders and variable-length integers.
 func (encoder *StatusEncoder) Init(value *Status) {
 
 	if value.NetworkName != nil {
@@ -1442,6 +1501,7 @@ func (encoder *StatusEncoder) Init(value *Status) {
 
 }
 
+// Initializes the NetworkName and RouterName contexts within the StatusParsingContext by calling their respective Init methods.
 func (context *StatusParsingContext) Init() {
 
 	context.NetworkName_context.Init()
@@ -1449,6 +1509,7 @@ func (context *StatusParsingContext) Init() {
 
 }
 
+// Encodes a Status object into a binary buffer using TLV (Type-Length-Value) encoding, serializing fields such as HTTP status code, version, network/router names (if present), and count metrics like RIB entries, neighbors, and FIB entries.
 func (encoder *StatusEncoder) EncodeInto(value *Status, buf []byte) {
 
 	pos := uint(0)
@@ -1499,6 +1560,7 @@ func (encoder *StatusEncoder) EncodeInto(value *Status, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes a Status object into a binary wire format using the encoder's specified length and returns it as a single slice within a Wire structure.
 func (encoder *StatusEncoder) Encode(value *Status) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1509,6 +1571,7 @@ func (encoder *StatusEncoder) Encode(value *Status) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded Status object, extracting required fields like Version, NRibEntries, NNeighbors, and NFibEntries, and optional fields like NetworkName and RouterName, while handling critical and non-critical extensions based on the ignoreCritical flag.
 func (context *StatusParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Status, error) {
 
 	var handled_Version bool = false
@@ -1668,16 +1731,21 @@ func (context *StatusParsingContext) Parse(reader enc.WireView, ignoreCritical b
 	return value, nil
 }
 
+// Encodes the Status object into a wire format representation using the associated StatusEncoder.
 func (value *Status) Encode() enc.Wire {
 	encoder := StatusEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded bytes of the Status by concatenating the results of its encoding.  
+
+**Alternative (more concise):** Serializes the Status into a single byte slice by encoding and joining its components.
 func (value *Status) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a Status object from the provided encoded wire format data, with an option to ignore critical fields that cannot be processed.
 func ParseStatus(reader enc.WireView, ignoreCritical bool) (*Status, error) {
 	context := StatusParsingContext{}
 	context.Init()

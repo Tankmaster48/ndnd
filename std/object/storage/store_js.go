@@ -31,6 +31,7 @@ type jsStoreTuple struct {
 	wire []byte
 }
 
+// Constructs a JsStore instance initialized with a JavaScript API binding, a transaction counter, and a cache with priority queue support for approximately 64MB of data (8192 entries).
 func NewJsStore(api js.Value) *JsStore {
 	return &JsStore{
 		api: api,
@@ -43,6 +44,7 @@ func NewJsStore(api js.Value) *JsStore {
 	}
 }
 
+// Retrieves data entries from a JavaScript-based storage system using a name, with optional prefix-based loading and cache management for efficient access to segmented data.
 func (s *JsStore) Get(name enc.Name, prefix bool) ([]byte, error) {
 	*s.cacheP++ // priority
 
@@ -93,6 +95,7 @@ func (s *JsStore) Get(name enc.Name, prefix bool) ([]byte, error) {
 	return nil, nil
 }
 
+// Stores data with the given name in a JavaScript-managed storage system, converting inputs to JavaScript-compatible structures, handling asynchronous operations with transaction support, and caching the entry for future retrieval.
 func (s *JsStore) Put(name enc.Name, wire []byte) error {
 	tlvBytes := name.BytesInner()
 	name_js := jsutil.SliceToJsArray(tlvBytes)
@@ -112,6 +115,7 @@ func (s *JsStore) Put(name enc.Name, wire []byte) error {
 	return nil
 }
 
+// Invokes the JavaScript API to remove an entry associated with the given name from the store, without evicting it from the cache.
 func (s *JsStore) Remove(name enc.Name) error {
 	// This does not evict the cache, but that's fine.
 	// Applications should not rely on the cache for correctness.
@@ -121,12 +125,14 @@ func (s *JsStore) Remove(name enc.Name) error {
 	return nil
 }
 
+// This function removes data associated with the specified prefix from the JavaScript store by invoking the `remove` API with the prefix converted to a JavaScript array and a boolean flag.
 func (s *JsStore) RemovePrefix(prefix enc.Name) error {
 	name_js := jsutil.SliceToJsArray(prefix.BytesInner())
 	s.api.Call("remove", name_js, true)
 	return nil
 }
 
+// Removes a contiguous range of entries from a flat key space in a JavaScript-backed store, using the provided prefix combined with first and last components as bounds, returning an error if the first key exceeds the last.
 func (s *JsStore) RemoveFlatRange(prefix enc.Name, first enc.Component, last enc.Component) error {
 	firstKey := prefix.Append(first).BytesInner()
 	lastKey := prefix.Append(last).BytesInner()
@@ -140,6 +146,7 @@ func (s *JsStore) RemoveFlatRange(prefix enc.Name, first enc.Component, last enc
 	return nil
 }
 
+// Begins a new transaction and returns a new JsStore instance with the same configuration and a new transaction handle.
 func (s *JsStore) Begin() (ndn.Store, error) {
 	return &JsStore{
 		api:       s.api,
@@ -151,16 +158,19 @@ func (s *JsStore) Begin() (ndn.Store, error) {
 	}, nil
 }
 
+// Commits the current transaction by invoking the JavaScript API's "commit" method and waiting for its completion.
 func (s *JsStore) Commit() error {
 	jsutil.Await(s.api.Call("commit", s.tx))
 	return nil
 }
 
+// Rolls back the current transaction in the JavaScript store by invoking the associated API method and awaiting its completion.
 func (s *JsStore) Rollback() error {
 	jsutil.Await(s.api.Call("rollback", s.tx))
 	return nil
 }
 
+// Clears the entire cache by removing all entries from the cache map and emptying the priority queue.
 func (s *JsStore) ClearCache() {
 	for s.cachePq.Len() > 0 {
 		k := s.cachePq.Pop()
@@ -168,6 +178,7 @@ func (s *JsStore) ClearCache() {
 	}
 }
 
+// Inserts a TLV-encoded entry into the cache with its wire format, evicting the least recently used entry if the cache exceeds its maximum size.
 func (s *JsStore) insertCache(tlvstr string, wire []byte) {
 	if s.cache[tlvstr] == nil {
 		s.cache[tlvstr] = s.cachePq.Push(jsStoreTuple{

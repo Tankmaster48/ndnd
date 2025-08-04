@@ -18,6 +18,7 @@ type StringMapEncoder struct {
 type StringMapParsingContext struct {
 }
 
+// Initializes the StringMapEncoder with the provided StringMap, calculating the total encoded length of all key-value parameters using TLV encoding rules.
 func (encoder *StringMapEncoder) Init(value *StringMap) {
 	{
 		Params_l := len(value.Params)
@@ -73,10 +74,12 @@ func (encoder *StringMapEncoder) Init(value *StringMap) {
 
 }
 
+// Initializes the StringMapParsingContext, preparing it for parsing operations with default settings.
 func (context *StringMapParsingContext) Init() {
 
 }
 
+// Encodes a StringMap's key-value pairs into a TLV-encoded byte buffer using type identifiers 0x85 for keys and 0x87 for values.
 func (encoder *StringMapEncoder) EncodeInto(value *StringMap, buf []byte) {
 
 	pos := uint(0)
@@ -113,6 +116,7 @@ func (encoder *StringMapEncoder) EncodeInto(value *StringMap, buf []byte) {
 	}
 }
 
+// Encodes the provided StringMap into a byte slice using the encoder's length and returns it as a single-component Wire structure.
 func (encoder *StringMapEncoder) Encode(value *StringMap) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -123,6 +127,7 @@ func (encoder *StringMapEncoder) Encode(value *StringMap) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded StringMap from the provided wire format reader, extracting parameters (type 133) as key-value pairs (string keys and byte slices) and handling unrecognized or critical fields according to the ignoreCritical flag.
 func (context *StringMapParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*StringMap, error) {
 
 	var handled_Params bool = false
@@ -223,16 +228,19 @@ func (context *StringMapParsingContext) Parse(reader enc.WireView, ignoreCritica
 	return value, nil
 }
 
+// Encodes the StringMap value into a Wire format using a StringMapEncoder.
 func (value *StringMap) Encode() enc.Wire {
 	encoder := StringMapEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte slice formed by encoding and joining the elements of the StringMap.
 func (value *StringMap) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a StringMap from a wire-encoded format using the provided reader, with an option to ignore critical unrecognized elements.
 func ParseStringMap(reader enc.WireView, ignoreCritical bool) (*StringMap, error) {
 	context := StringMapParsingContext{}
 	context.Init()
@@ -246,6 +254,7 @@ type InnerEncoder struct {
 type InnerParsingContext struct {
 }
 
+// Initializes the encoder's length by calculating the combined size of a fixed field and the variable-length encoded value of the `Num` field from the provided `Inner` struct.
 func (encoder *InnerEncoder) Init(value *Inner) {
 
 	l := uint(0)
@@ -255,10 +264,12 @@ func (encoder *InnerEncoder) Init(value *Inner) {
 
 }
 
+// Initializes the InnerParsingContext, preparing it for parsing operations.
 func (context *InnerParsingContext) Init() {
 
 }
 
+// Encodes the given Inner struct into a binary format in the provided buffer, writing a type tag (1) followed by a length-prefixed encoding of the Num field as a natural number.
 func (encoder *InnerEncoder) EncodeInto(value *Inner, buf []byte) {
 
 	pos := uint(0)
@@ -270,6 +281,7 @@ func (encoder *InnerEncoder) EncodeInto(value *Inner, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes the provided Inner value into a byte slice of the pre-determined length specified by the encoder, returning it as a single-element enc.Wire structure containing the encoded data.
 func (encoder *InnerEncoder) Encode(value *Inner) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -280,6 +292,7 @@ func (encoder *InnerEncoder) Encode(value *Inner) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded data into an Inner structure, extracting a required uint64 "Num" field (type 1) and handling critical/non-critical fields according to the ignoreCritical flag.
 func (context *InnerParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Inner, error) {
 
 	var handled_Num bool = false
@@ -357,16 +370,19 @@ func (context *InnerParsingContext) Parse(reader enc.WireView, ignoreCritical bo
 	return value, nil
 }
 
+// Encodes the Inner value into its wire format representation using an InnerEncoder.
 func (value *Inner) Encode() enc.Wire {
 	encoder := InnerEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte slice representing the TLV-encoded form of the Inner value.
 func (value *Inner) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses encoded data into an Inner structure using the provided WireView, with an option to ignore critical elements if specified.
 func ParseInner(reader enc.WireView, ignoreCritical bool) (*Inner, error) {
 	context := InnerParsingContext{}
 	context.Init()
@@ -385,6 +401,7 @@ type IntStructMapParsingContext struct {
 	Params_v_context InnerParsingContext
 }
 
+// Initializes an IntStructMapEncoder with the provided IntStructMap, setting up nested encoders for each map entry and calculating the total encoded length including keys and nested values.
 func (encoder *IntStructMapEncoder) Init(value *IntStructMap) {
 	{
 		Params_l := len(value.Params)
@@ -443,10 +460,12 @@ func (encoder *IntStructMapEncoder) Init(value *IntStructMap) {
 
 }
 
+// Initializes the internal Params_v_context field by invoking its Init method to prepare for parsing.
 func (context *IntStructMapParsingContext) Init() {
 	context.Params_v_context.Init()
 }
 
+// Encodes a map of uint64 keys and *Inner values into a binary buffer using type-length-value encoding with specific tag bytes (0x85 for keys, 0x87 for values) and length prefixes.
 func (encoder *IntStructMapEncoder) EncodeInto(value *IntStructMap, buf []byte) {
 
 	pos := uint(0)
@@ -485,6 +504,7 @@ func (encoder *IntStructMapEncoder) EncodeInto(value *IntStructMap, buf []byte) 
 	}
 }
 
+// Encodes an IntStructMap into a pre-allocated wire buffer, returning a structured byte slice suitable for NDN data transmission.
 func (encoder *IntStructMapEncoder) Encode(value *IntStructMap) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -495,6 +515,7 @@ func (encoder *IntStructMapEncoder) Encode(value *IntStructMap) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded data into an IntStructMap, handling map entries with uint64 keys and Inner values (type 133/135), while enforcing critical field rules based on the ignoreCritical flag.
 func (context *IntStructMapParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*IntStructMap, error) {
 
 	var handled_Params bool = false
@@ -601,16 +622,19 @@ func (context *IntStructMapParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the IntStructMap into a wire-encoded format for transmission or storage.
 func (value *IntStructMap) Encode() enc.Wire {
 	encoder := IntStructMapEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte representation of the IntStructMap by concatenating its encoded components.
 func (value *IntStructMap) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded Integer Struct Map into a Go struct, optionally ignoring critical fields.
 func ParseIntStructMap(reader enc.WireView, ignoreCritical bool) (*IntStructMap, error) {
 	context := IntStructMapParsingContext{}
 	context.Init()

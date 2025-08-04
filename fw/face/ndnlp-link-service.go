@@ -46,6 +46,7 @@ type NDNLPLinkServiceOptions struct {
 	DefaultCongestionThresholdBytes uint64
 }
 
+// Constructs an NDNLPLinkServiceOptions with a 100ms base congestion marking interval, 65536-byte default congestion threshold, and enables packet reassembly and fragmentation.
 func MakeNDNLPLinkServiceOptions() NDNLPLinkServiceOptions {
 	return NDNLPLinkServiceOptions{
 		BaseCongestionMarkingInterval:   time.Duration(100) * time.Millisecond,
@@ -105,6 +106,7 @@ func (l *NDNLPLinkService) SetOptions(options NDNLPLinkServiceOptions) {
 	l.computeHeaderOverhead()
 }
 
+// Computes the total header overhead for LP packets based on enabled features such as fragmentation and incoming face indication, accounting for additional fields like sequence numbers, fragment indices, and face IDs.
 func (l *NDNLPLinkService) computeHeaderOverhead() {
 	l.headerOverhead = lpPacketOverhead // LpPacket (Type + Length of up to 2^16)
 
@@ -139,6 +141,7 @@ func (l *NDNLPLinkService) Run(initial []byte) {
 	go l.runSend()
 }
 
+// Starts the transport's receive process, optionally locks the current thread to a core based on configuration, and signals completion by sending `true` to the `stopped` channel.
 func (l *NDNLPLinkService) runReceive() {
 	if CfgLockThreadsToCores() {
 		runtime.LockOSThread()
@@ -148,6 +151,7 @@ func (l *NDNLPLinkService) runReceive() {
 	l.stopped <- true
 }
 
+// This function runs a loop that sends packets from the link service's send queue and cleans up the face upon stopping.
 func (l *NDNLPLinkService) runSend() {
 	if CfgLockThreadsToCores() {
 		runtime.LockOSThread()
@@ -164,6 +168,7 @@ func (l *NDNLPLinkService) runSend() {
 	}
 }
 
+// Sends an outbound NDN packet over a link service, handling congestion marking, fragmentation based on MTU constraints, and adding necessary transport headers before transmission.
 func sendPacket(l *NDNLPLinkService, out dispatch.OutPkt) {
 	pkt := out.Pkt
 	wire := pkt.Raw
@@ -268,6 +273,7 @@ func sendPacket(l *NDNLPLinkService, out dispatch.OutPkt) {
 	}
 }
 
+// Processes incoming NDNLPv2 frames by decoding, reassembling fragmented packets, handling congestion and forwarding controls, and dispatching the resulting Interest or Data packets for further processing.
 func (l *NDNLPLinkService) handleIncomingFrame(frame []byte) {
 	// We have to copy so receive transport buffer can be reused
 	frameCopy := make([]byte, len(frame))
@@ -361,6 +367,7 @@ func (l *NDNLPLinkService) handleIncomingFrame(frame []byte) {
 	}
 }
 
+// Reassembles incoming packet fragments into a complete wire-encoded packet by managing a buffer, validating fragment counts and indices, and returning the full payload once all fragments are received.
 func (l *NDNLPLinkService) reassemble(
 	frame *defn.FwLpPacket,
 	baseSequence uint64,
@@ -419,6 +426,7 @@ func (l *NDNLPLinkService) reassemble(
 	return buffer
 }
 
+// Determines whether to mark congestion for a packet by checking if the accumulated send queue size exceeds a threshold, using periodic checks to avoid frequent expensive operations.
 func (l *NDNLPLinkService) checkCongestion(wire enc.Wire) bool {
 	if !CfgCongestionMarking() {
 		return false
@@ -441,6 +449,7 @@ func (l *NDNLPLinkService) checkCongestion(wire enc.Wire) bool {
 	return false
 }
 
+// Constructs a bitmask of face flags indicating whether consumer-controlled forwarding and congestion marking are enabled in the link service options.
 func (op *NDNLPLinkServiceOptions) Flags() (ret uint64) {
 	if op.IsConsumerControlledForwardingEnabled {
 		ret |= FaceFlagLocalFields

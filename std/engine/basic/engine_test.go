@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Sets up a test environment with a dummy face and timer, runs the provided test logic function with these components, and ensures proper cleanup of the engine.
 func executeTest(t *testing.T, main func(*face.DummyFace, *basic_engine.Engine, *basic_engine.DummyTimer)) {
 	tu.SetT(t)
 
@@ -28,11 +29,13 @@ func executeTest(t *testing.T, main func(*face.DummyFace, *basic_engine.Engine, 
 	require.NoError(t, engine.Stop())
 }
 
+// "Executes a test scenario to verify the correct initialization and startup behavior of the engine using dummy face and timer components."
 func TestEngineStart(t *testing.T) {
 	executeTest(t, func(face *face.DummyFace, engine *basic_engine.Engine, timer *basic_engine.DummyTimer) {
 	})
 }
 
+// Sends an Interest with freshness and lifetime requirements, verifies receipt of a matching Data packet with expected name, freshness, and content via a callback.
 func TestConsumerBasic(t *testing.T) {
 	executeTest(t, func(face *face.DummyFace, engine *basic_engine.Engine, timer *basic_engine.DummyTimer) {
 		hitCnt := 0
@@ -72,6 +75,7 @@ func TestConsumerBasic(t *testing.T) {
 
 // TODO: TestInterestCancel
 
+// Tests the handling of a NACK response (specifically NackReasonNoRoute) for an expressed Interest by verifying callback invocation, packet encoding, and correct result codes.
 func TestInterestNack(t *testing.T) {
 	executeTest(t, func(face *face.DummyFace, engine *basic_engine.Engine, timer *basic_engine.DummyTimer) {
 		hitCnt := 0
@@ -107,6 +111,7 @@ func TestInterestNack(t *testing.T) {
 	})
 }
 
+// Tests that expressing an Interest with a short lifetime results in a timeout callback when no Data is received before the timer expires, even if a Data packet is subsequently sent.
 func TestInterestTimeout(t *testing.T) {
 	executeTest(t, func(face *face.DummyFace, engine *basic_engine.Engine, timer *basic_engine.DummyTimer) {
 		hitCnt := 0
@@ -135,6 +140,7 @@ func TestInterestTimeout(t *testing.T) {
 	})
 }
 
+// Tests the behavior of the `CanBePrefix` flag in NDN Interests by verifying that setting `CanBePrefix: true` allows an Interest to match and receive a Data packet with a longer name, while `CanBePrefix: false` results in a timeout unless the Data name exactly matches.
 func TestInterestCanBePrefix(t *testing.T) {
 	executeTest(t, func(face *face.DummyFace, engine *basic_engine.Engine, timer *basic_engine.DummyTimer) {
 		hitCnt := 0
@@ -198,6 +204,7 @@ func TestInterestCanBePrefix(t *testing.T) {
 	})
 }
 
+// Tests the handling of NDN Interests with implicit SHA-256 digest components by verifying timeout behavior for an invalid digest and successful data retrieval for a valid digest.
 func TestImplicitSha256(t *testing.T) {
 	executeTest(t, func(face *face.DummyFace, engine *basic_engine.Engine, timer *basic_engine.DummyTimer) {
 		hitCnt := 0
@@ -255,6 +262,7 @@ func TestImplicitSha256(t *testing.T) {
 
 // No need to test AppParam for expression. If `spec.MakeInterest` works, `engine.Express` will.
 
+// This function tests that an Interest routed to a registered handler produces a correctly formatted Data packet with a Blob content type and test signature when processed by the NDN engine.
 func TestRoute(t *testing.T) {
 	executeTest(t, func(face *face.DummyFace, engine *basic_engine.Engine, timer *basic_engine.DummyTimer) {
 		hitCnt := 0
@@ -289,6 +297,7 @@ func TestRoute(t *testing.T) {
 	})
 }
 
+// Constructs and processes an Interest packet for "/not/important", generating a signed Data packet with "test" content and verifying PIT token handling via a dummy face and engine.
 func TestPitToken(t *testing.T) {
 	executeTest(t, func(face *face.DummyFace, engine *basic_engine.Engine, timer *basic_engine.DummyTimer) {
 		hitCnt := 0

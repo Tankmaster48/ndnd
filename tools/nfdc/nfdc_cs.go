@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Fetches and prints content store (CS) status information, including capacity, admission/serve flags, and hit/miss statistics, from an NDN network using a status dataset query.
 func (t *Tool) ExecCsInfo(_ *cobra.Command, args []string) {
 	t.Start()
 	defer t.Stop()

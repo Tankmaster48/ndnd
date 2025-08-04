@@ -13,6 +13,7 @@ import (
 	mgmt "github.com/named-data/ndnd/std/ndn/mgmt_2022"
 )
 
+// Decodes control parameters from a specific component of the given Interest's name (after the LOCAL_PREFIX) into a ControlArgs object, returning nil if parsing fails.
 func decodeControlParameters(m Module, interest *Interest) *mgmt.ControlArgs {
 	paramVal := interest.Name()[len(LOCAL_PREFIX)+2].Val
 	params, err := mgmt.ParseControlParameters(enc.NewBufferView(paramVal), true)

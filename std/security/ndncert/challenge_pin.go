@@ -11,10 +11,12 @@ type ChallengePin struct {
 	CodeCallback func(status string) string
 }
 
+// Returns the keyword "pin" that identifies the ChallengePin type.
 func (*ChallengePin) Name() string {
 	return KwPin
 }
 
+// Handles a PIN challenge by invoking a configured callback to retrieve a verification code when the challenge status indicates a code is needed or incorrect, returning the code in a ParamMap for authentication continuation or errors for misconfiguration/invalid states.
 func (c *ChallengePin) Request(input ParamMap, status optional.Optional[string]) (ParamMap, error) {
 	// Validate challenge configuration
 	if c.CodeCallback == nil {

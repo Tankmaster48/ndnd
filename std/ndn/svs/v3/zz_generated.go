@@ -18,6 +18,7 @@ type SvsDataParsingContext struct {
 	StateVector_context StateVectorParsingContext
 }
 
+// Initializes the encoder with the provided SVS data, computing the total encoded length by including the state vector's encoded size if present.
 func (encoder *SvsDataEncoder) Init(value *SvsData) {
 	if value.StateVector != nil {
 		encoder.StateVector_encoder.Init(value.StateVector)
@@ -33,10 +34,12 @@ func (encoder *SvsDataEncoder) Init(value *SvsData) {
 
 }
 
+// Initializes the internal state vector context associated with this parsing context.
 func (context *SvsDataParsingContext) Init() {
 	context.StateVector_context.Init()
 }
 
+// Encodes the `StateVector` field of the provided `SvsData` into the given byte buffer if non-nil, writing a type identifier (201), encoded length, and serialized state vector data.
 func (encoder *SvsDataEncoder) EncodeInto(value *SvsData, buf []byte) {
 
 	pos := uint(0)
@@ -52,6 +55,7 @@ func (encoder *SvsDataEncoder) EncodeInto(value *SvsData, buf []byte) {
 	}
 }
 
+// Encodes the provided *SvsData into a byte slice of length equal to the encoder's Length field, returning it as a single-element enc.Wire.
 func (encoder *SvsDataEncoder) Encode(value *SvsData) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -62,6 +66,7 @@ func (encoder *SvsDataEncoder) Encode(value *SvsData) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded SVSData, extracting a StateVector field (type 201) and handling critical/unrecognized fields according to the ignoreCritical flag.
 func (context *SvsDataParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*SvsData, error) {
 
 	var handled_StateVector bool = false
@@ -126,16 +131,19 @@ func (context *SvsDataParsingContext) Parse(reader enc.WireView, ignoreCritical 
 	return value, nil
 }
 
+// Encodes the SvsData instance into a wire-encoded format using the SvsDataEncoder for transmission or storage.
 func (value *SvsData) Encode() enc.Wire {
 	encoder := SvsDataEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the SVS data value into a byte slice.
 func (value *SvsData) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses wire-format SVS data into an SvsData structure, optionally ignoring critical fields.
 func ParseSvsData(reader enc.WireView, ignoreCritical bool) (*SvsData, error) {
 	context := SvsDataParsingContext{}
 	context.Init()
@@ -154,6 +162,7 @@ type StateVectorParsingContext struct {
 	Entries_context StateVectorEntryParsingContext
 }
 
+// Initializes the StateVectorEncoder with the provided StateVector, setting up per-entry encoders and computing the total encoded length including TLV overhead for each entry.
 func (encoder *StateVectorEncoder) Init(value *StateVector) {
 	{
 		Entries_l := len(value.Entries)
@@ -205,10 +214,12 @@ func (encoder *StateVectorEncoder) Init(value *StateVector) {
 
 }
 
+// Initializes the internal entries context of this state vector parsing context.
 func (context *StateVectorParsingContext) Init() {
 	context.Entries_context.Init()
 }
 
+// Encodes a StateVector into a TLV (Type-Length-Value) binary format by serializing each entry in its Entries map using corresponding subencoders, writing the result directly into the provided byte buffer.
 func (encoder *StateVectorEncoder) EncodeInto(value *StateVector, buf []byte) {
 
 	pos := uint(0)
@@ -240,6 +251,7 @@ func (encoder *StateVectorEncoder) EncodeInto(value *StateVector, buf []byte) {
 	}
 }
 
+// Encodes the provided StateVector into a binary wire format using the encoder's configured length, returning the result as a slice of byte slices.
 func (encoder *StateVectorEncoder) Encode(value *StateVector) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -250,6 +262,7 @@ func (encoder *StateVectorEncoder) Encode(value *StateVector) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded StateVector from the provided reader, handling recognized entries (e.g., type 202) and skipping or rejecting unrecognized fields based on the ignoreCritical flag.
 func (context *StateVectorParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*StateVector, error) {
 
 	var handled_Entries bool = false
@@ -328,16 +341,19 @@ func (context *StateVectorParsingContext) Parse(reader enc.WireView, ignoreCriti
 	return value, nil
 }
 
+// Encodes the StateVector into its wire format representation using the StateVectorEncoder.
 func (value *StateVector) Encode() enc.Wire {
 	encoder := StateVectorEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the StateVector and returns the resulting byte slice.
 func (value *StateVector) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a StateVector from the provided WireView input, optionally ignoring critical fields that cannot be processed based on the ignoreCritical flag.
 func ParseStateVector(reader enc.WireView, ignoreCritical bool) (*StateVector, error) {
 	context := StateVectorParsingContext{}
 	context.Init()
@@ -357,6 +373,7 @@ type StateVectorEntryParsingContext struct {
 	SeqNoEntries_context SeqNoEntryParsingContext
 }
 
+// Initializes a StateVectorEntryEncoder with the provided StateVectorEntry value, calculating the total encoded length by aggregating the TLV-encoded sizes of its Name and SeqNoEntries fields.
 func (encoder *StateVectorEntryEncoder) Init(value *StateVectorEntry) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -419,11 +436,13 @@ func (encoder *StateVectorEntryEncoder) Init(value *StateVectorEntry) {
 
 }
 
+// Initializes the sequence number entries context within the state vector entry parsing context.
 func (context *StateVectorEntryParsingContext) Init() {
 
 	context.SeqNoEntries_context.Init()
 }
 
+// Encodes a StateVectorEntry struct into a binary buffer, serializing its Name field as a TLV-encoded NDN name component list and its SeqNoEntries as a sequence of TLV-encoded SeqNoEntry records.
 func (encoder *StateVectorEntryEncoder) EncodeInto(value *StateVectorEntry, buf []byte) {
 
 	pos := uint(0)
@@ -463,6 +482,9 @@ func (encoder *StateVectorEntryEncoder) EncodeInto(value *StateVectorEntry, buf 
 	}
 }
 
+// Encodes a StateVectorEntry into a binary wire format using the encoder's pre-determined buffer length.  
+
+Example: Converts a StateVectorEntry struct into a byte slice of fixed size (as defined by the encoder) for network transmission.
 func (encoder *StateVectorEntryEncoder) Encode(value *StateVectorEntry) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -473,6 +495,7 @@ func (encoder *StateVectorEntryEncoder) Encode(value *StateVectorEntry) enc.Wire
 	return wire
 }
 
+// Parses a TLV-encoded StateVectorEntry from the provided WireView reader, handling Name (type 7) and SeqNoEntries (type 210) fields using a recursive context-based approach, with optional critical field error handling.
 func (context *StateVectorEntryParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*StateVectorEntry, error) {
 
 	var handled_Name bool = false
@@ -562,16 +585,20 @@ func (context *StateVectorEntryParsingContext) Parse(reader enc.WireView, ignore
 	return value, nil
 }
 
+// Encodes the StateVectorEntry into its wire format representation for serialization or transmission.
 func (value *StateVectorEntry) Encode() enc.Wire {
 	encoder := StateVectorEntryEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// **Description:**  
+Encodes the StateVectorEntry and joins the resulting components into a single byte slice.
 func (value *StateVectorEntry) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a StateVectorEntry from wire format data, optionally ignoring critical parsing errors.
 func ParseStateVectorEntry(reader enc.WireView, ignoreCritical bool) (*StateVectorEntry, error) {
 	context := StateVectorEntryParsingContext{}
 	context.Init()
@@ -585,6 +612,7 @@ type SeqNoEntryEncoder struct {
 type SeqNoEntryParsingContext struct {
 }
 
+// Initializes the encoder by calculating and setting the total encoded length of the SeqNoEntry, which includes fixed overhead and variable-length fields for the BootstrapTime and SeqNo natural numbers.
 func (encoder *SeqNoEntryEncoder) Init(value *SeqNoEntry) {
 
 	l := uint(0)
@@ -596,10 +624,12 @@ func (encoder *SeqNoEntryEncoder) Init(value *SeqNoEntry) {
 
 }
 
+// Initializes the sequence number entry parsing context.
 func (context *SeqNoEntryParsingContext) Init() {
 
 }
 
+// Encodes a `SeqNoEntry` into the provided buffer using TLV format, with type 212 for `BootstrapTime` and type 214 for `SeqNo`, each prefixed by their encoded lengths.
 func (encoder *SeqNoEntryEncoder) EncodeInto(value *SeqNoEntry, buf []byte) {
 
 	pos := uint(0)
@@ -616,6 +646,7 @@ func (encoder *SeqNoEntryEncoder) EncodeInto(value *SeqNoEntry, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes a sequence number entry (`SeqNoEntry`) into a binary wire format using the encoder's predefined buffer length, returning a slice containing the serialized byte array.
 func (encoder *SeqNoEntryEncoder) Encode(value *SeqNoEntry) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -626,6 +657,7 @@ func (encoder *SeqNoEntryEncoder) Encode(value *SeqNoEntry) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded `SeqNoEntry` structure, requiring `BootstrapTime` (type 212) and `SeqNo` (type 214) fields, while optionally ignoring unknown critical fields based on the `ignoreCritical` flag.
 func (context *SeqNoEntryParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*SeqNoEntry, error) {
 
 	var handled_BootstrapTime bool = false
@@ -726,16 +758,23 @@ func (context *SeqNoEntryParsingContext) Parse(reader enc.WireView, ignoreCritic
 	return value, nil
 }
 
+// Encodes the sequence number entry into a wire format using the associated encoder.
 func (value *SeqNoEntry) Encode() enc.Wire {
 	encoder := SeqNoEntryEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// **Function Description:**  
+Returns the encoded sequence number entry as a concatenated byte slice for serialization.  
+
+**Explanation:**  
+This function encodes the `SeqNoEntry` value (likely into a structured or segmented byte format) and joins the resulting components into a single contiguous byte slice, enabling efficient transmission or storage.
 func (value *SeqNoEntry) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a TLV-encoded sequence number entry from the provided wire format into a SeqNoEntry structure, with an option to ignore critical unrecognized elements.
 func ParseSeqNoEntry(reader enc.WireView, ignoreCritical bool) (*SeqNoEntry, error) {
 	context := SeqNoEntryParsingContext{}
 	context.Init()
@@ -754,6 +793,7 @@ type PassiveStateEncoder struct {
 type PassiveStateParsingContext struct {
 }
 
+// Initializes the PassiveStateEncoder with the provided PassiveState data, calculates the total encoded length required for the data array, and prepares a wire encoding plan for TLV-based serialization.
 func (encoder *PassiveStateEncoder) Init(value *PassiveState) {
 	{
 		Data_l := len(value.Data)
@@ -829,10 +869,12 @@ func (encoder *PassiveStateEncoder) Init(value *PassiveState) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the PassiveStateParsingContext to its default state for parsing operations.
 func (context *PassiveStateParsingContext) Init() {
 
 }
 
+// Encodes the Data field of a PassiveState into a TLV wire format using a subencoder, serializing each byte slice element with type 253 and a calculated length.
 func (encoder *PassiveStateEncoder) EncodeInto(value *PassiveState, wire enc.Wire) {
 
 	wireIdx := 0
@@ -866,6 +908,7 @@ func (encoder *PassiveStateEncoder) EncodeInto(value *PassiveState, wire enc.Wir
 	}
 }
 
+// Encodes a PassiveState into a wire format by allocating a byte buffer according to the encoder's predefined wire plan and populating it with the state's data.
 func (encoder *PassiveStateEncoder) Encode(value *PassiveState) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -885,6 +928,7 @@ func (encoder *PassiveStateEncoder) Encode(value *PassiveState) enc.Wire {
 	return wire
 }
 
+// Parses binary-encoded PassiveState data from a WireView reader, handling the 'Data' field (type 4000) and skipping or rejecting unknown critical fields based on the ignoreCritical flag.
 func (context *PassiveStateParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*PassiveState, error) {
 
 	var handled_Data bool = false
@@ -964,16 +1008,19 @@ func (context *PassiveStateParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the PassiveState object into a wire format using the PassiveStateEncoder for transmission or storage.
 func (value *PassiveState) Encode() enc.Wire {
 	encoder := PassiveStateEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Serializes the PassiveState value into a byte slice by encoding its components and concatenating them.
 func (value *PassiveState) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a PassiveState object from the provided wire format data, with an option to skip critical fields if the ignoreCritical flag is enabled.
 func ParsePassiveState(reader enc.WireView, ignoreCritical bool) (*PassiveState, error) {
 	context := PassiveStateParsingContext{}
 	context.Init()

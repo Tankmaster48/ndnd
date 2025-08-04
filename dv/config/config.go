@@ -74,6 +74,7 @@ type Neighbor struct {
 	Created bool `json:"-"`
 }
 
+// "Returns a default configuration with invalid network/router identifiers, 5-second advertisement sync interval, 30-second router dead interval, and an undefined key chain URI, requiring customization before use."
 func DefaultConfig() *Config {
 	return &Config{
 		Network:                      "", // invalid
@@ -84,6 +85,7 @@ func DefaultConfig() *Config {
 	}
 }
 
+// Parses and validates NDN router configuration parameters, constructs name components for advertisements and data packets, and enforces hierarchical naming constraints between network and router identities.
 func (c *Config) Parse() (err error) {
 	// Validate prefixes not empty
 	if c.Network == "" || c.Router == "" {
@@ -162,50 +164,62 @@ func (c *Config) Parse() (err error) {
 	return nil
 }
 
+// Returns the network name stored in the configuration as an `enc.Name`.
 func (c *Config) NetworkName() enc.Name {
 	return c.networkNameN
 }
 
+// Returns the router's name stored in the configuration as an `enc.Name`.
 func (c *Config) RouterName() enc.Name {
 	return c.routerNameN
 }
 
+// Returns the configured advertisement synchronization prefix name.
 func (c *Config) AdvertisementSyncPrefix() enc.Name {
 	return c.advSyncPfxN
 }
 
+// Returns the active name prefix used for advertisement synchronization in the configuration.
 func (c *Config) AdvertisementSyncActivePrefix() enc.Name {
 	return c.advSyncActivePfxN
 }
 
+// Returns the name of the passive prefix used for advertisement synchronization in the routing protocol.
 func (c *Config) AdvertisementSyncPassivePrefix() enc.Name {
 	return c.advSyncPassivePfxN
 }
 
+// Returns the configured advertisement data prefix name used for data packet naming in the NDN network.
 func (c *Config) AdvertisementDataPrefix() enc.Name {
 	return c.advDataPfxN
 }
 
+// Returns the configured group prefix name used for prefix table synchronization.
 func (c *Config) PrefixTableGroupPrefix() enc.Name {
 	return c.pfxSyncGroupPfxN
 }
 
+// Returns the management prefix configured for this instance.
 func (c *Config) MgmtPrefix() enc.Name {
 	return c.mgmtPrefix
 }
 
+// Returns the advertisement synchronization interval as a `time.Duration`, converting the configured millisecond value into the appropriate duration for timing operations.
 func (c *Config) AdvertisementSyncInterval() time.Duration {
 	return time.Duration(c.AdvertisementSyncInterval_ms) * time.Millisecond
 }
 
+// Returns the router dead interval duration as a `time.Duration`, converted from the configured value in milliseconds.
 func (c *Config) RouterDeadInterval() time.Duration {
 	return time.Duration(c.RouterDeadInterval_ms) * time.Millisecond
 }
 
+// Returns the names of the trust anchors configured in this configuration.
 func (c *Config) TrustAnchorNames() []enc.Name {
 	return c.trustAnchorsN
 }
 
+// Returns the schema bytes associated with the configuration.
 func (c *Config) SchemaBytes() []byte {
 	return SchemaBytes
 }

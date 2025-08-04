@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Tests the HMAC-SHA256 signer's ability to generate a 32-byte signature for input data, verifying the signature type, key name, size estimation, and correctness against a fixed expected value when using the key "mykey" on the payload "hello".
 func TestHmacSigner(t *testing.T) {
 	tu.SetT(t)
 

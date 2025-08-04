@@ -20,6 +20,7 @@ var CmdRepo = &cobra.Command{
 	Run:     run,
 }
 
+// "Initializes and starts a repository service using a YAML configuration file, runs it until an interrupt or termination signal is received, and ensures proper shutdown."
 func run(cmd *cobra.Command, args []string) {
 	config := struct {
 		Repo *Config `json:"repo"`

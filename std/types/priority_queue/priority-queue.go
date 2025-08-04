@@ -19,26 +19,31 @@ type Queue[V any, P constraints.Ordered] struct {
 	pq wrapper[V, P]
 }
 
+// Returns the number of elements currently in the priority queue.
 func (pq *wrapper[V, P]) Len() int {
 	return len(*pq)
 }
 
+// Implements the Less method for a priority queue, comparing priorities of elements at indices i and j and returning true if the priority at i is less than at j, ensuring the heap maintains correct ordering.
 func (pq *wrapper[V, P]) Less(i, j int) bool {
 	return (*pq)[i].priority < (*pq)[j].priority
 }
 
+// Swaps the elements at positions i and j in the priority queue and updates their stored indices to maintain consistency with their new positions in the underlying slice.
 func (pq *wrapper[V, P]) Swap(i, j int) {
 	(*pq)[i], (*pq)[j] = (*pq)[j], (*pq)[i]
 	(*pq)[i].index = i
 	(*pq)[j].index = j
 }
 
+// Adds an item to the priority queue by asserting its type, setting its index to the current length of the queue, and appending it to the underlying slice.
 func (pq *wrapper[V, P]) Push(x any) {
 	item := x.(*Item[V, P])
 	item.index = len(*pq)
 	*pq = append(*pq, item)
 }
 
+// Removes and returns the last element from the priority queue, ensuring memory safety by nil-ing the element and invalidating its index.
 func (pq *wrapper[V, P]) Pop() any {
 	old := *pq
 	n := len(old)

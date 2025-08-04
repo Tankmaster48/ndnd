@@ -11,6 +11,7 @@ type Buffer []byte
 // Wire is a collection of Buffer. May be allocated in non-contiguous memory.
 type Wire []Buffer
 
+// Joins multiple byte slices in a Wire into a single concatenated byte slice.
 func (w Wire) Join() []byte {
 	if len(w) == 0 {
 		return []byte{}
@@ -31,6 +32,7 @@ func (w Wire) Join() []byte {
 	return b
 }
 
+// Returns the total length in bytes of all components in the Wire structure.
 func (w Wire) Length() uint64 {
 	ret := uint64(0)
 	for _, v := range w {
@@ -43,6 +45,7 @@ type ErrFormat struct {
 	Msg string
 }
 
+// Implements the error interface by returning the error message stored in this ErrFormat instance.
 func (e ErrFormat) Error() string {
 	return e.Msg
 }
@@ -51,6 +54,7 @@ type ErrNotFound struct {
 	Key string
 }
 
+// Returns an error string indicating the specified key was not found, formatted as "key: not found".
 func (e ErrNotFound) Error() string {
 	return e.Key + ": not found"
 }
@@ -92,6 +96,9 @@ type ErrUnrecognizedField struct {
 	TypeNum TLNum
 }
 
+// This function returns an error message indicating the presence of an unrecognized critical field with the specified type number.  
+
+Example: Returns an error message stating that an unrecognized critical field with type number X exists.
 func (e ErrUnrecognizedField) Error() string {
 	return fmt.Sprintf("There exists an unrecognized field that has a critical type number: %d", e.TypeNum)
 }
@@ -105,6 +112,7 @@ type ErrSkipRequired struct {
 	TypeNum TLNum
 }
 
+// Returns an error message indicating that a required field with the specified name and type number is missing from the input.
 func (e ErrSkipRequired) Error() string {
 	return fmt.Sprintf("The required field %s(%d) is missing in the input", e.Name, e.TypeNum)
 }
@@ -114,10 +122,12 @@ type ErrFailToParse struct {
 	Err     error
 }
 
+// Returns a formatted error message indicating failure to parse a specific field, including the field's type number and the underlying error.
 func (e ErrFailToParse) Error() string {
 	return fmt.Sprintf("Failed to parse field %d: %v", e.TypeNum, e.Err)
 }
 
+// Returns the underlying error that caused the parsing failure.
 func (e ErrFailToParse) Unwrap() error {
 	return e.Err
 }
@@ -126,10 +136,12 @@ type ErrUnexpected struct {
 	Err error
 }
 
+// Returns a formatted error message indicating an unexpected parsing error, including the underlying error details from `e.Err`.
 func (e ErrUnexpected) Error() string {
 	return fmt.Sprintf("Unexpected error happened in parsing: %v", e.Err)
 }
 
+// Returns the underlying error that this `ErrUnexpected` instance wraps, enabling error chain unwrapping for inspection or handling.
 func (e ErrUnexpected) Unwrap() error {
 	return e.Err
 }
@@ -144,6 +156,7 @@ type ErrIncompatibleType struct {
 	Value   any
 }
 
+// Returns an error message describing a type incompatibility by specifying the field name, expected type, and actual value received.
 func (e ErrIncompatibleType) Error() string {
 	return fmt.Sprintf("The field %s(%d) expected type %s but got %+v", e.Name, e.TypeNum, e.ValType, e.Value)
 }

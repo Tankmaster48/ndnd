@@ -68,6 +68,7 @@ const SchemaJson = `{
 
 const HmacKey = "Hello, World!"
 
+// Fetches versioned data from an NDN schema-based group signature application as a consumer, using a specified version number and HMAC key, and handles retrieval outcomes such as success, timeout, or NACK.
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal(nil, "Insufficient argument. Please input the version number given by the producer.")

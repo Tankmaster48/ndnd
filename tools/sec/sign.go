@@ -22,6 +22,7 @@ type ToolSignCert struct {
 	Issuer string
 }
 
+// Configures a command to sign an NDN certificate using a key file and CSR input, with options for validity period, additional info, and issuer ID.
 func (t *ToolSignCert) configure(root *cobra.Command) {
 	cmd := &cobra.Command{
 		GroupID: "key",
@@ -47,6 +48,7 @@ file as both the signer key and the CSR.`,
 	root.AddCommand(cmd)
 }
 
+// Signs a Certificate Signing Request (CSR) from standard input using a specified key file, generating a PEM-encoded certificate with user-configurable validity periods and an optional issuer identity.
 func (t *ToolSignCert) signCert(_ *cobra.Command, args []string) {
 	keysFile, err := os.Open(args[0])
 	if err != nil {

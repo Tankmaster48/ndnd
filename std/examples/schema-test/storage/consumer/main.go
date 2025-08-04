@@ -46,6 +46,7 @@ const SchemaJson = `{
   ]
 }`
 
+// Constructs an NDN consumer application that fetches data using a schema-defined path with a time-based version parameter, demonstrating Interest sending and caching behavior.
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal(nil, "Insufficient argument. Please input the version number given by the producer.")

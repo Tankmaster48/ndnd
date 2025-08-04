@@ -14,6 +14,7 @@ import (
 
 const TimeFmt = "20060102T150405" // ISO 8601 time format
 
+// Ensures that the Data and Interest types satisfy the required ndn.Signature, ndn.Data, and ndn.Interest interfaces through compile-time checks.
 func _() {
 	// Trait for Signature of Data
 	var _ ndn.Signature = &Data{}
@@ -27,6 +28,7 @@ func _() {
 
 type Spec struct{}
 
+// Returns the signature type of the Data packet, defaulting to `SignatureNone` if no signature information is present.
 func (d *Data) SigType() ndn.SigType {
 	if d.SignatureInfo == nil {
 		return ndn.SignatureNone
@@ -35,6 +37,7 @@ func (d *Data) SigType() ndn.SigType {
 	}
 }
 
+// Returns the name of the key used to sign the Data packet, extracted from the KeyLocator in the SignatureInfo, or nil if SignatureInfo or KeyLocator is missing.
 func (d *Data) KeyName() enc.Name {
 	if d.SignatureInfo == nil || d.SignatureInfo.KeyLocator == nil {
 		return nil
@@ -43,14 +46,17 @@ func (d *Data) KeyName() enc.Name {
 	}
 }
 
+// Returns the signature nonce of the Data packet, which is nil for unsigned packets.
 func (d *Data) SigNonce() []byte {
 	return nil
 }
 
+// Returns the current signature time of the Data packet as a time.Time pointer, or nil if the packet is unsigned.
 func (d *Data) SigTime() *time.Time {
 	return nil
 }
 
+// Sets or unsets the signature time in the Data packet's SignatureInfo, initializing the SignatureInfo if necessary.
 func (d *Data) SetSigTime(t *time.Time) error {
 	if d.SignatureInfo == nil {
 		d.SignatureInfo = &SignatureInfo{}
@@ -63,10 +69,12 @@ func (d *Data) SetSigTime(t *time.Time) error {
 	return nil
 }
 
+// Returns a pointer to the signature sequence number field of the Data packet, enabling direct access for modification or retrieval.
 func (d *Data) SigSeqNum() *uint64 {
 	return nil
 }
 
+// Returns the optional validity period (not-before and not-after timestamps) of the Data packet's signature, parsed from the SignatureInfo's validity period if present and valid.
 func (d *Data) Validity() (notBefore, notAfter optional.Optional[time.Time]) {
 	if d.SignatureInfo != nil && d.SignatureInfo.ValidityPeriod != nil {
 		nbVal, err := time.Parse(TimeFmt, d.SignatureInfo.ValidityPeriod.NotBefore)
@@ -82,6 +90,7 @@ func (d *Data) Validity() (notBefore, notAfter optional.Optional[time.Time]) {
 	return
 }
 
+// Returns the signature value as a byte slice if present, or nil if the signature is not set.
 func (d *Data) SigValue() []byte {
 	if d.SignatureValue == nil {
 		return nil
@@ -90,14 +99,17 @@ func (d *Data) SigValue() []byte {
 	}
 }
 
+// Returns the Data packet as an ndn.Signature interface, allowing it to be used where a signature is expected.
 func (d *Data) Signature() ndn.Signature {
 	return d
 }
 
+// Returns the name of the Data packet.
 func (d *Data) Name() enc.Name {
 	return d.NameV
 }
 
+// Returns the content type from the Data's MetaInfo as an optional value if present, or an empty optional if MetaInfo is nil.
 func (d *Data) ContentType() (val optional.Optional[ndn.ContentType]) {
 	if d.MetaInfo != nil {
 		return optional.CastInt[uint64, ndn.ContentType](d.MetaInfo.ContentType)
@@ -105,6 +117,7 @@ func (d *Data) ContentType() (val optional.Optional[ndn.ContentType]) {
 	return val
 }
 
+// Returns the optional freshness period from the Data's MetaInfo, if present, or an empty optional value if MetaInfo is nil.
 func (d *Data) Freshness() (val optional.Optional[time.Duration]) {
 	if d.MetaInfo != nil {
 		return d.MetaInfo.FreshnessPeriod
@@ -112,6 +125,10 @@ func (d *Data) Freshness() (val optional.Optional[time.Duration]) {
 	return val
 }
 
+// Returns the FinalBlockID component from the Data packet's MetaInfo as an optional value, if present.  
+
+**Explanation:**  
+This function checks if the Data packet's `MetaInfo` contains a `FinalBlockID`, and if so, parses and returns it as an `optional.Some[enc.Component]`. If the `FinalBlockID` is absent or invalid, it returns `optional.None`, reflecting that the FinalBlockID is not always present in NDN Data packets (e.g., when data is unsegmented).
 func (d *Data) FinalBlockID() (val optional.Optional[enc.Component]) {
 	if d.MetaInfo != nil && d.MetaInfo.FinalBlockID != nil {
 		reader := enc.NewBufferView(d.MetaInfo.FinalBlockID)
@@ -122,14 +139,17 @@ func (d *Data) FinalBlockID() (val optional.Optional[enc.Component]) {
 	return val
 }
 
+// Returns the wire-encoded content of the Data packet.
 func (d *Data) Content() enc.Wire {
 	return d.ContentV
 }
 
+// Returns the wire-encoded representation of the Data packet using CrossSchema encoding.
 func (d *Data) CrossSchema() enc.Wire {
 	return d.CrossSchemaV
 }
 
+// Returns the signature type of the Interest, defaulting to `SignatureNone` if the `SignatureInfo` field is nil.
 func (t *Interest) SigType() ndn.SigType {
 	if t.SignatureInfo == nil {
 		return ndn.SignatureNone
@@ -138,6 +158,7 @@ func (t *Interest) SigType() ndn.SigType {
 	}
 }
 
+// Returns the key name from the Interest's KeyLocator if the SignatureInfo and KeyLocator are present; otherwise, returns nil.
 func (t *Interest) KeyName() enc.Name {
 	if t.SignatureInfo == nil || t.SignatureInfo.KeyLocator == nil {
 		return nil
@@ -146,6 +167,7 @@ func (t *Interest) KeyName() enc.Name {
 	}
 }
 
+// Returns the signature nonce from the Interest's SignatureInfo if present, otherwise returns nil.
 func (t *Interest) SigNonce() []byte {
 	if t.SignatureInfo != nil {
 		return t.SignatureInfo.SignatureNonce
@@ -154,6 +176,7 @@ func (t *Interest) SigNonce() []byte {
 	}
 }
 
+// Returns a pointer to the signature time of the Interest's signature info as a Go time.Time if the signature time is set, otherwise returns nil.
 func (t *Interest) SigTime() *time.Time {
 	if t.SignatureInfo != nil && t.SignatureInfo.SignatureTime.IsSet() {
 		return utils.IdPtr(time.UnixMilli(t.SignatureInfo.SignatureTime.Unwrap().Milliseconds()))
@@ -162,6 +185,7 @@ func (t *Interest) SigTime() *time.Time {
 	}
 }
 
+// Returns a pointer to the signature sequence number of the Interest if its SignatureInfo is present and the sequence number is set, otherwise returns nil.
 func (t *Interest) SigSeqNum() *uint64 {
 	if t.SignatureInfo != nil && t.SignatureInfo.SignatureSeqNum.IsSet() {
 		return utils.IdPtr(t.SignatureInfo.SignatureSeqNum.Unwrap())
@@ -170,30 +194,37 @@ func (t *Interest) SigSeqNum() *uint64 {
 	}
 }
 
+// Returns the optional validity periods (notBefore and notAfter) associated with the Interest, if set.
 func (t *Interest) Validity() (notBefore, notAfter optional.Optional[time.Time]) {
 	return
 }
 
+// Returns the full signature value as a byte slice by concatenating its components.
 func (t *Interest) SigValue() []byte {
 	return t.SignatureValue.Join()
 }
 
+// Returns the Interest itself as an ndn.Signature interface, enabling signature validation workflows by treating the Interest's signing information as a signature container.
 func (t *Interest) Signature() ndn.Signature {
 	return t
 }
 
+// Returns the name of the Interest, which identifies the data being requested.
 func (t *Interest) Name() enc.Name {
 	return t.NameV
 }
 
+// Returns whether the Interest can be treated as a prefix for name matching.
 func (t *Interest) CanBePrefix() bool {
 	return t.CanBePrefixV
 }
 
+// Returns whether the Interest requires a fresh response from the network, bypassing cached data.
 func (t *Interest) MustBeFresh() bool {
 	return t.MustBeFreshV
 }
 
+// Returns the list of names in the forwarding hint for this Interest, or nil if the forwarding hint is unset.
 func (t *Interest) ForwardingHint() []enc.Name {
 	if t.ForwardingHintV == nil {
 		return nil
@@ -201,14 +232,17 @@ func (t *Interest) ForwardingHint() []enc.Name {
 	return t.ForwardingHintV.Names
 }
 
+// Returns the optional 32-bit unsigned integer nonce value associated with this Interest packet.
 func (t *Interest) Nonce() optional.Optional[uint32] {
 	return t.NonceV
 }
 
+// Returns the optional lifetime of the Interest, indicating how long the Interest remains valid before expiring.
 func (t *Interest) Lifetime() optional.Optional[time.Duration] {
 	return t.InterestLifetimeV
 }
 
+// Returns the HopLimit value of the Interest as a pointer to an unsigned integer, or nil if the value is not set.
 func (t *Interest) HopLimit() *uint {
 	if t.HopLimitV == nil {
 		return nil
@@ -217,6 +251,7 @@ func (t *Interest) HopLimit() *uint {
 	}
 }
 
+// Returns the application parameters of the Interest in wire format.
 func (t *Interest) AppParam() enc.Wire {
 	return t.ApplicationParameters
 }
@@ -470,6 +505,7 @@ func (Spec) MakeInterest(name enc.Name, config *ndn.InterestConfig, appParam enc
 	}, nil
 }
 
+// Validates an NDN Interest packet by checking its name is non-empty, ensuring signature parameters are present when required, and verifying the SHA-256 digest in the name's final component matches the computed digest of covered content.
 func checkInterest(val *Interest, context *InterestParsingContext) error {
 	if val.NameV == nil {
 		return ndn.ErrInvalidValue{Item: "Interest.Name", Value: nil}
@@ -555,10 +591,12 @@ func ReadPacket(reader enc.WireView) (ret *Packet, context PacketParsingContext,
 	return
 }
 
+// Returns the encoded data (of type enc.Wire) representing the portion of the Interest that is covered by a signature, as stored in the parsing context.
 func (c InterestParsingContext) SigCovered() enc.Wire {
 	return c.sigCovered
 }
 
+// Returns the wire-encoded portion of the Data packet that is covered by the signature, used for verifying the packet's integrity.
 func (c DataParsingContext) SigCovered() enc.Wire {
 	return c.sigCovered
 }

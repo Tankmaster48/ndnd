@@ -24,18 +24,22 @@ type ForwarderStatusModule struct {
 	manager *Thread
 }
 
+// Implements the Stringer interface by returning the string "mgmt-status" as the identifier for the ForwarderStatusModule.
 func (f *ForwarderStatusModule) String() string {
 	return "mgmt-status"
 }
 
+// Sets the manager field of the ForwarderStatusModule to the provided Thread instance.
 func (f *ForwarderStatusModule) registerManager(manager *Thread) {
 	f.manager = manager
 }
 
+// Returns the manager thread associated with the forwarder status module.
 func (f *ForwarderStatusModule) getManager() *Thread {
 	return f.manager
 }
 
+// Handles incoming Interest requests under the `/localhost` prefix for forwarder status management, dispatching to specific handlers based on the verb in the Interest name or returning an error for unknown verbs.
 func (f *ForwarderStatusModule) handleIncomingInterest(interest *Interest) {
 	// Only allow from /localhost
 	if !LOCAL_PREFIX.IsPrefix(interest.Name()) {
@@ -54,6 +58,7 @@ func (f *ForwarderStatusModule) handleIncomingInterest(interest *Interest) {
 	}
 }
 
+// This function generates and sends a general status dataset for the NDN forwarder in response to an Interest by aggregating thread-specific statistics and encoding them into a Data packet with a predefined name hierarchy.
 func (f *ForwarderStatusModule) general(interest *Interest) {
 	if len(interest.Name()) > len(LOCAL_PREFIX)+2 {
 		// Ignore because contains version and/or segment components

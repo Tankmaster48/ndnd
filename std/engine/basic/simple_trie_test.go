@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This function tests the basic operations of the `basic_engine.NameTrie` implementation, verifying correct behavior for exact and prefix name matching, node creation, value storage, and pruning in a Named Data Networking (NDN) name trie structure.
 func TestBasicMatch(t *testing.T) {
 	tu.SetT(t)
 
@@ -71,6 +72,7 @@ func TestBasicMatch(t *testing.T) {
 	require.False(t, trie.HasChildren())
 }
 
+// Tests the `PruneIf` method of a NameTrie, verifying that nodes are removed when their associated value satisfies a given condition (e.g., being zero), while ensuring parent nodes are retained if they have other children and only fully pruned when all descendants are removed.
 func TestPruneIf(t *testing.T) {
 	tu.SetT(t)
 

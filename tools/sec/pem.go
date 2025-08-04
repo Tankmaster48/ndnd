@@ -11,6 +11,7 @@ import (
 
 type ToolPem struct{}
 
+// Configures a Cobra command with PEM encoding/decoding utilities for converting NDN keys/certificates between TLV and PEM formats via stdin/stdout.
 func (t *ToolPem) configure(cmd *cobra.Command) {
 	cmd.AddGroup(&cobra.Group{
 		ID:    "encoding",
@@ -40,6 +41,7 @@ Provide PEM data as input to stdin.`,
 	})
 }
 
+// Encodes binary input read from standard input into PEM format using the security package and writes the resulting PEM-encoded data to standard output, exiting on errors.
 func (t *ToolPem) Encode(_ *cobra.Command, args []string) {
 	input, err := io.ReadAll(os.Stdin)
 	if err != nil {
@@ -58,6 +60,7 @@ func (t *ToolPem) Encode(_ *cobra.Command, args []string) {
 	os.Stdout.Write(out)
 }
 
+// Decodes a single PEM-encoded NDN data structure from standard input, validates it contains exactly one entry, and writes the decoded binary data to standard output.
 func (t *ToolPem) Decode(_ *cobra.Command, args []string) {
 	input, err := io.ReadAll(os.Stdin)
 	if err != nil {

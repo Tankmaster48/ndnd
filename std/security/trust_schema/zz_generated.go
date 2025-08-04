@@ -25,6 +25,7 @@ type CrossSchemaContentParsingContext struct {
 	PrefixSchemaRules_context PrefixSchemaRuleParsingContext
 }
 
+// Initializes the CrossSchemaContentEncoder with the provided schema rules, setting up sub-encoders for each rule and calculating the total encoded length based on TLV (Type-Length-Value) encoding requirements.
 func (encoder *CrossSchemaContentEncoder) Init(value *CrossSchemaContent) {
 	{
 		SimpleSchemaRules_l := len(value.SimpleSchemaRules)
@@ -120,11 +121,13 @@ func (encoder *CrossSchemaContentEncoder) Init(value *CrossSchemaContent) {
 
 }
 
+// Initializes the CrossSchemaContentParsingContext by initializing its associated SimpleSchemaRules and PrefixSchemaRules contexts.
 func (context *CrossSchemaContentParsingContext) Init() {
 	context.SimpleSchemaRules_context.Init()
 	context.PrefixSchemaRules_context.Init()
 }
 
+// Encodes a CrossSchemaContent object into a binary TLV (Type-Length-Value) format in the provided buffer, serializing sequences of SimpleSchemaRules and PrefixSchemaRules using their respective sub-encoders with type identifiers 620 and 622.
 func (encoder *CrossSchemaContentEncoder) EncodeInto(value *CrossSchemaContent, buf []byte) {
 
 	pos := uint(0)
@@ -183,6 +186,7 @@ func (encoder *CrossSchemaContentEncoder) EncodeInto(value *CrossSchemaContent, 
 	}
 }
 
+// Encodes the given CrossSchemaContent object into a binary wire format by allocating a buffer of the encoder's specified length and writing the encoded data into it.
 func (encoder *CrossSchemaContentEncoder) Encode(value *CrossSchemaContent) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -193,6 +197,7 @@ func (encoder *CrossSchemaContentEncoder) Encode(value *CrossSchemaContent) enc.
 	return wire
 }
 
+// Parses TLV-encoded Cross Schema content into a CrossSchemaContent object, handling SimpleSchemaRules (type 620) and PrefixSchemaRules (type 622) with delegated parsers, while enforcing critical field recognition unless ignoreCritical is true.
 func (context *CrossSchemaContentParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*CrossSchemaContent, error) {
 
 	var handled_SimpleSchemaRules bool = false
@@ -295,16 +300,19 @@ func (context *CrossSchemaContentParsingContext) Parse(reader enc.WireView, igno
 	return value, nil
 }
 
+// Encodes the CrossSchemaContent instance into its wire format representation using a CrossSchemaContentEncoder.
 func (value *CrossSchemaContent) Encode() enc.Wire {
 	encoder := CrossSchemaContentEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Joins the encoded components of CrossSchemaContent into a single byte slice.
 func (value *CrossSchemaContent) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses encoded data into a CrossSchemaContent structure using a parsing context, with an option to ignore critical unrecognized elements.
 func ParseCrossSchemaContent(reader enc.WireView, ignoreCritical bool) (*CrossSchemaContent, error) {
 	context := CrossSchemaContentParsingContext{}
 	context.Init()
@@ -322,6 +330,7 @@ type SimpleSchemaRuleParsingContext struct {
 	KeyLocator_context spec_2022.KeyLocatorParsingContext
 }
 
+// Initializes the encoder with the provided schema rule, calculating the total encoded length by summing the contributions of the name prefix components and key locator.
 func (encoder *SimpleSchemaRuleEncoder) Init(value *SimpleSchemaRule) {
 	if value.NamePrefix != nil {
 		encoder.NamePrefix_length = 0
@@ -348,11 +357,13 @@ func (encoder *SimpleSchemaRuleEncoder) Init(value *SimpleSchemaRule) {
 
 }
 
+// Initializes the KeyLocator context embedded within the SimpleSchemaRuleParsingContext.
 func (context *SimpleSchemaRuleParsingContext) Init() {
 
 	context.KeyLocator_context.Init()
 }
 
+// Encodes a SimpleSchemaRule into a TLV (Type-Length-Value) binary format in the provided buffer, handling optional NamePrefix (type 7) and KeyLocator (type 28) fields with their respective sub-encoders.
 func (encoder *SimpleSchemaRuleEncoder) EncodeInto(value *SimpleSchemaRule, buf []byte) {
 
 	pos := uint(0)
@@ -376,6 +387,7 @@ func (encoder *SimpleSchemaRuleEncoder) EncodeInto(value *SimpleSchemaRule, buf 
 	}
 }
 
+// Encodes a SimpleSchemaRule into a binary wire format using the encoder's specified length, returning a slice containing the serialized byte array.
 func (encoder *SimpleSchemaRuleEncoder) Encode(value *SimpleSchemaRule) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -386,6 +398,7 @@ func (encoder *SimpleSchemaRuleEncoder) Encode(value *SimpleSchemaRule) enc.Wire
 	return wire
 }
 
+// Parses a TLV-encoded SimpleSchemaRule from the provided WireView, handling NamePrefix (type 7) and KeyLocator (type 28) fields while skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *SimpleSchemaRuleParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*SimpleSchemaRule, error) {
 
 	var handled_NamePrefix bool = false
@@ -461,16 +474,19 @@ func (context *SimpleSchemaRuleParsingContext) Parse(reader enc.WireView, ignore
 	return value, nil
 }
 
+// "Encodes the SimpleSchemaRule into a binary wire format for network transmission or storage using the SimpleSchemaRuleEncoder."
 func (value *SimpleSchemaRule) Encode() enc.Wire {
 	encoder := SimpleSchemaRuleEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the schema rule by encoding its components and concatenating them.
 func (value *SimpleSchemaRule) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a SimpleSchemaRule from encoded wire-format data using the provided WireView, with an option to ignore critical fields if specified.
 func ParseSimpleSchemaRule(reader enc.WireView, ignoreCritical bool) (*SimpleSchemaRule, error) {
 	context := SimpleSchemaRuleParsingContext{}
 	context.Init()
@@ -486,6 +502,7 @@ type PrefixSchemaRuleEncoder struct {
 type PrefixSchemaRuleParsingContext struct {
 }
 
+// Initializes the encoder's total length based on the provided PrefixSchemaRule's name prefix, accounting for the encoded length of each prefix component and associated TLV (Type-Length-Value) overhead.
 func (encoder *PrefixSchemaRuleEncoder) Init(value *PrefixSchemaRule) {
 	if value.NamePrefix != nil {
 		encoder.NamePrefix_length = 0
@@ -504,10 +521,12 @@ func (encoder *PrefixSchemaRuleEncoder) Init(value *PrefixSchemaRule) {
 
 }
 
+// Initializes the parsing context for prefix schema rules, preparing it to process and validate schema-based naming conventions in Named Data Networking.
 func (context *PrefixSchemaRuleParsingContext) Init() {
 
 }
 
+// Encodes the NamePrefix field of a PrefixSchemaRule into a byte buffer using TLV (Type-Length-Value) format, writing the type byte 7, encoded length, and sequential name components if the NamePrefix is non-nil.
 func (encoder *PrefixSchemaRuleEncoder) EncodeInto(value *PrefixSchemaRule, buf []byte) {
 
 	pos := uint(0)
@@ -522,6 +541,7 @@ func (encoder *PrefixSchemaRuleEncoder) EncodeInto(value *PrefixSchemaRule, buf 
 	}
 }
 
+// Encodes the provided PrefixSchemaRule into a byte slice according to the encoder's schema and returns it as a single-element enc.Wire array.
 func (encoder *PrefixSchemaRuleEncoder) Encode(value *PrefixSchemaRule) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -532,6 +552,7 @@ func (encoder *PrefixSchemaRuleEncoder) Encode(value *PrefixSchemaRule) enc.Wire
 	return wire
 }
 
+// Parses a TLV-encoded PrefixSchemaRule, extracting the NamePrefix field (type 7) and handling unrecognized critical fields according to the ignoreCritical flag.
 func (context *PrefixSchemaRuleParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*PrefixSchemaRule, error) {
 
 	var handled_NamePrefix bool = false
@@ -597,16 +618,19 @@ func (context *PrefixSchemaRuleParsingContext) Parse(reader enc.WireView, ignore
 	return value, nil
 }
 
+// Encodes the PrefixSchemaRule into its wire format representation using a PrefixSchemaRuleEncoder.
 func (value *PrefixSchemaRule) Encode() enc.Wire {
 	encoder := PrefixSchemaRuleEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the serialized byte representation of the PrefixSchemaRule by encoding its components and concatenating them.
 func (value *PrefixSchemaRule) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a PrefixSchemaRule from wire-encoded data using a parsing context, with an option to ignore critical errors during decoding.
 func ParsePrefixSchemaRule(reader enc.WireView, ignoreCritical bool) (*PrefixSchemaRule, error) {
 	context := PrefixSchemaRuleParsingContext{}
 	context.Init()
@@ -620,6 +644,7 @@ type LvsUserFnArgEncoder struct {
 type LvsUserFnArgParsingContext struct {
 }
 
+// Calculates the total encoded length of an LvsUserFnArg by summing the size contributions of its Value and Tag fields for TLV (Type-Length-Value) encoding.
 func (encoder *LvsUserFnArgEncoder) Init(value *LvsUserFnArg) {
 
 	l := uint(0)
@@ -636,10 +661,12 @@ func (encoder *LvsUserFnArgEncoder) Init(value *LvsUserFnArg) {
 
 }
 
+// Initializes the argument parsing context for use in processing user function arguments.
 func (context *LvsUserFnArgParsingContext) Init() {
 
 }
 
+// Encodes the `LvsUserFnArg` value into a binary buffer, writing a `!` marker followed by the length-prefixed `Value` bytes if present, and a `#` marker followed by a length-prefixed natural number representation of the optional `Tag` if set.
 func (encoder *LvsUserFnArgEncoder) EncodeInto(value *LvsUserFnArg, buf []byte) {
 
 	pos := uint(0)
@@ -661,6 +688,7 @@ func (encoder *LvsUserFnArgEncoder) EncodeInto(value *LvsUserFnArg, buf []byte) 
 	}
 }
 
+// Encodes the provided LvsUserFnArg into a wire-format byte slice using the encoder's precomputed length and returns it as an enc.Wire containing a single byte slice element.
 func (encoder *LvsUserFnArgEncoder) Encode(value *LvsUserFnArg) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -671,6 +699,7 @@ func (encoder *LvsUserFnArgEncoder) Encode(value *LvsUserFnArg) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded LvsUserFnArg structure from a WireView reader, extracting a byte array value (type 33) and an integer tag (type 35), while handling critical fields according to the ignoreCritical flag.
 func (context *LvsUserFnArgParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LvsUserFnArg, error) {
 
 	var handled_Value bool = false
@@ -763,16 +792,19 @@ func (context *LvsUserFnArgParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the LvsUserFnArg value into a wire format for transmission.
 func (value *LvsUserFnArg) Encode() enc.Wire {
 	encoder := LvsUserFnArgEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the encoded LvsUserFnArg value.
 func (value *LvsUserFnArg) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses an LvsUserFnArg structure from encoded wire data, with an option to ignore critical unrecognized fields.
 func ParseLvsUserFnArg(reader enc.WireView, ignoreCritical bool) (*LvsUserFnArg, error) {
 	context := LvsUserFnArgParsingContext{}
 	context.Init()
@@ -791,6 +823,7 @@ type LvsUserFnCallParsingContext struct {
 	Args_context LvsUserFnArgParsingContext
 }
 
+// Initializes the encoder with the provided LvsUserFnCall value, calculating the total encoded length by summing the TLV-encoded sizes of the function ID and arguments.
 func (encoder *LvsUserFnCallEncoder) Init(value *LvsUserFnCall) {
 
 	{
@@ -848,11 +881,13 @@ func (encoder *LvsUserFnCallEncoder) Init(value *LvsUserFnCall) {
 
 }
 
+// Initializes the `LvsUserFnCallParsingContext` by initializing its embedded argument parsing context (`Args_context`).
 func (context *LvsUserFnCallParsingContext) Init() {
 
 	context.Args_context.Init()
 }
 
+// Encodes an LvsUserFnCall object into a binary buffer using type-length-value encoding, serializing the function ID (tag 39) and arguments (tag 51) with their respective encoders.
 func (encoder *LvsUserFnCallEncoder) EncodeInto(value *LvsUserFnCall, buf []byte) {
 
 	pos := uint(0)
@@ -891,6 +926,7 @@ func (encoder *LvsUserFnCallEncoder) EncodeInto(value *LvsUserFnCall, buf []byte
 	}
 }
 
+// Encodes the provided LvsUserFnCall value into a byte slice of length specified by the encoder, returning it as a single-element enc.Wire.
 func (encoder *LvsUserFnCallEncoder) Encode(value *LvsUserFnCall) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -901,6 +937,7 @@ func (encoder *LvsUserFnCallEncoder) Encode(value *LvsUserFnCall) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded LvsUserFnCall structure from binary data, extracting a function identifier (FnId) and a sequence of arguments (Args) using the provided Args_context parser, with optional ignoreCritical handling for unknown fields.
 func (context *LvsUserFnCallParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LvsUserFnCall, error) {
 
 	var handled_FnId bool = false
@@ -990,16 +1027,21 @@ func (context *LvsUserFnCallParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the LvsUserFnCall value into a wire format representation using an associated encoder.  
+
+*Example rationale*: The function initializes an encoder with the provided value and then produces its encoded wire output, typical for NDN data structure serialization.
 func (value *LvsUserFnCall) Encode() enc.Wire {
 	encoder := LvsUserFnCallEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte slice representation of the LvsUserFnCall by encoding and joining its components.
 func (value *LvsUserFnCall) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-format LvsUserFnCall structure into a typed object using the provided wire view and parsing context, with an option to ignore critical unrecognized components.
 func ParseLvsUserFnCall(reader enc.WireView, ignoreCritical bool) (*LvsUserFnCall, error) {
 	context := LvsUserFnCallParsingContext{}
 	context.Init()
@@ -1016,6 +1058,7 @@ type LvsConstraintOptionParsingContext struct {
 	Fn_context LvsUserFnCallParsingContext
 }
 
+// Initializes the LvsConstraintOptionEncoder with the provided LvsConstraintOption, calculating the total encoded length by summing contributions from the Fn, Value, and Tag fields according to TLV encoding rules.
 func (encoder *LvsConstraintOptionEncoder) Init(value *LvsConstraintOption) {
 
 	if value.Fn != nil {
@@ -1041,11 +1084,13 @@ func (encoder *LvsConstraintOptionEncoder) Init(value *LvsConstraintOption) {
 
 }
 
+// Initializes the Fn_context component of the LvsConstraintOptionParsingContext.
 func (context *LvsConstraintOptionParsingContext) Init() {
 
 	context.Fn_context.Init()
 }
 
+// Encodes an LvsConstraintOption into a byte buffer using TLV (Type-Length-Value) format, handling optional fields (Value, Tag, Fn) with distinct type markers and recursively encoding nested structures.
 func (encoder *LvsConstraintOptionEncoder) EncodeInto(value *LvsConstraintOption, buf []byte) {
 
 	pos := uint(0)
@@ -1076,6 +1121,7 @@ func (encoder *LvsConstraintOptionEncoder) EncodeInto(value *LvsConstraintOption
 	}
 }
 
+// Encodes the provided LvsConstraintOption into a wire format by writing it into a byte slice of the encoder's specified length and returns the resulting wire structure.
 func (encoder *LvsConstraintOptionEncoder) Encode(value *LvsConstraintOption) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1086,6 +1132,7 @@ func (encoder *LvsConstraintOptionEncoder) Encode(value *LvsConstraintOption) en
 	return wire
 }
 
+// Parses a TLV-encoded LvsConstraintOption from a WireView reader, handling Value (type 33), Tag (type 35), and Fn (type 49) fields while enforcing critical field constraints unless ignored.
 func (context *LvsConstraintOptionParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LvsConstraintOption, error) {
 
 	var handled_Value bool = false
@@ -1188,16 +1235,19 @@ func (context *LvsConstraintOptionParsingContext) Parse(reader enc.WireView, ign
 	return value, nil
 }
 
+// Encodes the LvsConstraintOption into a wire format using the LvsConstraintOptionEncoder.
 func (value *LvsConstraintOption) Encode() enc.Wire {
 	encoder := LvsConstraintOptionEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the LVS constraint option by encoding its components and concatenating them into a single byte slice.
 func (value *LvsConstraintOption) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded LVS constraint option into a structured object, optionally ignoring critical unrecognized constraints.
 func ParseLvsConstraintOption(reader enc.WireView, ignoreCritical bool) (*LvsConstraintOption, error) {
 	context := LvsConstraintOptionParsingContext{}
 	context.Init()
@@ -1216,6 +1266,7 @@ type LvsPatternConstraintParsingContext struct {
 	ConsOptions_context LvsConstraintOptionParsingContext
 }
 
+// Initializes the encoder with the given LvsPatternConstraint, setting up subencoders for each constraint option and calculating the total encoded length including TLV overhead.
 func (encoder *LvsPatternConstraintEncoder) Init(value *LvsPatternConstraint) {
 	{
 		ConsOptions_l := len(value.ConsOptions)
@@ -1267,10 +1318,12 @@ func (encoder *LvsPatternConstraintEncoder) Init(value *LvsPatternConstraint) {
 
 }
 
+// Initializes the ConsOptions context within the LvsPatternConstraintParsingContext.
 func (context *LvsPatternConstraintParsingContext) Init() {
 	context.ConsOptions_context.Init()
 }
 
+// Encodes the `ConsOptions` sequence of an `LvsPatternConstraint` into a binary buffer using TLV (Type-Length-Value) encoding, with each constraint option processed by its dedicated subencoder.
 func (encoder *LvsPatternConstraintEncoder) EncodeInto(value *LvsPatternConstraint, buf []byte) {
 
 	pos := uint(0)
@@ -1302,6 +1355,7 @@ func (encoder *LvsPatternConstraintEncoder) EncodeInto(value *LvsPatternConstrai
 	}
 }
 
+// Encodes an LvsPatternConstraint into a binary wire format using the encoder's specified buffer length, returning the serialized data as a slice of byte slices.
 func (encoder *LvsPatternConstraintEncoder) Encode(value *LvsPatternConstraint) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1312,6 +1366,7 @@ func (encoder *LvsPatternConstraintEncoder) Encode(value *LvsPatternConstraint) 
 	return wire
 }
 
+// Parses a TLV-encoded LvsPatternConstraint from the provided wire format reader, handling ConsOptions fields and skipping unrecognized or non-critical fields based on the ignoreCritical flag.
 func (context *LvsPatternConstraintParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LvsPatternConstraint, error) {
 
 	var handled_ConsOptions bool = false
@@ -1390,16 +1445,19 @@ func (context *LvsPatternConstraintParsingContext) Parse(reader enc.WireView, ig
 	return value, nil
 }
 
+// Encodes the LvsPatternConstraint into a wire format using a dedicated encoder.
 func (value *LvsPatternConstraint) Encode() enc.Wire {
 	encoder := LvsPatternConstraintEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the concatenated byte representation of the encoded LvsPatternConstraint components.
 func (value *LvsPatternConstraint) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a LVS pattern constraint from encoded data, using a parsing context and an option to ignore critical unrecognized components.
 func ParseLvsPatternConstraint(reader enc.WireView, ignoreCritical bool) (*LvsPatternConstraint, error) {
 	context := LvsPatternConstraintParsingContext{}
 	context.Init()
@@ -1418,6 +1476,7 @@ type LvsPatternEdgeParsingContext struct {
 	ConsSets_context LvsPatternConstraintParsingContext
 }
 
+// Initializes the LvsPatternEdgeEncoder with the provided LvsPatternEdge value, setting up nested constraint encoders and calculating the total encoded length including TLV overhead for Dest, Tag, and ConsSets fields.
 func (encoder *LvsPatternEdgeEncoder) Init(value *LvsPatternEdge) {
 
 	{
@@ -1474,11 +1533,13 @@ func (encoder *LvsPatternEdgeEncoder) Init(value *LvsPatternEdge) {
 
 }
 
+// Initializes the `ConsSets_context` field of the `LvsPatternEdgeParsingContext`.
 func (context *LvsPatternEdgeParsingContext) Init() {
 
 	context.ConsSets_context.Init()
 }
 
+// Encodes an LvsPatternEdge data structure into a binary buffer using a TLV (Type-Length-Value) format, including fields for destination, tag, and optional constraint sets with type-specific encoding.
 func (encoder *LvsPatternEdgeEncoder) EncodeInto(value *LvsPatternEdge, buf []byte) {
 
 	pos := uint(0)
@@ -1520,6 +1581,7 @@ func (encoder *LvsPatternEdgeEncoder) EncodeInto(value *LvsPatternEdge, buf []by
 	}
 }
 
+// Encodes an LvsPatternEdge into a wire byte slice using the pre-determined length specified by the encoder.
 func (encoder *LvsPatternEdgeEncoder) Encode(value *LvsPatternEdge) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1530,6 +1592,7 @@ func (encoder *LvsPatternEdgeEncoder) Encode(value *LvsPatternEdge) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded LvsPatternEdge structure into a Go object, handling required fields (Dest, Tag) and optional ConsSets constraints while validating critical fields according to NDN encoding rules.
 func (context *LvsPatternEdgeParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LvsPatternEdge, error) {
 
 	var handled_Dest bool = false
@@ -1654,16 +1717,19 @@ func (context *LvsPatternEdgeParsingContext) Parse(reader enc.WireView, ignoreCr
 	return value, nil
 }
 
+// Encodes the LvsPatternEdge value into its wire representation using an LvsPatternEdgeEncoder.
 func (value *LvsPatternEdge) Encode() enc.Wire {
 	encoder := LvsPatternEdgeEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the LvsPatternEdge by encoding its components and concatenating them into a single byte slice.
 func (value *LvsPatternEdge) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses an LvsPatternEdge structure from the provided wire view, initializing a parsing context and using the ignoreCritical flag to determine handling of critical TLV elements.
 func ParseLvsPatternEdge(reader enc.WireView, ignoreCritical bool) (*LvsPatternEdge, error) {
 	context := LvsPatternEdgeParsingContext{}
 	context.Init()
@@ -1677,6 +1743,7 @@ type LvsValueEdgeEncoder struct {
 type LvsValueEdgeParsingContext struct {
 }
 
+// Initializes the encoder's length by calculating the total encoded size of the LvsValueEdge, including 1 byte for the Dest field's type, its natural number encoding length, and conditional 1 byte plus encoded length and raw size for the optional Value field.
 func (encoder *LvsValueEdgeEncoder) Init(value *LvsValueEdge) {
 
 	l := uint(0)
@@ -1691,10 +1758,12 @@ func (encoder *LvsValueEdgeEncoder) Init(value *LvsValueEdge) {
 
 }
 
+// Initializes the LvsValueEdgeParsingContext, but performs no actions.
 func (context *LvsValueEdgeParsingContext) Init() {
 
 }
 
+// Encodes an LvsValueEdge into a binary buffer with a fixed header (37) for the destination, followed by a variable-length natural number encoding of the destination, and optionally includes a tagged (33) value payload with length prefixing.
 func (encoder *LvsValueEdgeEncoder) EncodeInto(value *LvsValueEdge, buf []byte) {
 
 	pos := uint(0)
@@ -1713,6 +1782,7 @@ func (encoder *LvsValueEdgeEncoder) EncodeInto(value *LvsValueEdge, buf []byte) 
 	}
 }
 
+// Encodes the provided LvsValueEdge into a wire-format byte slice using the encoder's precomputed length and returns it as an enc.Wire.
 func (encoder *LvsValueEdgeEncoder) Encode(value *LvsValueEdge) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1723,6 +1793,7 @@ func (encoder *LvsValueEdgeEncoder) Encode(value *LvsValueEdge) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded data into an `LvsValueEdge` struct containing a required `Dest` (uint64) and optional `Value` field, with optional skipping of critical fields when `ignoreCritical` is true.
 func (context *LvsValueEdgeParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LvsValueEdge, error) {
 
 	var handled_Dest bool = false
@@ -1811,16 +1882,19 @@ func (context *LvsValueEdgeParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the LvsValueEdge value into a wire format representation using the LvsValueEdgeEncoder.
 func (value *LvsValueEdge) Encode() enc.Wire {
 	encoder := LvsValueEdgeEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded bytes of the LvsValueEdge by concatenating its encoded components.
 func (value *LvsValueEdge) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a TLV-encoded LvsValueEdge structure from the provided wire view, with an option to ignore critical unrecognized elements.
 func ParseLvsValueEdge(reader enc.WireView, ignoreCritical bool) (*LvsValueEdge, error) {
 	context := LvsValueEdgeParsingContext{}
 	context.Init()
@@ -1847,6 +1921,7 @@ type LvsNodeParsingContext struct {
 	PatternEdges_context LvsPatternEdgeParsingContext
 }
 
+// Initializes the LvsNodeEncoder with the provided LvsNode value, configuring subencoders for its RuleName, Edges, PatternEdges, and SignCons fields while calculating the total encoded length for TLV-based serialization.
 func (encoder *LvsNodeEncoder) Init(value *LvsNode) {
 
 	{
@@ -2028,6 +2103,7 @@ func (encoder *LvsNodeEncoder) Init(value *LvsNode) {
 
 }
 
+// Initializes the `Edges_context` and `PatternEdges_context` sub-contexts within the `LvsNodeParsingContext`.
 func (context *LvsNodeParsingContext) Init() {
 
 	context.Edges_context.Init()
@@ -2035,6 +2111,7 @@ func (context *LvsNodeParsingContext) Init() {
 
 }
 
+// Encodes an LvsNode structure into a binary buffer using TLV (Type-Length-Value) encoding, serializing fields such as node ID (type 37), parent ID (type 87), rule names (type 41), edges (type 81), pattern edges (type 83), and signature constraints (type 85) with appropriate length prefixes and nested encodings.
 func (encoder *LvsNodeEncoder) EncodeInto(value *LvsNode, buf []byte) {
 
 	pos := uint(0)
@@ -2148,6 +2225,7 @@ func (encoder *LvsNodeEncoder) EncodeInto(value *LvsNode, buf []byte) {
 	}
 }
 
+// Serializes the provided `LvsNode` into a byte slice of length specified by the encoder and returns it as a `Wire` structure.
 func (encoder *LvsNodeEncoder) Encode(value *LvsNode) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2158,6 +2236,7 @@ func (encoder *LvsNodeEncoder) Encode(value *LvsNode) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded wire format into an LvsNode structure, handling required fields like Id, optional fields like Parent, and nested elements such as Edges/PatternEdges using provided parsing contexts, with support for critical field skipping.
 func (context *LvsNodeParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LvsNode, error) {
 
 	var handled_Id bool = false
@@ -2372,16 +2451,19 @@ func (context *LvsNodeParsingContext) Parse(reader enc.WireView, ignoreCritical 
 	return value, nil
 }
 
+// Encodes the LvsNode into a binary wire format using an LvsNodeEncoder for transmission or storage.
 func (value *LvsNode) Encode() enc.Wire {
 	encoder := LvsNodeEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the LvsNode by encoding its internal structure and concatenating the resulting components into a single byte slice.
 func (value *LvsNode) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a TLV-encoded LvsNode structure from the provided WireView, optionally ignoring critical elements that cannot be processed if the ignoreCritical flag is enabled.
 func ParseLvsNode(reader enc.WireView, ignoreCritical bool) (*LvsNode, error) {
 	context := LvsNodeParsingContext{}
 	context.Init()
@@ -2395,6 +2477,7 @@ type LvsTagSymbolEncoder struct {
 type LvsTagSymbolParsingContext struct {
 }
 
+// Initializes the encoder's length by calculating the total encoded size of the LvsTagSymbol, accounting for optional Tag and Ident fields using TLV (Type-Length-Value) encoding rules.
 func (encoder *LvsTagSymbolEncoder) Init(value *LvsTagSymbol) {
 
 	l := uint(0)
@@ -2411,10 +2494,12 @@ func (encoder *LvsTagSymbolEncoder) Init(value *LvsTagSymbol) {
 
 }
 
+// Initializes the parsing context for LVS tag symbols, preparing it for subsequent parsing operations.
 func (context *LvsTagSymbolParsingContext) Init() {
 
 }
 
+// Encodes an LvsTagSymbol into the provided byte buffer, writing the Tag value (if present) as a type-length-value field prefixed with '#' and the Ident field (if non-nil) as a type-length-value field prefixed with ')'.
 func (encoder *LvsTagSymbolEncoder) EncodeInto(value *LvsTagSymbol, buf []byte) {
 
 	pos := uint(0)
@@ -2436,6 +2521,7 @@ func (encoder *LvsTagSymbolEncoder) EncodeInto(value *LvsTagSymbol, buf []byte) 
 	}
 }
 
+// Constructs a wire-encoded byte slice for the given LvsTagSymbol using the encoder's specified length.
 func (encoder *LvsTagSymbolEncoder) Encode(value *LvsTagSymbol) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2446,6 +2532,7 @@ func (encoder *LvsTagSymbolEncoder) Encode(value *LvsTagSymbol) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded LvsTagSymbol from the provided wire format reader, handling 'Tag' (type 35) and 'Ident' (type 41) fields while skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *LvsTagSymbolParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LvsTagSymbol, error) {
 
 	var handled_Tag bool = false
@@ -2538,16 +2625,19 @@ func (context *LvsTagSymbolParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the LvsTagSymbol value into a wire format using the LvsTagSymbolEncoder.
 func (value *LvsTagSymbol) Encode() enc.Wire {
 	encoder := LvsTagSymbolEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the LvsTagSymbol by encoding its components and concatenating them into a single byte slice.
 func (value *LvsTagSymbol) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses an LvsTagSymbol from the provided wire data, optionally ignoring critical parsing errors.
 func ParseLvsTagSymbol(reader enc.WireView, ignoreCritical bool) (*LvsTagSymbol, error) {
 	context := LvsTagSymbolParsingContext{}
 	context.Init()
@@ -2570,6 +2660,7 @@ type LvsModelParsingContext struct {
 	Symbols_context LvsTagSymbolParsingContext
 }
 
+// Initializes the LvsModelEncoder with the provided LvsModel value, setting up nested encoders for nodes and symbols and calculating the total encoded length required to serialize the model.
 func (encoder *LvsModelEncoder) Init(value *LvsModel) {
 
 	{
@@ -2672,12 +2763,14 @@ func (encoder *LvsModelEncoder) Init(value *LvsModel) {
 
 }
 
+// Initializes the nodes and symbols contexts of the LvsModelParsingContext.
 func (context *LvsModelParsingContext) Init() {
 
 	context.Nodes_context.Init()
 	context.Symbols_context.Init()
 }
 
+// Encodes an LVS model into a binary buffer using TLV (Type-Length-Value) format with specific type tags and nested subencoders for nodes and symbols.
 func (encoder *LvsModelEncoder) EncodeInto(value *LvsModel, buf []byte) {
 
 	pos := uint(0)
@@ -2749,6 +2842,7 @@ func (encoder *LvsModelEncoder) EncodeInto(value *LvsModel, buf []byte) {
 	}
 }
 
+// Encodes the provided LvsModel into a byte slice of the encoder's specified length, returning it as a wire structure.
 func (encoder *LvsModelEncoder) Encode(value *LvsModel) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2759,6 +2853,7 @@ func (encoder *LvsModelEncoder) Encode(value *LvsModel) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded LVS model data into an LvsModel struct, handling required fields (Version, StartId, NamedPatternCnt) and delegating Node/Symbol parsing to sub-contexts, with optional critical field ignoring.
 func (context *LvsModelParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LvsModel, error) {
 
 	var handled_Version bool = false
@@ -2930,16 +3025,19 @@ func (context *LvsModelParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the LvsModel instance into a wire-format representation using the LvsModelEncoder.
 func (value *LvsModel) Encode() enc.Wire {
 	encoder := LvsModelEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the LvsModel by encoding its components and joining them into a single slice.
 func (value *LvsModel) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses an LVS model from the provided wire-encoded data, using a parsing context and optionally ignoring critical errors.
 func ParseLvsModel(reader enc.WireView, ignoreCritical bool) (*LvsModel, error) {
 	context := LvsModelParsingContext{}
 	context.Init()

@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This test verifies the correct behavior of data consumption on a dummy face, ensuring that NDNPackets are sent, consumed in order, and that errors are appropriately handled during invalid operations like consuming before opening or after closing.
 func TestBasicConsume(t *testing.T) {
 	tu.SetT(t)
 
@@ -47,6 +48,7 @@ func TestBasicConsume(t *testing.T) {
 	require.NoError(t, face.Close())
 }
 
+// Tests the correct handling of sequential packet feeding through a dummy face by verifying that three distinct NDN packet payloads are received in order without errors.
 func TestBasicFeed(t *testing.T) {
 	tu.SetT(t)
 	cnt := 0

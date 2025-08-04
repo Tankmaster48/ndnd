@@ -110,10 +110,13 @@ var TEST_MODEL_COMPLEX = []byte{
 	0x62, 0x67, 0x06, 0x23, 0x01, 0x06, 0x29, 0x01, 0x63,
 }
 
+// **Description:**  
+Converts a string to an `enc.Name` by parsing it, assuming no errors occur during conversion.
 func sname(n string) enc.Name {
 	return tu.NoErr(enc.NameFromStr(n))
 }
 
+// Parses a trust schema model from a binary buffer and verifies its structural properties, including version, node count, symbol count, and pattern counts.
 func TestParseModel(t *testing.T) {
 	tu.SetT(t)
 
@@ -128,6 +131,7 @@ func TestParseModel(t *testing.T) {
 	require.Equal(t, 6, len(m.Symbols))
 }
 
+// Tests the schema's ability to correctly match and collect rules for various name patterns, validating both successful matches against expected rules and failure cases for invalid or partial matches.
 func TestModelSimpleMatch(t *testing.T) {
 	tu.SetT(t)
 
@@ -175,6 +179,7 @@ func TestModelSimpleMatch(t *testing.T) {
 	require.Equal(t, 0, len(ms))
 }
 
+// Constructs a complex trust schema and verifies that the `MatchCollect` method correctly identifies applicable rules for various NDN names based on nested patterns and conditional constraints.
 func TestModelComplexMatch(t *testing.T) {
 	tu.SetT(t)
 
@@ -226,6 +231,7 @@ func TestModelComplexMatch(t *testing.T) {
 	require.Equal(t, 2, len(ms)) // r1, r3
 }
 
+// This function tests the access control logic of a trust schema by verifying whether specific hierarchical name relationships are correctly authorized or denied based on predefined schema rules.
 func TestModelSimpleCheck(t *testing.T) {
 	tu.SetT(t)
 
@@ -239,6 +245,7 @@ func TestModelSimpleCheck(t *testing.T) {
 	require.False(t, s.Check(sname("/a/blog/author/100001/KEY/1/000001/1"), sname("/a/blog/KEY/1/self/1")))
 }
 
+// Validates the correctness of name-checking logic against a complex schema model by asserting allowed/denied name matches.
 func TestModelComplexCheck(t *testing.T) {
 	tu.SetT(t)
 

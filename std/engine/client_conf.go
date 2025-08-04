@@ -11,6 +11,7 @@ type ClientConfig struct {
 	TransportUri string
 }
 
+// Constructs a ClientConfig with a transport URI determined by OS-specific defaults, config files in increasing priority directories, and environment variable overrides.
 func GetClientConfig() ClientConfig {
 	// Default configuration
 	transportUri := "unix:///run/nfd/nfd.sock"

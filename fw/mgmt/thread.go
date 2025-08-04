@@ -41,6 +41,7 @@ type Thread struct {
 	signer ndn.Signer
 }
 
+// Returns "mgmt" as the string representation of the Thread.
 func (m *Thread) String() string {
 	return "mgmt"
 }
@@ -71,6 +72,7 @@ func MakeMgmtThread() *Thread {
 	return m
 }
 
+// Registers a module with the Thread, associating it with the given name and establishing the Thread as the module's manager.
 func (m *Thread) registerModule(name string, module Module) {
 	m.modules[name] = module
 	module.registerManager(m)

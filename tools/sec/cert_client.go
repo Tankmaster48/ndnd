@@ -32,6 +32,7 @@ type CertClient struct {
 	challenge ndncert.Challenge
 }
 
+// Constructs a CLI command for the NDNCERT certificate client to request new certificates by interacting with a CA, using the specified root certificate file and customizable options like output file, key file, challenge type, and email.
 func CmdCertCli() *cobra.Command {
 	client := CertClient{}
 
@@ -58,10 +59,12 @@ the CA to obtain a new certificate.`,
 	return cmd
 }
 
+// Returns the string identifier "ndncert-cli" for the CertClient instance, used to represent the certificate client in string contexts.
 func (c *CertClient) String() string {
 	return "ndncert-cli"
 }
 
+// Initializes a certificate client with a CA certificate and optional private key, selects a challenge type, and executes the client's certificate operations.
 func (c *CertClient) run(_ *cobra.Command, args []string) {
 	// Read CA certificate
 	caCertFile, err := os.ReadFile(args[0])
@@ -145,6 +148,7 @@ func (c *CertClient) chooseChallenge() ndncert.Challenge {
 	return nil
 }
 
+// Requests a certificate from an NDN certificate authority, handling user input for probe parameters, key selection, and outputting the resulting PEM-encoded certificate and key to stdout or files.
 func (c *CertClient) client() {
 	// Start the engine
 	engine := engine.NewBasicEngine(engine.NewDefaultFace())
@@ -276,6 +280,7 @@ func (c *CertClient) client() {
 	}
 }
 
+// Prompts the user to select an option from a list by either name or numeric index and returns the corresponding index.
 func (c *CertClient) chooseOpts(msg string, opts []string) int {
 	fmt.Fprintf(os.Stderr, "%s\n", msg)
 	for i, opt := range opts {
@@ -306,6 +311,10 @@ func (c *CertClient) chooseOpts(msg string, opts []string) int {
 	return c.chooseOpts(msg, opts)
 }
 
+// Prints a formatted CA profile's details to standard error, including CA information, certificate prefix name, maximum validity period, and probe keys.  
+
+**Example-style description:**  
+Prints a structured summary of a CA profile's parameters (name, validity, keys) to standard error for debugging or logging.
 func (c *CertClient) printCaProfile(profile *spec_ndncert.CaProfile) {
 	fmt.Fprintln(os.Stderr, "=============== CA Profile ================")
 	fmt.Fprintln(os.Stderr, profile.CaInfo)
@@ -316,6 +325,7 @@ func (c *CertClient) printCaProfile(profile *spec_ndncert.CaProfile) {
 	fmt.Fprintln(os.Stderr)
 }
 
+// Prompts the user with the given message, reads a non-empty string input from standard input, and exits the program with an error if the input is empty.
 func (c *CertClient) scanln(msg string, val *string) {
 	fmt.Fprintf(os.Stderr, "%s: ", msg)
 	fmt.Scanln(val)

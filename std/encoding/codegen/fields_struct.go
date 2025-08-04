@@ -14,6 +14,7 @@ type StructField struct {
 	innerNoCopy bool
 }
 
+// Constructs a TLV struct field with the given name, type number, and annotation, validating nested structure type and nocopy flag compatibility with the provided model.
 func NewStructField(name string, typeNum uint64, annotation string, model *TlvModel) (TlvField, error) {
 	if annotation == "" {
 		return nil, ErrInvalidField
@@ -37,10 +38,14 @@ func NewStructField(name string, typeNum uint64, annotation string, model *TlvMo
 	}, nil
 }
 
+// Generates a variable declaration for an encoder struct associated with the field, combining the field's name with "_encoder" and the struct type with "Encoder".  
+
+Example: For a field named "data" of type "MyStruct", returns "data_encoder MyStructEncoder".
 func (f *StructField) GenEncoderStruct() (string, error) {
 	return fmt.Sprintf("%s_encoder %sEncoder", f.name, f.StructType), nil
 }
 
+// Generates code to initialize an encoder for a struct field, ensuring the field is non-nil before calling the encoder's Init method.
 func (f *StructField) GenInitEncoder() (string, error) {
 	var templ = template.Must(template.New("StructInitEncoder").Parse(`
 		if value.{{.}} != nil {
@@ -52,14 +57,19 @@ func (f *StructField) GenInitEncoder() (string, error) {
 	return g.output()
 }
 
+// Generates a parsing context struct declaration by combining the field's name and type, e.g., "fieldName_context FieldTypeParsingContext" for use in data parsing logic.
 func (f *StructField) GenParsingContextStruct() (string, error) {
 	return fmt.Sprintf("%s_context %sParsingContext", f.name, f.StructType), nil
 }
 
+// Generates a method call to initialize a context-specific struct field using the field's name.  
+
+Example: Returns "context.example_context.Init()" for a field named "example", facilitating context initialization in generated code.
 func (f *StructField) GenInitContext() (string, error) {
 	return fmt.Sprintf("context.%s_context.Init()", f.name), nil
 }
 
+// Generates code to calculate the TLV encoding length for a struct field, including type number, length field, and encoded value when non-nil.
 func (f *StructField) GenEncodingLength() (string, error) {
 	var g strErrBuf
 	g.printlnf("if value.%s != nil {", f.name)
@@ -70,6 +80,7 @@ func (f *StructField) GenEncodingLength() (string, error) {
 	return g.output()
 }
 
+// Generates Go code to compute the wire encoding length for a struct field, handling nested encodings with multiple buffers or Wire fields while avoiding unnecessary buffer creation when the inner structure is self-contained.
 func (f *StructField) GenEncodingWirePlan() (string, error) {
 	if f.innerNoCopy {
 		var g strErrBuf
@@ -98,6 +109,7 @@ func (f *StructField) GenEncodingWirePlan() (string, error) {
 	}
 }
 
+// Generates Go code to encode a struct field's value into a buffer, using either a direct copy method or a non-copying approach with wire plan indexing depending on the field's configuration.
 func (f *StructField) GenEncodeInto() (string, error) {
 	var g strErrBuf
 	g.printlnf("if value.%s != nil {", f.name)
@@ -142,10 +154,12 @@ func (f *StructField) GenEncodeInto() (string, error) {
 	return g.output()
 }
 
+// Generates a code snippet that sets the struct field to nil, indicating it should be skipped during processing.
 func (f *StructField) GenSkipProcess() (string, error) {
 	return fmt.Sprintf("value.%s = nil", f.name), nil
 }
 
+// Generates code to parse a struct field's value from a data stream using the corresponding context's Parse method, with length delegation and critical flag handling.
 func (f *StructField) GenReadFrom() (string, error) {
 	return fmt.Sprintf(
 		"value.%[1]s, err = context.%[1]s_context.Parse(reader.Delegate(int(l)), ignoreCritical)",

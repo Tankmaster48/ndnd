@@ -26,6 +26,7 @@ type FwPacketParsingContext struct {
 	LpPacket_context FwLpPacketParsingContext
 }
 
+// Initializes the encoder for a Forwarding Packet by setting up component encoders, calculating the total encoded length, and generating a wire encoding plan for the packet's Interest, Data, or LP packet components.
 func (encoder *FwPacketEncoder) Init(value *FwPacket) {
 	if value.Interest != nil {
 		encoder.Interest_encoder.Init(value.Interest)
@@ -111,12 +112,14 @@ func (encoder *FwPacketEncoder) Init(value *FwPacket) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the parsing contexts for Interest, Data, and LpPacket components within the forwarder packet parsing framework.
 func (context *FwPacketParsingContext) Init() {
 	context.Interest_context.Init()
 	context.Data_context.Init()
 	context.LpPacket_context.Init()
 }
 
+// Encodes a ForwardingPacket (FwPacket) into a TLV-based wire format, handling nested Interest, Data, and LpPacket components by delegating to their respective encoders and managing buffer layout via the provided Wire array.
 func (encoder *FwPacketEncoder) EncodeInto(value *FwPacket, wire enc.Wire) {
 
 	wireIdx := 0
@@ -228,6 +231,7 @@ func (encoder *FwPacketEncoder) EncodeInto(value *FwPacket, wire enc.Wire) {
 	}
 }
 
+// Encodes a ForwardingPacket (FwPacket) into a pre-allocated byte slice structure (enc.Wire) based on a predefined wire layout plan (wirePlan), returning the segmented byte arrays ready for serialization.
 func (encoder *FwPacketEncoder) Encode(value *FwPacket) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -247,6 +251,7 @@ func (encoder *FwPacketEncoder) Encode(value *FwPacket) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded NDN packet into a FwPacket containing Interest, Data, or LP packet components, handling critical fields based on the ignoreCritical flag.
 func (context *FwPacketParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FwPacket, error) {
 
 	var handled_Interest bool = false
@@ -331,16 +336,19 @@ func (context *FwPacketParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Serializes the FwPacket into its wire format using the FwPacketEncoder.
 func (value *FwPacket) Encode() enc.Wire {
 	encoder := FwPacketEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the serialized byte representation of the FwPacket by encoding its components and concatenating them into a single byte slice.
 func (value *FwPacket) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded Forwarding Packet from the given WireView into a FwPacket struct, with optional suppression of critical parsing errors based on the ignoreCritical flag.
 func ParseFwPacket(reader enc.WireView, ignoreCritical bool) (*FwPacket, error) {
 	context := FwPacketParsingContext{}
 	context.Init()
@@ -361,6 +369,7 @@ type FwInterestParsingContext struct {
 	ForwardingHintV_context FwLinksParsingContext
 }
 
+// Initializes the FwInterestEncoder with calculated total encoded length and wire plan based on the components and optional fields of the provided FwInterest.
 func (encoder *FwInterestEncoder) Init(value *FwInterest) {
 	if value.NameV != nil {
 		encoder.NameV_length = 0
@@ -468,12 +477,14 @@ func (encoder *FwInterestEncoder) Init(value *FwInterest) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the ForwardingHint parsing context within the Interest parsing context to prepare for processing ForwardingHint components in NDN Interest packets.
 func (context *FwInterestParsingContext) Init() {
 
 	context.ForwardingHintV_context.Init()
 
 }
 
+// Encodes an FwInterest object into NDN TLV wire format by serializing its name components, optional fields (nonce, lifetime, hop limit), control flags (CanBePrefix, MustBeFresh), and nested structures (forwarding hints) into a byte buffer according to the NDN Interest packet specification.
 func (encoder *FwInterestEncoder) EncodeInto(value *FwInterest, wire enc.Wire) {
 
 	wireIdx := 0
@@ -552,6 +563,8 @@ func (encoder *FwInterestEncoder) EncodeInto(value *FwInterest, wire enc.Wire) {
 	}
 }
 
+// **Function Description:**  
+Encodes an `FwInterest` into a wire format by allocating a pre-sized byte buffer according to the encoder's `wirePlan` and populating it with encoded data.
 func (encoder *FwInterestEncoder) Encode(value *FwInterest) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -571,6 +584,7 @@ func (encoder *FwInterestEncoder) Encode(value *FwInterest) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded NDN Interest packet into a structured FwInterest object, handling critical and non-critical fields according to the NDN specification and the ignoreCritical flag.
 func (context *FwInterestParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FwInterest, error) {
 
 	var handled_NameV bool = false
@@ -772,16 +786,19 @@ func (context *FwInterestParsingContext) Parse(reader enc.WireView, ignoreCritic
 	return value, nil
 }
 
+// Encodes the FwInterest into its wire format representation for transmission.
 func (value *FwInterest) Encode() enc.Wire {
 	encoder := FwInterestEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte representation of the Interest packet by concatenating all encoded components.
 func (value *FwInterest) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded Interest packet into an FwInterest object, optionally ignoring critical TLV elements that cannot be processed.
 func ParseFwInterest(reader enc.WireView, ignoreCritical bool) (*FwInterest, error) {
 	context := FwInterestParsingContext{}
 	context.Init()
@@ -799,6 +816,7 @@ type FwLinksEncoder struct {
 type FwLinksParsingContext struct {
 }
 
+// Initializes the FwLinksEncoder by calculating and storing the total encoded length of name components in the FwLinks structure, including TLV overhead for each name element.
 func (encoder *FwLinksEncoder) Init(value *FwLinks) {
 	{
 		Names_l := len(value.Names)
@@ -853,10 +871,12 @@ func (encoder *FwLinksEncoder) Init(value *FwLinks) {
 
 }
 
+// Initializes the parsing context for processing forwarder links configuration data.
 func (context *FwLinksParsingContext) Init() {
 
 }
 
+// Encodes the `Names` field of an `FwLinks` structure into a binary buffer using a sequence of subencoders, writing each name component as a TLV-encoded field with type byte 0x07.
 func (encoder *FwLinksEncoder) EncodeInto(value *FwLinks, buf []byte) {
 
 	pos := uint(0)
@@ -887,6 +907,9 @@ func (encoder *FwLinksEncoder) EncodeInto(value *FwLinks, buf []byte) {
 	}
 }
 
+// Encodes the provided FwLinks object into a wire-format byte slice using the encoder's predefined length.  
+
+Example: Serializes the FwLinks structure into a binary wire representation for transmission or storage.
 func (encoder *FwLinksEncoder) Encode(value *FwLinks) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -897,6 +920,7 @@ func (encoder *FwLinksEncoder) Encode(value *FwLinks) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded wire format data into a FwLinks structure, handling the 'Names' field (type 7) and processing/skipping other fields based on criticality and the ignoreCritical flag.
 func (context *FwLinksParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FwLinks, error) {
 
 	var handled_Names bool = false
@@ -976,16 +1000,19 @@ func (context *FwLinksParsingContext) Parse(reader enc.WireView, ignoreCritical 
 	return value, nil
 }
 
+// Encodes the FwLinks object into a wire-format representation suitable for network transmission using the FwLinksEncoder.
 func (value *FwLinks) Encode() enc.Wire {
 	encoder := FwLinksEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the FwLinks value by encoding its components and concatenating them into a single byte slice.
 func (value *FwLinks) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses wire-encoded FwLinks data into a FwLinks structure using the provided encoder, with an option to ignore critical parsing errors.
 func ParseFwLinks(reader enc.WireView, ignoreCritical bool) (*FwLinks, error) {
 	context := FwLinksParsingContext{}
 	context.Init()
@@ -1005,6 +1032,7 @@ type FwDataParsingContext struct {
 	MetaInfo_context FwMetaInfoParsingContext
 }
 
+// Initializes the encoder by calculating the total length of the encoded FwData object and preparing a wire plan based on the presence and lengths of its fields (NameV, MetaInfo, ContentV, SignatureInfo, and SignatureValue).
 func (encoder *FwDataEncoder) Init(value *FwData) {
 	if value.NameV != nil {
 		encoder.NameV_length = 0
@@ -1071,12 +1099,14 @@ func (encoder *FwDataEncoder) Init(value *FwData) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the internal MetaInfo context of the data parsing context, preparing it for subsequent data parsing operations.
 func (context *FwDataParsingContext) Init() {
 
 	context.MetaInfo_context.Init()
 
 }
 
+// Encodes a skeletal Data packet with Name and optional MetaInfo, including placeholder TLV elements for Content, SignatureInfo, and SignatureValue without their actual data.
 func (encoder *FwDataEncoder) EncodeInto(value *FwData, wire enc.Wire) {
 
 	wireIdx := 0
@@ -1121,6 +1151,7 @@ func (encoder *FwDataEncoder) EncodeInto(value *FwData, wire enc.Wire) {
 	}
 }
 
+// Encodes a *FwData object into a wire format by allocating a pre-sized byte buffer according to the encoder's wire plan, splitting the buffer into segments, and populating each segment with encoded data fields.
 func (encoder *FwDataEncoder) Encode(value *FwData) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -1140,6 +1171,7 @@ func (encoder *FwDataEncoder) Encode(value *FwData) enc.Wire {
 	return wire
 }
 
+// Parses a wire-encoded Data packet into an FwData structure, handling standard TLV fields like Name, MetaInfo, Content, and signatures, while skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *FwDataParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FwData, error) {
 
 	var handled_NameV bool = false
@@ -1248,16 +1280,19 @@ func (context *FwDataParsingContext) Parse(reader enc.WireView, ignoreCritical b
 	return value, nil
 }
 
+// Encodes the FwData structure into a wire-format representation using the FwDataEncoder.
 func (value *FwData) Encode() enc.Wire {
 	encoder := FwDataEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the FwData packet by encoding its contents and joining the resulting segments.
 func (value *FwData) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses wire-encoded data into an FwData structure using a parsing context, with an option to ignore critical parsing errors.
 func ParseFwData(reader enc.WireView, ignoreCritical bool) (*FwData, error) {
 	context := FwDataParsingContext{}
 	context.Init()
@@ -1271,6 +1306,7 @@ type FwMetaInfoEncoder struct {
 type FwMetaInfoParsingContext struct {
 }
 
+// Initializes the encoder's length based on the presence and encoding sizes of optional metadata fields (ContentType, FreshnessPeriod) and the FinalBlockID flag in the provided FwMetaInfo.
 func (encoder *FwMetaInfoEncoder) Init(value *FwMetaInfo) {
 
 	l := uint(0)
@@ -1290,10 +1326,12 @@ func (encoder *FwMetaInfoEncoder) Init(value *FwMetaInfo) {
 
 }
 
+// Initializes the parsing context for metadata associated with network data forwarding.
 func (context *FwMetaInfoParsingContext) Init() {
 
 }
 
+// Serializes the MetaInfo fields (Content-Type, FreshnessPeriod, and FinalBlockID) of an NDN Data packet into a byte buffer using TLV encoding, appending each present field sequentially.
 func (encoder *FwMetaInfoEncoder) EncodeInto(value *FwMetaInfo, buf []byte) {
 
 	pos := uint(0)
@@ -1322,6 +1360,7 @@ func (encoder *FwMetaInfoEncoder) EncodeInto(value *FwMetaInfo, buf []byte) {
 	}
 }
 
+// Encodes the provided Forwarding Metadata Info into a wire format byte slice using the encoder's specified buffer size.
 func (encoder *FwMetaInfoEncoder) Encode(value *FwMetaInfo) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1332,6 +1371,7 @@ func (encoder *FwMetaInfoEncoder) Encode(value *FwMetaInfo) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded metadata into a `FwMetaInfo` structure, handling recognized fields (ContentType, FreshnessPeriod, FinalBlockID) and skipping or erroring on unknown critical fields based on the `ignoreCritical` flag.
 func (context *FwMetaInfoParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FwMetaInfo, error) {
 
 	var handled_ContentType bool = false
@@ -1452,16 +1492,19 @@ func (context *FwMetaInfoParsingContext) Parse(reader enc.WireView, ignoreCritic
 	return value, nil
 }
 
+// Encodes the FwMetaInfo struct into its wire representation using a dedicated encoder.
 func (value *FwMetaInfo) Encode() enc.Wire {
 	encoder := FwMetaInfoEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the FwMetaInfo by encoding its fields and joining the resulting components into a single byte slice.
 func (value *FwMetaInfo) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses wire-encoded FwMetaInfo data into a FwMetaInfo object, optionally ignoring critical fields during parsing.
 func ParseFwMetaInfo(reader enc.WireView, ignoreCritical bool) (*FwMetaInfo, error) {
 	context := FwMetaInfoParsingContext{}
 	context.Init()
@@ -1486,6 +1529,7 @@ type FwLpPacketParsingContext struct {
 	CachePolicy_context FwCachePolicyParsingContext
 }
 
+// Initializes the FwLpPacketEncoder with the provided packet data, calculates the total encoded length by summing all field contributions, and constructs a wire encoding plan to guide the serialization of optional fields and fragments.
 func (encoder *FwLpPacketEncoder) Init(value *FwLpPacket) {
 
 	if value.Nack != nil {
@@ -1607,6 +1651,7 @@ func (encoder *FwLpPacketEncoder) Init(value *FwLpPacket) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the NACK handling and cache policy sub-contexts within the packet parsing context to prepare for processing NDN packets.
 func (context *FwLpPacketParsingContext) Init() {
 
 	context.Nack_context.Init()
@@ -1615,6 +1660,7 @@ func (context *FwLpPacketParsingContext) Init() {
 
 }
 
+// Encodes a Forwarding Layer Packet (FW-LP) into a wire format using TLV (Type-Length-Value) encoding, serializing optional fields like sequence numbers, fragmentation metadata, Nack information, and payload fragments across one or more byte buffers.
 func (encoder *FwLpPacketEncoder) EncodeInto(value *FwLpPacket, wire enc.Wire) {
 
 	wireIdx := 0
@@ -1723,6 +1769,7 @@ func (encoder *FwLpPacketEncoder) EncodeInto(value *FwLpPacket, wire enc.Wire) {
 	}
 }
 
+// Encodes a Forwarding Lp packet into a wire format by allocating precomputed byte slices according to the encoder's wire plan and populating them with packet data.
 func (encoder *FwLpPacketEncoder) Encode(value *FwLpPacket) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -1742,6 +1789,7 @@ func (encoder *FwLpPacketEncoder) Encode(value *FwLpPacket) enc.Wire {
 	return wire
 }
 
+// Parses a binary wire-format LpPacket into an FwLpPacket structure by reading TLV-encoded fields, handling critical/non-critical options, and constructing corresponding fields while respecting the ignoreCritical flag for unrecognized critical fields.
 func (context *FwLpPacketParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FwLpPacket, error) {
 
 	var handled_Sequence bool = false
@@ -1999,16 +2047,19 @@ func (context *FwLpPacketParsingContext) Parse(reader enc.WireView, ignoreCritic
 	return value, nil
 }
 
+// Encodes the FwLpPacket into a wire format using the FwLpPacketEncoder.
 func (value *FwLpPacket) Encode() enc.Wire {
 	encoder := FwLpPacketEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the packet by encoding its components and joining them into a single slice.
 func (value *FwLpPacket) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a Forwarding Lp packet from wire format data, optionally ignoring critical elements.
 func ParseFwLpPacket(reader enc.WireView, ignoreCritical bool) (*FwLpPacket, error) {
 	context := FwLpPacketParsingContext{}
 	context.Init()
@@ -2022,6 +2073,12 @@ type FwNetworkNackEncoder struct {
 type FwNetworkNackParsingContext struct {
 }
 
+// Initializes the encoder's total length by calculating the combined size of fixed overhead (3 bytes) and variable-length encoded Nack reason (1 byte header plus natural encoding length).  
+
+**Explanation**:  
+- `l += 3` accounts for fixed fields (e.g., TLV type + fixed-value fields).  
+- `enc.Nat(value.Reason).EncodingLength()` computes variable-length encoding (e.g., non-zero compact encoding for the Nack reason).  
+- The result sets `encoder.Length`, enabling downstream serialization with the correct buffer size.
 func (encoder *FwNetworkNackEncoder) Init(value *FwNetworkNack) {
 
 	l := uint(0)
@@ -2031,10 +2088,12 @@ func (encoder *FwNetworkNackEncoder) Init(value *FwNetworkNack) {
 
 }
 
+// Initializes the forwarder's network NACK parsing context for processing incoming NACK packets in a Named Data Networking (NDN) system.
 func (context *FwNetworkNackParsingContext) Init() {
 
 }
 
+// Encodes a FwNetworkNack message into the provided byte buffer, starting with a fixed TLV type (253) and a 16-bit code (801), followed by the encoded reason field using a length-prefixed format.
 func (encoder *FwNetworkNackEncoder) EncodeInto(value *FwNetworkNack, buf []byte) {
 
 	pos := uint(0)
@@ -2047,6 +2106,7 @@ func (encoder *FwNetworkNackEncoder) EncodeInto(value *FwNetworkNack, buf []byte
 	pos += uint(1 + buf[pos])
 }
 
+// Serializes a `FwNetworkNack` into a wire-encoded byte slice using the encoder's defined length for network transmission.
 func (encoder *FwNetworkNackEncoder) Encode(value *FwNetworkNack) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2057,6 +2117,7 @@ func (encoder *FwNetworkNackEncoder) Encode(value *FwNetworkNack) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded NACK packet into a FwNetworkNack structure, handling the required Reason field (type 801) and skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *FwNetworkNackParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FwNetworkNack, error) {
 
 	var handled_Reason bool = false
@@ -2134,16 +2195,19 @@ func (context *FwNetworkNackParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the FwNetworkNack object into a serialized wire format for network transmission.
 func (value *FwNetworkNack) Encode() enc.Wire {
 	encoder := FwNetworkNackEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the wire-encoded byte representation of the NetworkNACK.
 func (value *FwNetworkNack) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a NACK packet from a wire format reader into a FwNetworkNack object, using a parsing context and optionally ignoring critical errors.
 func ParseFwNetworkNack(reader enc.WireView, ignoreCritical bool) (*FwNetworkNack, error) {
 	context := FwNetworkNackParsingContext{}
 	context.Init()
@@ -2157,6 +2221,7 @@ type FwCachePolicyEncoder struct {
 type FwCachePolicyParsingContext struct {
 }
 
+// Calculates and sets the total encoded length of the FwCachePolicy by summing a fixed overhead of 3 bytes and the variable-length TLV encoding of the CachePolicyType field.
 func (encoder *FwCachePolicyEncoder) Init(value *FwCachePolicy) {
 
 	l := uint(0)
@@ -2166,10 +2231,12 @@ func (encoder *FwCachePolicyEncoder) Init(value *FwCachePolicy) {
 
 }
 
+// Initializes the FwCachePolicyParsingContext, but does not perform any actions.
 func (context *FwCachePolicyParsingContext) Init() {
 
 }
 
+// Encodes a Forwarding Cache Policy (FwCachePolicy) into a binary TLV format in the provided buffer, starting with a fixed type-value pair (253:821) followed by the encoded cache policy type.
 func (encoder *FwCachePolicyEncoder) EncodeInto(value *FwCachePolicy, buf []byte) {
 
 	pos := uint(0)
@@ -2182,6 +2249,7 @@ func (encoder *FwCachePolicyEncoder) EncodeInto(value *FwCachePolicy, buf []byte
 	pos += uint(1 + buf[pos])
 }
 
+// Serializes the given FwCachePolicy into a wire-encoded byte slice using the encoder's precomputed length.
 func (encoder *FwCachePolicyEncoder) Encode(value *FwCachePolicy) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2192,6 +2260,7 @@ func (encoder *FwCachePolicyEncoder) Encode(value *FwCachePolicy) enc.Wire {
 	return wire
 }
 
+// Parses a binary wire format representation into an FwCachePolicy structure, handling the required CachePolicyType field (type 821) and skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *FwCachePolicyParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FwCachePolicy, error) {
 
 	var handled_CachePolicyType bool = false
@@ -2269,16 +2338,19 @@ func (context *FwCachePolicyParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the FwCachePolicy into a wire format representation for transmission or storage.
 func (value *FwCachePolicy) Encode() enc.Wire {
 	encoder := FwCachePolicyEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the forwarder cache policy by encoding and joining its components.
 func (value *FwCachePolicy) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a Forwarding Cache Policy from a wire-encoded format, optionally ignoring critical unrecognized fields.
 func ParseFwCachePolicy(reader enc.WireView, ignoreCritical bool) (*FwCachePolicy, error) {
 	context := FwCachePolicyParsingContext{}
 	context.Init()

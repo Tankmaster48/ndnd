@@ -38,6 +38,7 @@ type DataParsingContext struct {
 	SignatureInfo_context SignatureInfoParsingContext
 }
 
+// Initializes the DataEncoder by calculating the total encoded length and constructing a wire format layout plan for the Data packet's fields, including name components, metadata, content, signature info, and cross-schema data.
 func (encoder *DataEncoder) Init(value *Data) {
 
 	if value.NameV != nil {
@@ -154,6 +155,7 @@ func (encoder *DataEncoder) Init(value *Data) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the DataParsingContext by resetting its MetaInfo and SignatureInfo components and preparing an empty buffer for signature-covered data.
 func (context *DataParsingContext) Init() {
 
 	context.MetaInfo_context.Init()
@@ -163,6 +165,7 @@ func (context *DataParsingContext) Init() {
 
 }
 
+// Encodes a Data object into a TLV (Type-Length-Value) wire format, handling components such as name, meta-info, content, signature info/value, and cross-schema data, while managing multi-buffer encoding and tracking signature-covered regions for signing.
 func (encoder *DataEncoder) EncodeInto(value *Data, wire enc.Wire) {
 
 	wireIdx := 0
@@ -277,6 +280,7 @@ func (encoder *DataEncoder) EncodeInto(value *Data, wire enc.Wire) {
 	}
 }
 
+// Encodes a Data object into a wire-format byte slice using a predefined layout, allocating buffer segments according to the encoder's wire plan.
 func (encoder *DataEncoder) Encode(value *Data) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -296,6 +300,7 @@ func (encoder *DataEncoder) Encode(value *Data) enc.Wire {
 	return wire
 }
 
+// Parses a Data packet from NDN wire format, handling fields such as Name, MetaInfo, Content, and Signature components while respecting criticality and order constraints.
 func (context *DataParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Data, error) {
 
 	var handled_sigCovered bool = false
@@ -456,6 +461,7 @@ type MetaInfoEncoder struct {
 type MetaInfoParsingContext struct {
 }
 
+// Calculates the total TLV-encoded length of the MetaInfo by summing the contributions from each present field (ContentType, FreshnessPeriod, FinalBlockID) according to NDN encoding rules.
 func (encoder *MetaInfoEncoder) Init(value *MetaInfo) {
 
 	l := uint(0)
@@ -476,10 +482,14 @@ func (encoder *MetaInfoEncoder) Init(value *MetaInfo) {
 
 }
 
+// Initializes the metadata parsing context, preparing it for subsequent metadata parsing operations.
 func (context *MetaInfoParsingContext) Init() {
 
 }
 
+// Encodes the optional metadata fields (ContentType, FreshnessPeriod, FinalBlockID) of an NDN Data packet into a TLV-encoded byte buffer using variable-length natural number encoding for lengths.  
+
+This sentence captures the core purpose: encoding metadata fields into TLV format, mentions the specific fields involved, and highlights the variable-length encoding technique used for efficiency.
 func (encoder *MetaInfoEncoder) EncodeInto(value *MetaInfo, buf []byte) {
 
 	pos := uint(0)
@@ -509,6 +519,7 @@ func (encoder *MetaInfoEncoder) EncodeInto(value *MetaInfo, buf []byte) {
 	}
 }
 
+// Encodes the provided MetaInfo into a wire-encoded buffer of the specified length.
 func (encoder *MetaInfoEncoder) Encode(value *MetaInfo) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -519,6 +530,7 @@ func (encoder *MetaInfoEncoder) Encode(value *MetaInfo) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded MetaInfo structure from a wire format reader, handling ContentType, FreshnessPeriod, and FinalBlockID fields while respecting critical type handling based on the ignoreCritical flag.
 func (context *MetaInfoParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*MetaInfo, error) {
 
 	var handled_ContentType bool = false
@@ -639,16 +651,19 @@ func (context *MetaInfoParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the MetaInfo into a wire format for network transmission.
 func (value *MetaInfo) Encode() enc.Wire {
 	encoder := MetaInfoEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded bytes of the MetaInfo structure.
 func (value *MetaInfo) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a MetaInfo structure from the provided wire format data, using the specified parsing context and controlling whether unknown critical fields are ignored.
 func ParseMetaInfo(reader enc.WireView, ignoreCritical bool) (*MetaInfo, error) {
 	context := MetaInfoParsingContext{}
 	context.Init()
@@ -671,6 +686,7 @@ type SignatureInfoParsingContext struct {
 	AdditionalDescription_context CertAdditionalDescriptionParsingContext
 }
 
+// Initializes the SignatureInfoEncoder with the provided SignatureInfo value, setting up internal encoders for optional fields and calculating the total encoded length required for TLV encoding.
 func (encoder *SignatureInfoEncoder) Init(value *SignatureInfo) {
 
 	if value.KeyLocator != nil {
@@ -719,6 +735,7 @@ func (encoder *SignatureInfoEncoder) Init(value *SignatureInfo) {
 
 }
 
+// Initializes the KeyLocator, ValidityPeriod, and AdditionalDescription sub-contexts of the SignatureInfoParsingContext to prepare for parsing operations.
 func (context *SignatureInfoParsingContext) Init() {
 
 	context.KeyLocator_context.Init()
@@ -727,6 +744,7 @@ func (context *SignatureInfoParsingContext) Init() {
 	context.AdditionalDescription_context.Init()
 }
 
+// Encodes a SignatureInfo object into a TLV (Type-Length-Value) formatted byte buffer, serializing fields such as signature type, key locator, nonce, timestamp, sequence number, validity period, and additional description according to NDN specification rules.
 func (encoder *SignatureInfoEncoder) EncodeInto(value *SignatureInfo, buf []byte) {
 
 	pos := uint(0)
@@ -790,6 +808,7 @@ func (encoder *SignatureInfoEncoder) EncodeInto(value *SignatureInfo, buf []byte
 	}
 }
 
+// Encodes a `SignatureInfo` into a byte slice with the pre-allocated length specified by the encoder and returns it as a `Wire` structure.
 func (encoder *SignatureInfoEncoder) Encode(value *SignatureInfo) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -800,6 +819,7 @@ func (encoder *SignatureInfoEncoder) Encode(value *SignatureInfo) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded `SignatureInfo` data into a structured object, processing critical and optional fields (e.g., `SignatureType`, `KeyLocator`, `ValidityPeriod`) using the provided context and `ignoreCritical` flag to handle unrecognized elements.
 func (context *SignatureInfoParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*SignatureInfo, error) {
 
 	var handled_SignatureType bool = false
@@ -973,16 +993,19 @@ func (context *SignatureInfoParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the SignatureInfo into its wire format representation for network transmission.
 func (value *SignatureInfo) Encode() enc.Wire {
 	encoder := SignatureInfoEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the SignatureInfo by encoding its fields and joining any resulting segments into a single byte slice.
 func (value *SignatureInfo) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses encoded signature information from the provided WireView reader into a SignatureInfo structure, with an option to skip critical fields if specified.
 func ParseSignatureInfo(reader enc.WireView, ignoreCritical bool) (*SignatureInfo, error) {
 	context := SignatureInfoParsingContext{}
 	context.Init()
@@ -998,6 +1021,7 @@ type KeyLocatorEncoder struct {
 type KeyLocatorParsingContext struct {
 }
 
+// Initializes the KeyLocator encoder by computing the total encoded length of the KeyLocator's Name components and KeyDigest, accounting for TLV encoding overhead.
 func (encoder *KeyLocatorEncoder) Init(value *KeyLocator) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -1021,10 +1045,12 @@ func (encoder *KeyLocatorEncoder) Init(value *KeyLocator) {
 
 }
 
+// Initializes the KeyLocatorParsingContext to prepare for parsing key locator information in NDN.
 func (context *KeyLocatorParsingContext) Init() {
 
 }
 
+// Encodes a KeyLocator into a binary buffer using TLV format, writing the Name (type 7) with its components and KeyDigest (type 29) if non-nil.
 func (encoder *KeyLocatorEncoder) EncodeInto(value *KeyLocator, buf []byte) {
 
 	pos := uint(0)
@@ -1046,6 +1072,7 @@ func (encoder *KeyLocatorEncoder) EncodeInto(value *KeyLocator, buf []byte) {
 	}
 }
 
+// Encodes the provided KeyLocator into a binary wire format using the encoder's pre-determined buffer length and returns the result as a slice of byte slices (enc.Wire).
 func (encoder *KeyLocatorEncoder) Encode(value *KeyLocator) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1056,6 +1083,7 @@ func (encoder *KeyLocatorEncoder) Encode(value *KeyLocator) enc.Wire {
 	return wire
 }
 
+// Parses a KeyLocator from TLV-encoded wire format, extracting Name (type 7) and KeyDigest (type 29) fields while handling critical/unrecognized types according to the ignoreCritical flag.
 func (context *KeyLocatorParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*KeyLocator, error) {
 
 	var handled_Name bool = false
@@ -1132,16 +1160,19 @@ func (context *KeyLocatorParsingContext) Parse(reader enc.WireView, ignoreCritic
 	return value, nil
 }
 
+// Encodes the KeyLocator into its wire format representation for transmission or storage.
 func (value *KeyLocator) Encode() enc.Wire {
 	encoder := KeyLocatorEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the KeyLocator as a serialized byte slice by encoding its components and joining them.
 func (value *KeyLocator) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a KeyLocator structure from a wire-encoded TLV format, optionally ignoring critical unrecognized elements to ensure backward compatibility.
 func ParseKeyLocator(reader enc.WireView, ignoreCritical bool) (*KeyLocator, error) {
 	context := KeyLocatorParsingContext{}
 	context.Init()
@@ -1155,6 +1186,7 @@ type ValidityPeriodEncoder struct {
 type ValidityPeriodParsingContext struct {
 }
 
+// Calculates the total encoded length of a ValidityPeriod by summing the TLV header sizes (3 bytes each for NotBefore and NotAfter) plus the variable-length encodings of their respective value lengths and data.
 func (encoder *ValidityPeriodEncoder) Init(value *ValidityPeriod) {
 
 	l := uint(0)
@@ -1168,10 +1200,12 @@ func (encoder *ValidityPeriodEncoder) Init(value *ValidityPeriod) {
 
 }
 
+// Initializes the ValidityPeriodParsingContext to prepare for parsing validity periods in NDN data packets.
 func (context *ValidityPeriodParsingContext) Init() {
 
 }
 
+// Encodes a ValidityPeriod structure into a binary buffer, writing the NotBefore and NotAfter timestamps as TLV-encoded fields with type 253 and dynamic lengths.
 func (encoder *ValidityPeriodEncoder) EncodeInto(value *ValidityPeriod, buf []byte) {
 
 	pos := uint(0)
@@ -1190,6 +1224,9 @@ func (encoder *ValidityPeriodEncoder) EncodeInto(value *ValidityPeriod, buf []by
 	pos += uint(len(value.NotAfter))
 }
 
+// Encodes a ValidityPeriod into a wire-format byte slice using the encoder's precomputed length and EncodeInto method.  
+
+Example: Encodes a ValidityPeriod into a binary wire representation for NDN packet transmission.
 func (encoder *ValidityPeriodEncoder) Encode(value *ValidityPeriod) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1200,6 +1237,7 @@ func (encoder *ValidityPeriodEncoder) Encode(value *ValidityPeriod) enc.Wire {
 	return wire
 }
 
+// Parses a validity period from TLV-encoded data, requiring both NotBefore and NotAfter string fields and handling critical extensions according to the ignoreCritical flag.
 func (context *ValidityPeriodParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ValidityPeriod, error) {
 
 	var handled_NotBefore bool = false
@@ -1286,16 +1324,19 @@ func (context *ValidityPeriodParsingContext) Parse(reader enc.WireView, ignoreCr
 	return value, nil
 }
 
+// Encodes the ValidityPeriod into a binary wire format using the ValidityPeriodEncoder for network transmission or storage.
 func (value *ValidityPeriod) Encode() enc.Wire {
 	encoder := ValidityPeriodEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Serializes the validity period by encoding its components and joining them into a single byte slice.
 func (value *ValidityPeriod) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a validity period from the provided encoded data using a parsing context, with an option to skip processing of critical fields.
 func ParseValidityPeriod(reader enc.WireView, ignoreCritical bool) (*ValidityPeriod, error) {
 	context := ValidityPeriodParsingContext{}
 	context.Init()
@@ -1309,6 +1350,7 @@ type CertDescriptionEntryEncoder struct {
 type CertDescriptionEntryParsingContext struct {
 }
 
+// Calculates the total encoded length for a certificate description entry by summing the TLV encoding overhead and payload lengths of its key and value fields.
 func (encoder *CertDescriptionEntryEncoder) Init(value *CertDescriptionEntry) {
 
 	l := uint(0)
@@ -1322,10 +1364,12 @@ func (encoder *CertDescriptionEntryEncoder) Init(value *CertDescriptionEntry) {
 
 }
 
+// Initializes the CertDescriptionEntryParsingContext for parsing certificate description entries.
 func (context *CertDescriptionEntryParsingContext) Init() {
 
 }
 
+// Encodes a certificate description entry into a byte buffer using TLV (Type-Length-Value) format, writing the DescriptionKey with TLV type 513 and DescriptionValue with TLV type 514.
 func (encoder *CertDescriptionEntryEncoder) EncodeInto(value *CertDescriptionEntry, buf []byte) {
 
 	pos := uint(0)
@@ -1344,6 +1388,7 @@ func (encoder *CertDescriptionEntryEncoder) EncodeInto(value *CertDescriptionEnt
 	pos += uint(len(value.DescriptionValue))
 }
 
+// Encodes a CertDescriptionEntry into a wire-format byte slice using the encoder's specified length.
 func (encoder *CertDescriptionEntryEncoder) Encode(value *CertDescriptionEntry) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1354,6 +1399,7 @@ func (encoder *CertDescriptionEntryEncoder) Encode(value *CertDescriptionEntry) 
 	return wire
 }
 
+// Parses a TLV-encoded certificate description entry into a CertDescriptionEntry struct, ensuring required fields (DescriptionKey and DescriptionValue) are present and handling unknown critical fields based on the ignoreCritical flag.
 func (context *CertDescriptionEntryParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*CertDescriptionEntry, error) {
 
 	var handled_DescriptionKey bool = false
@@ -1440,16 +1486,19 @@ func (context *CertDescriptionEntryParsingContext) Parse(reader enc.WireView, ig
 	return value, nil
 }
 
+// Encodes the certificate description entry into its wire format representation using the CertDescriptionEntryEncoder.
 func (value *CertDescriptionEntry) Encode() enc.Wire {
 	encoder := CertDescriptionEntryEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the certificate description entry into a concatenated byte slice.
 func (value *CertDescriptionEntry) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a certificate description entry from wire format data using a parsing context, with an option to ignore critical fields during parsing.
 func ParseCertDescriptionEntry(reader enc.WireView, ignoreCritical bool) (*CertDescriptionEntry, error) {
 	context := CertDescriptionEntryParsingContext{}
 	context.Init()
@@ -1468,6 +1517,7 @@ type CertAdditionalDescriptionParsingContext struct {
 	DescriptionEntries_context CertDescriptionEntryParsingContext
 }
 
+// Initializes a CertAdditionalDescription encoder with the provided value, calculates and sets the total encoded length by aggregating the TLV-encoded lengths of each DescriptionEntry, including TLV overhead and sub-field lengths.
 func (encoder *CertAdditionalDescriptionEncoder) Init(value *CertAdditionalDescription) {
 	{
 		DescriptionEntries_l := len(value.DescriptionEntries)
@@ -1519,10 +1569,12 @@ func (encoder *CertAdditionalDescriptionEncoder) Init(value *CertAdditionalDescr
 
 }
 
+// Initializes the internal description entries context within the certificate additional description parsing context.
 func (context *CertAdditionalDescriptionParsingContext) Init() {
 	context.DescriptionEntries_context.Init()
 }
 
+// Encodes a CertAdditionalDescription structure into the provided byte buffer using TLV encoding, sequentially processing each DescriptionEntry with its associated sub-encoder.
 func (encoder *CertAdditionalDescriptionEncoder) EncodeInto(value *CertAdditionalDescription, buf []byte) {
 
 	pos := uint(0)
@@ -1555,6 +1607,7 @@ func (encoder *CertAdditionalDescriptionEncoder) EncodeInto(value *CertAdditiona
 	}
 }
 
+// Encodes a CertAdditionalDescription value into a binary wire structure using the encoder's specified length, returning a slice containing the serialized byte data.
 func (encoder *CertAdditionalDescriptionEncoder) Encode(value *CertAdditionalDescription) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1565,6 +1618,7 @@ func (encoder *CertAdditionalDescriptionEncoder) Encode(value *CertAdditionalDes
 	return wire
 }
 
+// Parses a TLV-encoded certificate additional description, extracting description entries (type 512) and handling critical/non-critical fields according to the ignoreCritical flag.
 func (context *CertAdditionalDescriptionParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*CertAdditionalDescription, error) {
 
 	var handled_DescriptionEntries bool = false
@@ -1643,16 +1697,19 @@ func (context *CertAdditionalDescriptionParsingContext) Parse(reader enc.WireVie
 	return value, nil
 }
 
+// Encodes the certificate additional description into a binary wire format using a dedicated encoder.
 func (value *CertAdditionalDescription) Encode() enc.Wire {
 	encoder := CertAdditionalDescriptionEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the certificate additional description by encoding its components and concatenating them into a single byte slice.
 func (value *CertAdditionalDescription) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a certificate additional description from encoded wire data, optionally ignoring critical fields that may not be recognized or supported.
 func ParseCertAdditionalDescription(reader enc.WireView, ignoreCritical bool) (*CertAdditionalDescription, error) {
 	context := CertAdditionalDescriptionParsingContext{}
 	context.Init()
@@ -1704,6 +1761,7 @@ type InterestParsingContext struct {
 	digestCoverEnd int
 }
 
+// Initializes an Interest encoder by calculating the total encoded length, setting up wire encoding positions for each field, and preparing a wire plan to guide the final byte-level encoding of the Interest packet.
 func (encoder *InterestEncoder) Init(value *Interest) {
 
 	encoder.NameV_wireIdx = -1
@@ -1855,6 +1913,7 @@ func (encoder *InterestEncoder) Init(value *Interest) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes an Interest parsing context by resetting its ForwardingHint and SignatureInfo sub-contexts and creating an empty buffer for signature-covered content.
 func (context *InterestParsingContext) Init() {
 
 	context.ForwardingHintV_context.Init()
@@ -1864,6 +1923,7 @@ func (context *InterestParsingContext) Init() {
 
 }
 
+// Encodes an NDN Interest into a wire-format TLV structure, handling fields such as name components, optional parameters, and signature information while tracking covered data regions for cryptographic signing.
 func (encoder *InterestEncoder) EncodeInto(value *Interest, wire enc.Wire) {
 
 	wireIdx := 0
@@ -2008,6 +2068,7 @@ func (encoder *InterestEncoder) EncodeInto(value *Interest, wire enc.Wire) {
 	encoder.digestCoverEnd_pos = int(pos)
 }
 
+// Encodes an Interest object into a wire-format byte slice structure defined by the encoder's wire plan, returning a slice of byte slices representing each encoded component.
 func (encoder *InterestEncoder) Encode(value *Interest) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -2027,6 +2088,7 @@ func (encoder *InterestEncoder) Encode(value *Interest) enc.Wire {
 	return wire
 }
 
+// Parses a binary-encoded NDN Interest packet into an Interest object, handling TLV fields, signature/digest coverage tracking, and optional critical field validation based on the ignoreCritical flag.
 func (context *InterestParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Interest, error) {
 
 	var handled_sigCovered bool = false
@@ -2339,6 +2401,7 @@ type LinksEncoder struct {
 type LinksParsingContext struct {
 }
 
+// Initializes the LinksEncoder with the provided Links value, precomputing the total encoded length by summing the TLV-encoded sizes of all name components and their associated headers.
 func (encoder *LinksEncoder) Init(value *Links) {
 	{
 		Names_l := len(value.Names)
@@ -2393,10 +2456,12 @@ func (encoder *LinksEncoder) Init(value *Links) {
 
 }
 
+// Initializes the LinksParsingContext, preparing it for link parsing operations.
 func (context *LinksParsingContext) Init() {
 
 }
 
+// Encodes the Names field of a Links structure into the provided byte buffer using NDN TLV format, with each name component prefixed by type 7 (Name) and encoded via subencoders.
 func (encoder *LinksEncoder) EncodeInto(value *Links, buf []byte) {
 
 	pos := uint(0)
@@ -2427,6 +2492,7 @@ func (encoder *LinksEncoder) EncodeInto(value *Links, buf []byte) {
 	}
 }
 
+// Encodes the provided Links object into a pre-allocated byte slice of size determined by the encoder and returns it as an enc.Wire structure.
 func (encoder *LinksEncoder) Encode(value *Links) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2437,6 +2503,7 @@ func (encoder *LinksEncoder) Encode(value *Links) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded Links structure, extracting Name fields (type 7) and handling critical fields according to the ignoreCritical flag.
 func (context *LinksParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Links, error) {
 
 	var handled_Names bool = false
@@ -2516,16 +2583,20 @@ func (context *LinksParsingContext) Parse(reader enc.WireView, ignoreCritical bo
 	return value, nil
 }
 
+// Encodes the Links object into a wire-format representation using the LinksEncoder, preparing it for transmission or storage.
 func (value *Links) Encode() enc.Wire {
 	encoder := LinksEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// **Function Description:**  
+Returns the concatenated byte representation of the encoded `Links` value by joining its encoded components.
 func (value *Links) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses link information from wire-format data into a Links structure, optionally ignoring critical fields not recognized during parsing.
 func ParseLinks(reader enc.WireView, ignoreCritical bool) (*Links, error) {
 	context := LinksParsingContext{}
 	context.Init()
@@ -2551,6 +2622,7 @@ type LpPacketParsingContext struct {
 	CachePolicy_context CachePolicyParsingContext
 }
 
+// Initializes the LpPacketEncoder with the provided LpPacket, calculating the total encoded length and constructing a wire encoding plan based on the presence and size of optional fields.
 func (encoder *LpPacketEncoder) Init(value *LpPacket) {
 
 	if value.Nack != nil {
@@ -2717,6 +2789,7 @@ func (encoder *LpPacketEncoder) Init(value *LpPacket) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the NACK handling and cache policy sub-contexts within the LP packet parsing context to prepare for packet processing.
 func (context *LpPacketParsingContext) Init() {
 
 	context.Nack_context.Init()
@@ -2725,6 +2798,7 @@ func (context *LpPacketParsingContext) Init() {
 
 }
 
+// Encodes an LpPacket into a wire-format byte slice using TLV encoding, handling optional fields, variable-length integers, and nested structures while managing multiple buffers for fragmented or complex data.
 func (encoder *LpPacketEncoder) EncodeInto(value *LpPacket, wire enc.Wire) {
 
 	wireIdx := 0
@@ -2879,6 +2953,7 @@ func (encoder *LpPacketEncoder) EncodeInto(value *LpPacket, wire enc.Wire) {
 	}
 }
 
+// Encodes an LpPacket into a wire format by allocating a pre-sized buffer based on the encoder's wire plan and populating it with the packet's data.
 func (encoder *LpPacketEncoder) Encode(value *LpPacket) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -2898,6 +2973,7 @@ func (encoder *LpPacketEncoder) Encode(value *LpPacket) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded Link Protocol (LP) packet into a structured LpPacket object, processing optional fields like sequence numbers, fragmentation metadata, and NACK information while enforcing critical TLV type handling rules based on the ignoreCritical flag.
 func (context *LpPacketParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*LpPacket, error) {
 
 	var handled_Sequence bool = false
@@ -3237,6 +3313,7 @@ type NetworkNackEncoder struct {
 type NetworkNackParsingContext struct {
 }
 
+// Initializes the NetworkNackEncoder by calculating the total encoding length required to represent the NetworkNack, combining fixed-size fields (3 bytes) and variable-length encoding of the reason field.
 func (encoder *NetworkNackEncoder) Init(value *NetworkNack) {
 
 	l := uint(0)
@@ -3246,10 +3323,12 @@ func (encoder *NetworkNackEncoder) Init(value *NetworkNack) {
 
 }
 
+// Initializes the NetworkNackParsingContext, setting up necessary state for parsing NDN NACK packets.
 func (context *NetworkNackParsingContext) Init() {
 
 }
 
+// Encodes a NetworkNack TLV structure into the provided byte buffer, writing the NACK type (253), a fixed length (801), and the encoded reason value in big-endian format.
 func (encoder *NetworkNackEncoder) EncodeInto(value *NetworkNack, buf []byte) {
 
 	pos := uint(0)
@@ -3262,6 +3341,7 @@ func (encoder *NetworkNackEncoder) EncodeInto(value *NetworkNack, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Serializes a NetworkNack object into a wire-encoded byte slice using the encoder's specified length.
 func (encoder *NetworkNackEncoder) Encode(value *NetworkNack) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -3272,6 +3352,7 @@ func (encoder *NetworkNackEncoder) Encode(value *NetworkNack) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded NetworkNack, extracting the Reason field (type 801) as a uint64 and skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *NetworkNackParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*NetworkNack, error) {
 
 	var handled_Reason bool = false
@@ -3349,16 +3430,19 @@ func (context *NetworkNackParsingContext) Parse(reader enc.WireView, ignoreCriti
 	return value, nil
 }
 
+// Encodes the NetworkNack into its wire format representation using a NetworkNackEncoder.
 func (value *NetworkNack) Encode() enc.Wire {
 	encoder := NetworkNackEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the NetworkNack into a byte slice by concatenating its encoded components.
 func (value *NetworkNack) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a NetworkNack from encoded data using the provided WireView reader and specified critical error handling flag.
 func ParseNetworkNack(reader enc.WireView, ignoreCritical bool) (*NetworkNack, error) {
 	context := NetworkNackParsingContext{}
 	context.Init()
@@ -3372,6 +3456,7 @@ type CachePolicyEncoder struct {
 type CachePolicyParsingContext struct {
 }
 
+// Initializes the encoder's length by calculating the total size required to encode the CachePolicy, including 3 bytes of fixed overhead and the variable-length encoded CachePolicyType.
 func (encoder *CachePolicyEncoder) Init(value *CachePolicy) {
 
 	l := uint(0)
@@ -3381,10 +3466,12 @@ func (encoder *CachePolicyEncoder) Init(value *CachePolicy) {
 
 }
 
+// Initializes the CachePolicyParsingContext, preparing it for parsing and applying cache policies to network data.
 func (context *CachePolicyParsingContext) Init() {
 
 }
 
+// Encodes a CachePolicy into the provided byte buffer using TLV format, starting with a fixed header (type 253, length 821) followed by the encoded CachePolicyType.
 func (encoder *CachePolicyEncoder) EncodeInto(value *CachePolicy, buf []byte) {
 
 	pos := uint(0)
@@ -3397,6 +3484,7 @@ func (encoder *CachePolicyEncoder) EncodeInto(value *CachePolicy, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes a CachePolicy value into a byte slice representing its wire format.
 func (encoder *CachePolicyEncoder) Encode(value *CachePolicy) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -3407,6 +3495,7 @@ func (encoder *CachePolicyEncoder) Encode(value *CachePolicy) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded CachePolicy from the provided wire format reader, extracting the CachePolicyType field and handling or skipping other fields based on criticality settings.
 func (context *CachePolicyParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*CachePolicy, error) {
 
 	var handled_CachePolicyType bool = false
@@ -3484,16 +3573,19 @@ func (context *CachePolicyParsingContext) Parse(reader enc.WireView, ignoreCriti
 	return value, nil
 }
 
+// Encodes the CachePolicy into a wire format using a CachePolicyEncoder for transmission or storage.
 func (value *CachePolicy) Encode() enc.Wire {
 	encoder := CachePolicyEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// "Encodes the CachePolicy into a byte slice by joining its encoded components."
 func (value *CachePolicy) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a CachePolicy from encoded wire format data, with an option to ignore critical unrecognized elements.
 func ParseCachePolicy(reader enc.WireView, ignoreCritical bool) (*CachePolicy, error) {
 	context := CachePolicyParsingContext{}
 	context.Init()
@@ -3516,6 +3608,7 @@ type PacketParsingContext struct {
 	LpPacket_context LpPacketParsingContext
 }
 
+// Initializes the PacketEncoder with the provided Packet, calculates the total encoded length, and constructs a wire encoding plan for efficiently encoding the packet's components (Interest, Data, or LpPacket) in TLV format.
 func (encoder *PacketEncoder) Init(value *Packet) {
 	if value.Interest != nil {
 		encoder.Interest_encoder.Init(value.Interest)
@@ -3601,12 +3694,14 @@ func (encoder *PacketEncoder) Init(value *Packet) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the packet parsing context by resetting its Interest, Data, and LpPacket sub-contexts for fresh parsing operations.
 func (context *PacketParsingContext) Init() {
 	context.Interest_context.Init()
 	context.Data_context.Init()
 	context.LpPacket_context.Init()
 }
 
+// Encodes a Packet (containing Interest, Data, or LpPacket) into a wire format using TLV encoding, writing type-specific fields (type 5 for Interest, 6 for Data, 100 for LpPacket) with their respective lengths and values into the provided wire buffer.
 func (encoder *PacketEncoder) EncodeInto(value *Packet, wire enc.Wire) {
 
 	wireIdx := 0
@@ -3718,6 +3813,7 @@ func (encoder *PacketEncoder) EncodeInto(value *Packet, wire enc.Wire) {
 	}
 }
 
+// Encodes a Packet into a contiguous byte buffer, partitioned into segments according to the encoder's wire plan, and returns a Wire structure of byte slices referencing these segments.
 func (encoder *PacketEncoder) Encode(value *Packet) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -3737,6 +3833,7 @@ func (encoder *PacketEncoder) Encode(value *Packet) enc.Wire {
 	return wire
 }
 
+// Parses a binary wire-format packet into a Packet structure by reading TLV-encoded fields for Interest (type 5), Data (type 6), and LpPacket (type 100), handling critical/non-critical fields according to the ignoreCritical flag.
 func (context *PacketParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Packet, error) {
 
 	var handled_Interest bool = false
@@ -3830,6 +3927,7 @@ type NameContainerEncoder struct {
 type NameContainerParsingContext struct {
 }
 
+// Initializes the NameContainerEncoder with the total encoded length of the NameContainer's name components, accounting for TLV encoding overhead and component lengths.
 func (encoder *NameContainerEncoder) Init(value *NameContainer) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -3848,10 +3946,12 @@ func (encoder *NameContainerEncoder) Init(value *NameContainer) {
 
 }
 
+// Initializes a NameContainerParsingContext for parsing name components in NDN data structures.
 func (context *NameContainerParsingContext) Init() {
 
 }
 
+// Encodes the name components of a NameContainer into a binary buffer using TLV format with type 7, followed by length and sequential component encodings.
 func (encoder *NameContainerEncoder) EncodeInto(value *NameContainer, buf []byte) {
 
 	pos := uint(0)
@@ -3866,6 +3966,7 @@ func (encoder *NameContainerEncoder) EncodeInto(value *NameContainer, buf []byte
 	}
 }
 
+// Encodes the provided NameContainer into its binary wire representation using a preallocated buffer of the encoder's calculated length.
 func (encoder *NameContainerEncoder) Encode(value *NameContainer) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -3876,6 +3977,7 @@ func (encoder *NameContainerEncoder) Encode(value *NameContainer) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded NameContainer from the provided wire reader, extracting the Name field (type 7) and optionally skipping unrecognized critical fields based on the ignoreCritical flag.
 func (context *NameContainerParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*NameContainer, error) {
 
 	var handled_Name bool = false
@@ -3941,16 +4043,21 @@ func (context *NameContainerParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the NameContainer instance into a wire-format representation using the NameContainerEncoder.
 func (value *NameContainer) Encode() enc.Wire {
 	encoder := NameContainerEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte representation of the name by concatenating all its components after encoding. 
+
+Example: Combines each component of the NameContainer into a single byte slice after TLV encoding.
 func (value *NameContainer) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a NameContainer from encoded wire format data using the provided reader, with an option to ignore critical unrecognized elements.
 func ParseNameContainer(reader enc.WireView, ignoreCritical bool) (*NameContainer, error) {
 	context := NameContainerParsingContext{}
 	context.Init()

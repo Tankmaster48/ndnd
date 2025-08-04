@@ -16,6 +16,7 @@ type MapField struct {
 	ValFieldType string
 }
 
+// Generates a Go struct for encoding a map field with keys of type Natural or String (which don't require encoders) and values using the value field's encoder structure.
 func (f *MapField) GenEncoderStruct() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("%s_valencoder map[%s]*struct{", f.name, f.KeyFieldType)
@@ -25,6 +26,7 @@ func (f *MapField) GenEncoderStruct() (string, error) {
 	return g.output()
 }
 
+// Generates initialization code for encoding a map field by creating a pseudo-encoder structure for each key-value pair in the map, enabling subsequent encoding operations.
 func (f *MapField) GenInitEncoder() (string, error) {
 	// SA Sequence Field
 	// KeyField does not need an encoder
@@ -59,15 +61,18 @@ func (f *MapField) GenInitEncoder() (string, error) {
 	return g.output()
 }
 
+// Generates a parsing context struct for the map field by delegating to the value field's generation logic, as the variable element count prevents slice-based representation.
 func (f *MapField) GenParsingContextStruct() (string, error) {
 	// This is not a slice, because the number of elements is unknown before parsing.
 	return f.ValField.GenParsingContextStruct()
 }
 
+// Delegates the generation of an initialization context string to the value field of the map.
 func (f *MapField) GenInitContext() (string, error) {
 	return f.ValField.GenInitContext()
 }
 
+// Generates code to encode a map field by iterating over its key-value pairs, using a specified encoding function to process each key and value within a pseudo-struct.
 func (f *MapField) encodingGeneral(funcName string) (string, error) {
 	templ := template.Must(template.New("MapEncodingGeneral").Parse(fmt.Sprintf(`
 		if value.{{.Name}} != nil {
@@ -97,18 +102,22 @@ func (f *MapField) encodingGeneral(funcName string) (string, error) {
 	return g.output()
 }
 
+// Generates the length component of the TLV encoding for the MapField by invoking the general encoding method with "GenEncodingLength".
 func (f *MapField) GenEncodingLength() (string, error) {
 	return f.encodingGeneral("GenEncodingLength")
 }
 
+// Generates a wire encoding plan for the MapField's data structure in Named-Data Networking.
 func (f *MapField) GenEncodingWirePlan() (string, error) {
 	return f.encodingGeneral("GenEncodingWirePlan")
 }
 
+// Generates the Go code for the `EncodeInto` method of a map field using a general encoding template.
 func (f *MapField) GenEncodeInto() (string, error) {
 	return f.encodingGeneral("GenEncodeInto")
 }
 
+// Generates code to read and decode a TLV-encoded map field into a struct's map, validating type numbers and populating key-value pairs with appropriate error handling.
 func (f *MapField) GenReadFrom() (string, error) {
 	templ := template.Must(template.New("NameEncodeInto").Parse(`
 		if value.{{.M.Name}} == nil {
@@ -148,19 +157,23 @@ func (f *MapField) GenReadFrom() (string, error) {
 	return g.output()
 }
 
+// Generates a comment indicating that processing for a map field should be skipped after parsing to avoid assigning nil values.
 func (f *MapField) GenSkipProcess() (string, error) {
 	// Skip is called after all elements are parsed, so we should not assign nil.
 	return "// map - skip", nil
 }
 
+// Returns an error message string indicating that generating a dictionary representation of the MapField is unimplemented.
 func (f *MapField) GenToDict() (string, error) {
 	return "ERROR = \"Unimplemented yet!\"", nil
 }
 
+// Returns an error message string indicating that generating code from a dictionary is unimplemented.
 func (f *MapField) GenFromDict() (string, error) {
 	return "ERROR = \"Unimplemented yet!\"", nil
 }
 
+// Constructs a TLV map field with specified name, type number, and annotation, defining key and value fields derived from the provided model and annotation parameters.
 func NewMapField(name string, typeNum uint64, annotation string, model *TlvModel) (TlvField, error) {
 	strs := strings.SplitN(annotation, ":", 6)
 	if len(strs) < 5 {

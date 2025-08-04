@@ -59,14 +59,17 @@ type SvsNode struct {
 	notifNode *schema.Node
 }
 
+// Returns a string representation of the SvsNode instance as "svs-node".
 func (n *SvsNode) String() string {
 	return "svs-node"
 }
 
+// Returns the receiver as a `schema.NodeImpl` interface, allowing the `SvsNode` to be used as a generic node implementation.
 func (n *SvsNode) NodeImplTrait() schema.NodeImpl {
 	return n
 }
 
+// Constructs and configures an SVS node with data sequence tracking under `/nodeId/seqNo`, notification handling under `/notif`, and event handlers for synchronization, attachment/detachment, and data suppression.
 func CreateSvsNode(node *schema.Node) schema.NodeImpl {
 	ret := &SvsNode{
 		BaseNodeImpl: schema.BaseNodeImpl{
@@ -102,6 +105,10 @@ func CreateSvsNode(node *schema.Node) schema.NodeImpl {
 	return ret
 }
 
+// Returns the index of the entry in the StateVector with the given name, or -1 if no such entry exists.  
+
+**Explanation**:  
+This function iterates through the `Entries` of the provided `StateVector`, checking each entry's `Name` against the given `name` using the `Equal` method. If a match is found, the corresponding index is returned; otherwise, `-1` is returned after the loop completes. The implementation prioritizes simplicity over efficiency, as noted by the comment.
 func findSvsEntry(v *spec_svs.StateVector, name enc.Name) int {
 	// This is less efficient but enough for a demo.
 	for i, n := range v.Entries {
@@ -112,6 +119,7 @@ func findSvsEntry(v *spec_svs.StateVector, name enc.Name) int {
 	return -1
 }
 
+// Processes an incoming Sync Interest by comparing remote and local state vectors, updating missing data ranges, handling synchronization state transitions, and managing aggregation timers to ensure consistency in the State Vector Sync protocol.
 func (n *SvsNode) onSyncInt(event *schema.Event) any {
 	remoteSv, err := spec_svs.ParseStateVector(enc.NewWireView(event.Content), true)
 	if err != nil {
@@ -204,15 +212,18 @@ func (n *SvsNode) onSyncInt(event *schema.Event) any {
 	return true
 }
 
+// Returns a channel for receiving notifications when data is missing, allowing direct access to missing data events without using the OnMissingData handler.
 func (n *SvsNode) MissingDataChannel() chan MissingData {
 	// Note: DO NOT use with OnMissingData
 	return n.missChan
 }
 
+// Returns the current sequence number associated with this node, typically used to track or order data versions in the network.
 func (n *SvsNode) MySequence() uint64 {
 	return n.selfSeq
 }
 
+// Aggregates a remote state vector into the node's aggregated state vector by updating existing entries with the maximum sequence number or adding new entries if they do not already exist.
 func (n *SvsNode) aggregate(remoteSv *spec_svs.StateVector) {
 	for _, cur := range remoteSv.Entries {
 		li := findSvsEntry(&n.aggSv, cur.Name)
@@ -227,6 +238,7 @@ func (n *SvsNode) aggregate(remoteSv *spec_svs.StateVector) {
 	}
 }
 
+// This function handles the periodic synchronization timer for an SVS node, transitioning from suppression to steady state if necessary, checking local data for updates against the aggregate state vector, and triggering state vector expression while rescheduling the timer for the next interval.
 func (n *SvsNode) onSyncTimer() {
 	n.dataLock.Lock()
 	defer n.dataLock.Unlock()
@@ -251,20 +263,24 @@ func (n *SvsNode) onSyncTimer() {
 	n.cancelSyncTimer = n.timer.Schedule(n.getSyncIntv(), n.onSyncTimer)
 }
 
+// Encodes the local state vector and signals the notification node to request state updates via the "NeedChan" channel.
 func (n *SvsNode) expressStateVec() {
 	n.notifNode.Apply(n.BaseMatching).Call("NeedChan", n.localSv.Encode())
 }
 
+// Returns a randomized synchronization interval by adding a deviation between -1/8 and +1/4 of the base SyncInterval's duration, ensuring asynchronous behavior among nodes.
 func (n *SvsNode) getSyncIntv() time.Duration {
 	dev := rand.Int63n(n.SyncInterval.Nanoseconds()/4) - n.SyncInterval.Nanoseconds()/8
 	return n.SyncInterval + time.Duration(dev)*time.Nanosecond
 }
 
+// Returns a suppression interval with randomized jitter, adding a deviation between -50% and +50% of the original SuppressionInterval's nanoseconds to avoid synchronized behavior among nodes.
 func (n *SvsNode) getAggIntv() time.Duration {
 	dev := rand.Int63n(n.SuppressionInterval.Nanoseconds()) - n.SuppressionInterval.Nanoseconds()/2
 	return n.SuppressionInterval + time.Duration(dev)*time.Nanosecond
 }
 
+// Generates a new signed Data packet with a unique name derived from the node's own prefix and an auto-incremented sequence number, using the provided content and MatchedNode to construct the packet.
 func (n *SvsNode) NewData(mNode schema.MatchedNode, content enc.Wire) enc.Wire {
 	n.dataLock.Lock()
 	defer n.dataLock.Unlock()
@@ -290,6 +306,7 @@ func (n *SvsNode) NewData(mNode schema.MatchedNode, content enc.Wire) enc.Wire {
 	return ret
 }
 
+// Initializes an SVS (State Vector Sync) node by configuring internal state, setting up timers and channels for synchronization, and starting the initial sync process to exchange state vectors with other nodes.
 func (n *SvsNode) onAttach(event *schema.Event) any {
 	if n.ChannelSize == 0 || len(n.SelfName) == 0 ||
 		n.BaseMatching == nil || n.SyncInterval <= 0 || n.SuppressionInterval <= 0 {
@@ -329,6 +346,7 @@ func (n *SvsNode) onAttach(event *schema.Event) any {
 	return nil
 }
 
+// Handles node detachment by canceling synchronization timers, closing communication channels, and signaling termination in a thread-safe manner.
 func (n *SvsNode) onDetach(event *schema.Event) any {
 	n.dataLock.Lock()
 	defer n.dataLock.Unlock()
@@ -339,10 +357,12 @@ func (n *SvsNode) onDetach(event *schema.Event) any {
 	return nil
 }
 
+// This function serves as a placeholder for handling callback operations associated with the SVS node, but its implementation is currently incomplete and raises a TODO panic.
 func (n *SvsNode) callbackRoutine() {
 	panic("TODO: TO BE DONE")
 }
 
+// Constructs a Data packet name by appending a generic name component and a sequence number component to a matched node's base name.
 func (n *SvsNode) GetDataName(mNode schema.MatchedNode, name []byte, seq uint64) enc.Name {
 	ret := make(enc.Name, len(mNode.Name)+2)
 	copy(ret, mNode.Name)
@@ -351,6 +371,7 @@ func (n *SvsNode) GetDataName(mNode schema.MatchedNode, name []byte, seq uint64)
 	return ret
 }
 
+// Casts the SvsNode to the specified target type, returning the node itself if casting to *SvsNode, its base implementation if casting to *schema.BaseNodeImpl, or nil for unsupported types.
 func (n *SvsNode) CastTo(ptr any) any {
 	switch ptr.(type) {
 	case (*SvsNode):
@@ -364,6 +385,7 @@ func (n *SvsNode) CastTo(ptr any) any {
 
 var SvsNodeDesc *schema.NodeImplDesc
 
+// Registers the SvsNode implementation with schema-defined properties (like SyncInterval and ContentType), event handlers (OnAttach/Detach/MissingData), and functions (NewData, GetDataName) for managing NDN data synchronization behavior.
 func init() {
 	SvsNodeDesc = &schema.NodeImplDesc{
 		ClassName: "SvsNode",

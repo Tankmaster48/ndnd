@@ -29,12 +29,14 @@ type memoryStoreNode struct {
 	wire []byte
 }
 
+// Constructs a new in-memory data store with an empty root node for storing NDN data.
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
 		root: &memoryStoreNode{},
 	}
 }
 
+// Retrieves the data associated with the given name from the memory store, returning the newest matching entry if the direct entry is empty and prefix mode is enabled.
 func (s *MemoryStore) Get(name enc.Name, prefix bool) ([]byte, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -48,6 +50,10 @@ func (s *MemoryStore) Get(name enc.Name, prefix bool) ([]byte, error) {
 	return nil, nil
 }
 
+// Stores the provided wire-encoded data under the specified name in the MemoryStore, using an active transaction context if one exists.  
+
+*Example usage context:*  
+This function is typically used to persist data entries in the in-memory storage, ensuring atomic updates when a transaction is in progress.
 func (s *MemoryStore) Put(name enc.Name, wire []byte) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -61,6 +67,7 @@ func (s *MemoryStore) Put(name enc.Name, wire []byte) error {
 	return nil
 }
 
+// Removes the data entry with the exact specified name from the in-memory store, ensuring thread safety with a mutex lock.
 func (s *MemoryStore) Remove(name enc.Name) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -69,6 +76,7 @@ func (s *MemoryStore) Remove(name enc.Name) error {
 	return nil
 }
 
+// Removes all entries with the specified prefix from the memory store in a thread-safe manner.
 func (s *MemoryStore) RemovePrefix(prefix enc.Name) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -77,6 +85,7 @@ func (s *MemoryStore) RemovePrefix(prefix enc.Name) error {
 	return nil
 }
 
+// Removes all entries from the MemoryStore under the given prefix where the component falls lexicographically between first and last (inclusive), using TLV-encoded string comparison.
 func (s *MemoryStore) RemoveFlatRange(prefix enc.Name, first enc.Component, last enc.Component) error {
 	firstKey, lastKey := first.TlvStr(), last.TlvStr()
 	if firstKey > lastKey {
@@ -96,12 +105,14 @@ func (s *MemoryStore) RemoveFlatRange(prefix enc.Name, first enc.Component, last
 	return nil
 }
 
+// "Initiates a transaction on the memory store by acquiring a lock and resetting the transaction context, returning the store instance for subsequent transactional operations."
 func (s *MemoryStore) Begin() (ndn.Store, error) {
 	s.txMutex.Lock()
 	s.tx = &memoryStoreNode{}
 	return s, nil
 }
 
+// Commits the current transaction by merging it into the root data structure and resetting the transaction state.
 func (s *MemoryStore) Commit() error {
 	defer s.txMutex.Unlock()
 	s.mutex.Lock()
@@ -111,12 +122,14 @@ func (s *MemoryStore) Commit() error {
 	return nil
 }
 
+// Rolls back the current transaction, discarding any uncommitted changes and releasing the transaction lock.
 func (s *MemoryStore) Rollback() error {
 	defer s.txMutex.Unlock()
 	s.tx = nil
 	return nil
 }
 
+// Returns the total memory size (in bytes) of all stored Data packets in the MemoryStore by summing the lengths of their wire representations.
 func (s *MemoryStore) MemSize() int {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
@@ -125,6 +138,7 @@ func (s *MemoryStore) MemSize() int {
 	return size
 }
 
+// Returns the deepest node matching the given name by recursively traversing the trie-like structure of name components.
 func (n *memoryStoreNode) find(name enc.Name) *memoryStoreNode {
 	if len(name) == 0 {
 		return n
@@ -142,6 +156,7 @@ func (n *memoryStoreNode) find(name enc.Name) *memoryStoreNode {
 	}
 }
 
+// Returns the newest node in the subtree rooted at `n` by recursively selecting the lexicographically greatest named child until a leaf node is reached.
 func (n *memoryStoreNode) findNewest() *memoryStoreNode {
 	if len(n.children) == 0 {
 		return n
@@ -164,6 +179,7 @@ func (n *memoryStoreNode) findNewest() *memoryStoreNode {
 	return known
 }
 
+// Inserts the provided wire-encoded data into a memory-based trie structure, creating or traversing nodes hierarchically according to the components of the given name.
 func (n *memoryStoreNode) insert(name enc.Name, wire []byte) {
 	if len(name) == 0 {
 		n.wire = wire
@@ -184,6 +200,7 @@ func (n *memoryStoreNode) insert(name enc.Name, wire []byte) {
 	}
 }
 
+// Removes the specified name (or subtree if prefix is true) from the trie-like memory store node and returns whether the node should be pruned by its parent.
 func (n *memoryStoreNode) remove(name enc.Name, prefix bool) bool {
 	// return value is if the parent should prune this child
 	if len(name) == 0 {
@@ -209,6 +226,7 @@ func (n *memoryStoreNode) remove(name enc.Name, prefix bool) bool {
 	return n.wire == nil && len(n.children) == 0
 }
 
+// Merges the transaction node's wire data and child nodes into the current node, recursively combining shared children and preserving existing structure where possible.
 func (n *memoryStoreNode) merge(tx *memoryStoreNode) {
 	if tx.wire != nil {
 		n.wire = tx.wire
@@ -227,6 +245,7 @@ func (n *memoryStoreNode) merge(tx *memoryStoreNode) {
 	}
 }
 
+// Performs a depth-first traversal of the node's subtree, recursively applying the provided function to the node and all its descendants.
 func (n *memoryStoreNode) walk(f func(*memoryStoreNode)) {
 	f(n)
 	for _, child := range n.children {

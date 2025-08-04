@@ -342,6 +342,7 @@ func (dv *Router) destroyFaces() {
 	}
 }
 
+// Initializes the router's prefix table with subscription tracking, synchronization via SVS (Synchronization with Versioning and Sync) for group updates, and automatic publication of changes through a configured client.
 func (dv *Router) createPrefixTable() {
 	// Subscription list
 	dv.pfxSubs = make(map[uint64]enc.Name)

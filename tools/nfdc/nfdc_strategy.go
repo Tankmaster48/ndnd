@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Fetches and prints the list of configured strategy choices (prefix-to-strategy mappings) from the NDN network's status dataset.
 func (t *Tool) ExecStrategyList(_ *cobra.Command, args []string) {
 	t.Start()
 	defer t.Stop()

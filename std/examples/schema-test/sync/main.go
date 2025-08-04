@@ -70,6 +70,7 @@ const SchemaJson = `{
   ]
 }`
 
+// Implements an NDN synchronization application that periodically publishes sequenced data under a schema-registered prefix, handles missing data requests via sequence number ranges, and uses HMAC authentication for secure data exchange.
 func main() {
 	// Note: remember to ` nfdc strategy set /example/schema /localhost/nfd/strategy/multicast `
 	nodeId := fmt.Sprintf("node-%d", rand.Int())

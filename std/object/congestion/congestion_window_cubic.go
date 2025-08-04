@@ -50,10 +50,12 @@ func NewCUBICCongestionWindow(cwnd int, rttEstimator *RTTEstimator) *CUBICConges
 	}
 }
 
+// Implements the fmt.Stringer interface by returning the identifier string "cubic-congestion-window" for this congestion control algorithm type.
 func (cw *CUBICCongestionWindow) String() string {
 	return "cubic-congestion-window"
 }
 
+// Returns the current congestion window size as an integer, safely read using a read lock to prevent race conditions in concurrent environments.
 func (cw *CUBICCongestionWindow) Size() int {
 	cw.mutex.RLock()
 	defer cw.mutex.RUnlock()
@@ -94,6 +96,7 @@ func (cw *CUBICCongestionWindow) CubicUpdate() {
 	log.Debug(cw, "Cubic increment", "wCubic", wCubic, "window", cw.window)
 }
 
+// Increments the congestion window using CUBIC's algorithm, applying fast growth during slow start (when window < ssthresh) or cubic-based adjustment during congestion avoidance, ensuring thread-safety with a mutex.
 func (cw *CUBICCongestionWindow) IncreaseWindow() {
 	cw.mutex.Lock()
 
@@ -110,6 +113,7 @@ func (cw *CUBICCongestionWindow) IncreaseWindow() {
 	log.Debug(cw, "Window size changes", "window", cw.window)
 }
 
+// Decreases the congestion window after detecting packet loss, applying CUBIC's multiplicative decrease and faster convergence logic to adjust window size and thresholds for efficient network congestion control.
 func (cw *CUBICCongestionWindow) DecreaseWindow() {
 	cw.mutex.Lock()
 
@@ -134,6 +138,7 @@ func (cw *CUBICCongestionWindow) DecreaseWindow() {
 	log.Debug(cw, "Window size changes", "window", cw.window)
 }
 
+// Handles congestion signals by adjusting the congestion window size: increases the window upon receiving a data signal (SigData) and decreases it upon detecting packet loss (SigLoss) or network congestion (SigCongest).
 func (cw *CUBICCongestionWindow) HandleSignal(signal CongestionSignal) {
 	switch signal {
 	case SigData:

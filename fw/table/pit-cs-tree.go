@@ -82,10 +82,12 @@ func NewPitCS(onExpiration OnPitExpiration) *PitCsTree {
 	return pitCs
 }
 
+// Returns a channel that receives periodic time ticks used for updating the PIT/CS tree.
 func (p *PitCsTree) UpdateTicker() <-chan time.Time {
 	return p.updateTicker.C
 }
 
+// Processes and removes expired entries from the PIT (Pending Interest Table) by checking the expiry queue, invoking expiration handling, and cleaning up associated interests.
 func (p *PitCsTree) Update() {
 	for p.pitExpiryQueue.Len() > 0 && p.pitExpiryQueue.PeekPriority() <= time.Now().UnixNano() {
 		entry := p.pitExpiryQueue.Pop()
@@ -95,6 +97,9 @@ func (p *PitCsTree) Update() {
 	}
 }
 
+// Updates the PIT entry's expiration time in the priority queue, adding it if new or adjusting its position if already present.  
+
+**Example**: Adds or updates a PIT entry's expiration in the priority queue to ensure timely removal.
 func (p *PitCsTree) updatePitExpiry(pitEntry PitEntry) {
 	e := pitEntry.(*nameTreePitEntry)
 	if e.pqItem == nil {
@@ -104,6 +109,7 @@ func (p *PitCsTree) updatePitExpiry(pitEntry PitEntry) {
 	}
 }
 
+// Returns the PitCsTable associated with this name tree PIT entry.
 func (e *nameTreePitEntry) PitCs() PitCsTable {
 	return e.pitCsTable
 }
@@ -222,6 +228,7 @@ func (p *PitCsTree) FindInterestPrefixMatchByDataEnc(data *defn.FwData, token *u
 	return p.findInterestPrefixMatchByNameEnc(data.NameV)
 }
 
+// Finds all PIT entries that match the given name via prefix in the PIT/CS tree.
 func (p *PitCsTree) findInterestPrefixMatchByNameEnc(name enc.Name) []PitEntry {
 	matching := make([]PitEntry, 0)
 	dataNameLen := len(name)
@@ -255,6 +262,7 @@ func (p *PitCsTree) IsCsServing() bool {
 	return CfgCsServe()
 }
 
+// Retrieves the component at the specified index (positive or negative) from the name, where negative indices count from the end (e.g., -1 is the last component), returning an empty component if out of bounds.
 func At(n enc.Name, index int) enc.Component {
 	if index < -len(n) || index >= len(n) {
 		return enc.Component{}
@@ -266,6 +274,7 @@ func At(n enc.Name, index int) enc.Component {
 	return n[index]
 }
 
+// Finds the exact matching tree node for the given name by recursively traversing children using hashed name components at each depth.
 func (p *pitCsTreeNode) findExactMatchEntryEnc(name enc.Name) *pitCsTreeNode {
 	if len(name) > p.depth {
 		if child, ok := p.children[At(name, p.depth).Hash()]; ok {
@@ -277,6 +286,7 @@ func (p *pitCsTreeNode) findExactMatchEntryEnc(name enc.Name) *pitCsTreeNode {
 	return nil
 }
 
+// Finds the deepest pitCsTreeNode that matches the longest prefix of the given name by recursively traversing the trie structure based on hashed name components.
 func (p *pitCsTreeNode) findLongestPrefixEntryEnc(name enc.Name) *pitCsTreeNode {
 	if len(name) > p.depth {
 		if child, ok := p.children[At(name, p.depth).Hash()]; ok {
@@ -286,6 +296,7 @@ func (p *pitCsTreeNode) findLongestPrefixEntryEnc(name enc.Name) *pitCsTreeNode 
 	return p
 }
 
+// Constructs a path in the PIT/CS trie for the given encoded name, creating and linking intermediate nodes as needed to represent each component of the name hierarchy.
 func (p *pitCsTreeNode) fillTreeToPrefixEnc(name enc.Name) *pitCsTreeNode {
 	entry := p.findLongestPrefixEntryEnc(name)
 
@@ -304,10 +315,12 @@ func (p *pitCsTreeNode) fillTreeToPrefixEnc(name enc.Name) *pitCsTreeNode {
 	return entry
 }
 
+// Returns the number of children in the PIT/CS tree node.
 func (p *pitCsTreeNode) getChildrenCount() int {
 	return len(p.children)
 }
 
+// Prunes empty nodes from the tree structure by removing them from their parent and returning them to a pool, starting from the current node and traversing upward until a non-empty node is encountered.
 func (p *pitCsTreeNode) pruneIfEmpty() {
 	for curNode := p; curNode.parent != nil && curNode.getChildrenCount() == 0 &&
 		len(curNode.pitEntries) == 0 && curNode.csEntry == nil; curNode = curNode.parent {

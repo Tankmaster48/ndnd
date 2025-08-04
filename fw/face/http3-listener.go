@@ -27,10 +27,12 @@ type HTTP3ListenerConfig struct {
 	TLSKey  string
 }
 
+// Constructs the HTTP3 listener address string by joining the bind address and port in the format "host:port".
 func (cfg HTTP3ListenerConfig) addr() string {
 	return net.JoinHostPort(cfg.Bind, strconv.FormatUint(uint64(cfg.Port), 10))
 }
 
+// Constructs a URL with the HTTPS scheme and the configured listener address as the host.
 func (cfg HTTP3ListenerConfig) URL() *url.URL {
 	u := &url.URL{
 		Scheme: "https",
@@ -39,6 +41,7 @@ func (cfg HTTP3ListenerConfig) URL() *url.URL {
 	return u
 }
 
+// Returns a string representation of the HTTP3ListenerConfig in the format "http3-listener (url=...)", where ... is the URL returned by the config's URL() method.
 func (cfg HTTP3ListenerConfig) String() string {
 	return fmt.Sprintf("http3-listener (url=%s)", cfg.URL())
 }
@@ -49,6 +52,7 @@ type HTTP3Listener struct {
 	server *webtransport.Server
 }
 
+// Constructs an HTTP/3 WebTransport listener configured with TLS certificates, QUIC settings, and an NDN endpoint handler for "/ndn".
 func NewHTTP3Listener(cfg HTTP3ListenerConfig) (*HTTP3Listener, error) {
 	l := &HTTP3Listener{}
 
@@ -82,10 +86,12 @@ func NewHTTP3Listener(cfg HTTP3ListenerConfig) (*HTTP3Listener, error) {
 	return l, nil
 }
 
+// Returns a string representation of the HTTP/3 listener, which is "HTTP/3 listener".
 func (l *HTTP3Listener) String() string {
 	return "HTTP/3 listener"
 }
 
+// Starts the HTTP/3 listener and logs a fatal error if it fails to start.
 func (l *HTTP3Listener) Run() {
 	e := l.server.ListenAndServe()
 	if !errors.Is(e, http.ErrServerClosed) {
@@ -93,6 +99,7 @@ func (l *HTTP3Listener) Run() {
 	}
 }
 
+// Handles an incoming HTTP/3 WebTransport connection by upgrading the request, establishing a bidirectional transport with remote/local addresses, and initializing an NDNLPLinkService with fragmentation enabled to facilitate Named Data Networking (NDN) communication over the WebTransport session.
 func (l *HTTP3Listener) handler(rw http.ResponseWriter, r *http.Request) {
 	c, e := l.server.Upgrade(rw, r)
 	if e != nil {

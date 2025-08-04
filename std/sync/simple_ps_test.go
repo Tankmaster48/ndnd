@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This function tests a hierarchical name-based publisher-subscriber system, verifying subscription matching (including prefix and root subscriptions), publication routing, and unsubscription behavior for NDN-like name patterns.
 func TestSimplePs(t *testing.T) {
 	tu.SetT(t)
 

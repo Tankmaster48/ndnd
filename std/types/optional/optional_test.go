@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// **Description:**  
+Tests an optional value container's functionality for holding a value or being empty, including methods to check if a value is present, retrieve it with a presence flag, unwrap it (with panic if empty), or return a default value when empty.
 func TestOptional(t *testing.T) {
 	option := optional.Some[int](42)
 	require.True(t, option.IsSet())

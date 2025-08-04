@@ -16,6 +16,7 @@ import (
 
 type CatChunks struct{}
 
+// Constructs a Cobra command for retrieving NDN data under a specified name prefix and writing the content to stdout.
 func CmdCatChunks() *cobra.Command {
 	cc := CatChunks{}
 
@@ -31,10 +32,12 @@ The object contents are written to stdout on success.`,
 	}
 }
 
+// Returns the string representation "cat" for the CatChunks object.
 func (cc *CatChunks) String() string {
 	return "cat"
 }
 
+// Fetches an NDN object from the given name, streams its content to stdout, and outputs fetch statistics such as byte count, time taken, and throughput.
 func (cc *CatChunks) run(_ *cobra.Command, args []string) {
 	name, err := enc.NameFromStr(args[0])
 	if err != nil {

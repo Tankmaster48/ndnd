@@ -26,10 +26,12 @@ func ConvIntPtr[A, B constraints.Integer](a *A) *B {
 	}
 }
 
+// Converts a time.Time to a 64-bit unsigned integer representing the number of milliseconds since the Unix epoch.
 func MakeTimestamp(t time.Time) uint64 {
 	return uint64(t.UnixNano() / int64(time.Millisecond))
 }
 
+// Converts a byte slice nonce into a 32-bit unsigned integer by interpreting up to the first four bytes as a big-endian value, discarding or zero-padding as necessary.
 func ConvertNonce(nonce []byte) (ret optional.Optional[uint32]) {
 	x := uint32(0)
 	for _, b := range nonce {

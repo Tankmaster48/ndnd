@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Returns a pointer to the provided uint64 value.
 func TestIdPtr(t *testing.T) {
 	tu.SetT(t)
 
@@ -16,6 +17,8 @@ func TestIdPtr(t *testing.T) {
 	require.Equal(t, uint64(42), *p)
 }
 
+// **Function Description:**  
+Converts a UTC time to a 64-bit unsigned integer representing the number of milliseconds since the Unix epoch (January 1, 1970).
 func TestMakeTimestamp(t *testing.T) {
 	tu.SetT(t)
 
@@ -23,6 +26,7 @@ func TestMakeTimestamp(t *testing.T) {
 	require.Equal(t, uint64(1609459200000), utils.MakeTimestamp(date))
 }
 
+// Converts a 4-byte big-endian byte slice representing a nonce into its corresponding uint32 value.
 func TestConvertNonce(t *testing.T) {
 	tu.SetT(t)
 
@@ -35,6 +39,7 @@ func TestConvertNonce(t *testing.T) {
 	require.Equal(t, uint32(0x421ce14b), val.Unwrap())
 }
 
+// Verifies if two slices are header-equal by checking if they share the same underlying array and have identical length and capacity.
 func TestHeaderEqual(t *testing.T) {
 	tu.SetT(t)
 

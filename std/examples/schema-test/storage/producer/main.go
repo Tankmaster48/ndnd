@@ -48,6 +48,7 @@ const SchemaJson = `{
   ]
 }`
 
+// Initializes an NDN producer application using a predefined schema to generate and serve timestamped data packets under the /example/schema/storageApp prefix, with automatic signal handling for graceful shutdown.
 func main() {
 	// Setup schema tree
 	tree := schema.CreateFromJson(SchemaJson, map[string]any{

@@ -13,10 +13,12 @@ type ChallengeEmail struct {
 	CodeCallback func(status string) string
 }
 
+// This function returns the constant string "email" as the identifier for the ChallengeEmail type.
 func (*ChallengeEmail) Name() string {
 	return KwEmail
 }
 
+// Handles the email-based challenge authentication flow by returning initial email parameters or a verification code based on the challenge status.
 func (c *ChallengeEmail) Request(input ParamMap, status optional.Optional[string]) (ParamMap, error) {
 	// Validate challenge configuration
 	if len(c.Email) == 0 || c.CodeCallback == nil {

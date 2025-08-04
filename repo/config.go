@@ -22,6 +22,7 @@ type Config struct {
 	NameN enc.Name
 }
 
+// Parses the repository name into a structured format and ensures the storage directory exists, creating it if necessary, for a valid configuration setup.
 func (c *Config) Parse() (err error) {
 	c.NameN, err = enc.NameFromStr(c.Name)
 	if err != nil || len(c.NameN) == 0 {
@@ -43,6 +44,7 @@ func (c *Config) Parse() (err error) {
 	return nil
 }
 
+// Converts the configuration's trust anchor strings into enc.Name objects, panicking if any name is invalid.
 func (c *Config) TrustAnchorNames() []enc.Name {
 	res := make([]enc.Name, len(c.TrustAnchors))
 	for i, ta := range c.TrustAnchors {
@@ -55,6 +57,7 @@ func (c *Config) TrustAnchorNames() []enc.Name {
 	return res
 }
 
+// Returns a default configuration with empty name and storage directory, requiring user modification for valid use.
 func DefaultConfig() *Config {
 	return &Config{
 		Name:       "", // invalid

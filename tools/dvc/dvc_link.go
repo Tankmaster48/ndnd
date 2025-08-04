@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Registers a permanent route in the NDN router's RIB with a protocol-specific prefix (`/localhop/<network>/DV/ADS/ACT`) for distance-vector routing, using the specified face.
 func (t *Tool) RunDvLinkCreate(cmd *cobra.Command, args []string) {
 	t.Start()
 	defer t.Stop()
@@ -34,6 +35,7 @@ func (t *Tool) RunDvLinkCreate(cmd *cobra.Command, args []string) {
 	}, []string{})
 }
 
+// Destroys an NDN face specified by the given face ID or URI using the nfdc tool.
 func (t *Tool) RunDvLinkDestroy(cmd *cobra.Command, args []string) {
 	// just destroy the face assuming we created it
 	new(nfdc.Tool).ExecCmd(cmd, "faces", "destroy", []string{

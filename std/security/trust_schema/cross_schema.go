@@ -25,6 +25,7 @@ type SignCrossSchemaArgs struct {
 	Store ndn.Store
 }
 
+// Signs a cross schema Data packet with specified validity period, ensuring the name includes a version component and a single segment, and optionally stores the result.
 func SignCrossSchema(args SignCrossSchemaArgs) (enc.Wire, error) {
 	// Check all parameters
 	if args.Signer == nil || args.Name == nil {
@@ -71,6 +72,7 @@ func SignCrossSchema(args SignCrossSchemaArgs) (enc.Wire, error) {
 	return cs.Wire, nil
 }
 
+// The Match function determines whether the given data and certificate names conform to the schema rules defined in CrossSchemaContent by checking if the certificate name is a valid prefix or derived from the data name according to the specified rules.
 func (cross *CrossSchemaContent) Match(dataName enc.Name, certName enc.Name) bool {
 	for _, rule := range cross.SimpleSchemaRules {
 		if rule.NamePrefix == nil || rule.KeyLocator == nil || rule.KeyLocator.Name == nil {

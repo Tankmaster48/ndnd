@@ -33,6 +33,7 @@ type PrefixNextHop struct {
 	Cost uint64
 }
 
+// Constructs a new PrefixTable initialized with the provided configuration and publish function, setting up an empty routers map and assigning the 'me' field to the router specified by the configuration's RouterName.
 func NewPrefixTable(config *config.Config, publish func(enc.Wire)) *PrefixTable {
 	pt := &PrefixTable{
 		config:  config,
@@ -44,10 +45,14 @@ func NewPrefixTable(config *config.Config, publish func(enc.Wire)) *PrefixTable 
 	return pt
 }
 
+// Returns the string representation of the PrefixTable as "dv-prefix".  
+
+This function implements the `String()` method for the `PrefixTable` type, returning the fixed string "dv-prefix" to represent the object.
 func (pt *PrefixTable) String() string {
 	return "dv-prefix"
 }
 
+// Returns the router associated with the specified name, creating a new router with an empty `Prefixes` map if it does not exist.
 func (pt *PrefixTable) GetRouter(name enc.Name) *PrefixTableRouter {
 	hash := name.Hash()
 	router := pt.routers[hash]
@@ -60,6 +65,7 @@ func (pt *PrefixTable) GetRouter(name enc.Name) *PrefixTableRouter {
 	return router
 }
 
+// Resets the prefix table by clearing all stored prefixes and publishing a network-wide reset operation that designates the current router as the exit point for the affected prefixes.
 func (pt *PrefixTable) Reset() {
 	log.Info(pt, "Reset table")
 	clear(pt.me.Prefixes)
@@ -71,6 +77,7 @@ func (pt *PrefixTable) Reset() {
 	pt.publish(op.Encode())
 }
 
+// Announces a prefix on a specific face with a given cost, updating the prefix table's entry and publishing the updated entry if the computed cost changes.
 func (pt *PrefixTable) Announce(name enc.Name, face uint64, cost uint64) {
 	log.Info(pt, "Local announce", "name", name, "face", face, "cost", cost)
 	hash := name.TlvStr()
@@ -110,6 +117,7 @@ func (pt *PrefixTable) Announce(name enc.Name, face uint64, cost uint64) {
 	}
 }
 
+// Withdraws a prefix from a specific face by removing the face from the prefix's next hops and republishes the prefix entry if its cost changes as a result.
 func (pt *PrefixTable) Withdraw(name enc.Name, face uint64) {
 	log.Info(pt, "Local withdraw", "name", name, "face", face)
 	hash := name.TlvStr()
@@ -201,6 +209,7 @@ func (pt *PrefixTable) Apply(wire enc.Wire) (dirty bool) {
 	return dirty
 }
 
+// Generates an encoded prefix operation list snapshot containing the exit router and all registered prefixes with their associated costs, resetting the target's state upon application.
 func (pt *PrefixTable) Snap() enc.Wire {
 	snap := tlv.PrefixOpList{
 		ExitRouter:    &tlv.Destination{Name: pt.config.RouterName()},
@@ -218,6 +227,7 @@ func (pt *PrefixTable) Snap() enc.Wire {
 	return snap.Encode()
 }
 
+// Computes the minimum cost among all next hops for the prefix entry and returns true if the entry's stored cost is updated as a result.
 func (e *PrefixEntry) computeCost() (dirty bool) {
 	cost := ^uint64(0)
 	for _, nh := range e.NextHops {

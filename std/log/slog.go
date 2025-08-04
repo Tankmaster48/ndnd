@@ -18,6 +18,7 @@ type Tag interface {
 	String() string
 }
 
+// Constructs a Logger that writes text-formatted log entries to the specified io.Writer, configured for trace-level logging with custom attribute handling.
 func NewText(w io.Writer) *Logger {
 	return &Logger{
 		slog: slog.New(slog.NewTextHandler(w, &slog.HandlerOptions{
@@ -28,6 +29,7 @@ func NewText(w io.Writer) *Logger {
 	}
 }
 
+// Constructs a Logger that writes JSON-formatted logs to the provided io.Writer, with the underlying handler configured for Trace-level logging and custom attribute replacement, while the Logger's active level is set to Info.
 func NewJson(w io.Writer) *Logger {
 	return &Logger{
 		slog: slog.New(slog.NewJSONHandler(w, &slog.HandlerOptions{
@@ -118,6 +120,7 @@ func (l *Logger) Fatal(t Tag, msg string, v ...any) {
 	l.log(t, msg, LevelFatal, v...)
 }
 
+// Replaces the value of the log level attribute with its string representation for logging purposes.
 func replaceAttr(groups []string, a slog.Attr) slog.Attr {
 	if a.Key == slog.LevelKey {
 		level := a.Value.Any().(slog.Level)

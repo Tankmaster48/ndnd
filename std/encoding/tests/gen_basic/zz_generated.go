@@ -18,6 +18,7 @@ type FakeMetaInfoEncoder struct {
 type FakeMetaInfoParsingContext struct {
 }
 
+// Calculates the total length required to encode the FakeMetaInfo fields (Number, Time, and optional Binary) in a TLV format, including type markers and variable-length encodings, and sets the result on the encoder.
 func (encoder *FakeMetaInfoEncoder) Init(value *FakeMetaInfo) {
 
 	l := uint(0)
@@ -34,10 +35,12 @@ func (encoder *FakeMetaInfoEncoder) Init(value *FakeMetaInfo) {
 
 }
 
+// Initializes the fake metadata parsing context to a default state, preparing it for test scenarios involving metadata parsing operations.
 func (context *FakeMetaInfoParsingContext) Init() {
 
 }
 
+// Encodes a FakeMetaInfo struct into a TLV (Type-Length-Value) binary format in the provided buffer, including the Number (type 24), Time in milliseconds (type 25), and optional Binary data (type 26) fields.
 func (encoder *FakeMetaInfoEncoder) EncodeInto(value *FakeMetaInfo, buf []byte) {
 
 	pos := uint(0)
@@ -61,6 +64,7 @@ func (encoder *FakeMetaInfoEncoder) EncodeInto(value *FakeMetaInfo, buf []byte) 
 	}
 }
 
+// Encodes a `FakeMetaInfo` object into a byte slice using the encoder's `EncodeInto` method and wraps the result in an `enc.Wire` structure for transmission or storage.
 func (encoder *FakeMetaInfoEncoder) Encode(value *FakeMetaInfo) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -71,6 +75,7 @@ func (encoder *FakeMetaInfoEncoder) Encode(value *FakeMetaInfo) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded MetaInfo data into a FakeMetaInfo struct, requiring Number and Time fields, with optional Binary data and configurable handling of critical fields.
 func (context *FakeMetaInfoParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FakeMetaInfo, error) {
 
 	var handled_Number bool = false
@@ -186,16 +191,19 @@ func (context *FakeMetaInfoParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the FakeMetaInfo into its wire format using a FakeMetaInfoEncoder for transmission or storage.
 func (value *FakeMetaInfo) Encode() enc.Wire {
 	encoder := FakeMetaInfoEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the concatenated byte slice of the encoded metadata information.
 func (value *FakeMetaInfo) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses encoded metadata into a FakeMetaInfo instance from a WireView, with an option to ignore critical fields during parsing.
 func ParseFakeMetaInfo(reader enc.WireView, ignoreCritical bool) (*FakeMetaInfo, error) {
 	context := FakeMetaInfoParsingContext{}
 	context.Init()
@@ -209,6 +217,7 @@ type OptFieldEncoder struct {
 type OptFieldParsingContext struct {
 }
 
+// Calculates the total encoded length for an optional field encoder by summing the TLV-encoded sizes of present fields (Number, Time, Binary, Bool) in the provided OptField.
 func (encoder *OptFieldEncoder) Init(value *OptField) {
 
 	l := uint(0)
@@ -233,10 +242,12 @@ func (encoder *OptFieldEncoder) Init(value *OptField) {
 
 }
 
+// Initializes the optional field parsing context, intended to be overridden by subclasses for custom setup.
 func (context *OptFieldParsingContext) Init() {
 
 }
 
+// Encodes an optional field (OptField) into a binary buffer using a TLV (Type-Length-Value) format, handling numeric, time, binary, and boolean values with distinct type codes (24, 25, 26, 48) and variable-length encoding.
 func (encoder *OptFieldEncoder) EncodeInto(value *OptField, buf []byte) {
 
 	pos := uint(0)
@@ -272,6 +283,7 @@ func (encoder *OptFieldEncoder) EncodeInto(value *OptField, buf []byte) {
 	}
 }
 
+// Encodes the provided optional field into its wire format byte slice using the encoder's specified length and returns it wrapped in a Wire structure.
 func (encoder *OptFieldEncoder) Encode(value *OptField) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -282,6 +294,7 @@ func (encoder *OptFieldEncoder) Encode(value *OptField) enc.Wire {
 	return wire
 }
 
+// Parses a wire-encoded TLV structure into an OptField, handling Number (type 24), Time (type 25), Binary (type 26), and Bool (type 48) fields while respecting criticality and defaulting unset fields.
 func (context *OptFieldParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*OptField, error) {
 
 	var handled_Number bool = false
@@ -413,16 +426,19 @@ func (context *OptFieldParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the OptField value into a wire-format representation using an OptFieldEncoder for serialization.
 func (value *OptField) Encode() enc.Wire {
 	encoder := OptFieldEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the optional field by encoding its value and concatenating the resulting byte slices.
 func (value *OptField) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a TLV-encoded optional field from the provided wire format reader, using a parsing context and optionally ignoring critical fields if specified.
 func ParseOptField(reader enc.WireView, ignoreCritical bool) (*OptField, error) {
 	context := OptFieldParsingContext{}
 	context.Init()
@@ -439,6 +455,7 @@ type WireNameFieldEncoder struct {
 type WireNameFieldParsingContext struct {
 }
 
+// Initializes the WireNameFieldEncoder by calculating the total encoded length of the provided WireNameField, summing the TLV-encoded sizes of Wire (raw bytes) and Name (NDN name components).
 func (encoder *WireNameFieldEncoder) Init(value *WireNameField) {
 	if value.Wire != nil {
 		encoder.Wire_length = 0
@@ -468,10 +485,12 @@ func (encoder *WireNameFieldEncoder) Init(value *WireNameField) {
 
 }
 
+// Initializes the wire name field parsing context, currently serving as a placeholder with no implementation.
 func (context *WireNameFieldParsingContext) Init() {
 
 }
 
+// Encodes a WireNameField into a binary buffer using TLV (Type-Length-Value) format, writing encoded Wire and Name components sequentially with type tags 1 and 2 respectively when non-nil.
 func (encoder *WireNameFieldEncoder) EncodeInto(value *WireNameField, buf []byte) {
 
 	pos := uint(0)
@@ -495,6 +514,7 @@ func (encoder *WireNameFieldEncoder) EncodeInto(value *WireNameField, buf []byte
 	}
 }
 
+// Encodes the provided WireNameField into a byte slice of the encoder's specified length, returning a single-element Wire slice containing the encoded bytes.
 func (encoder *WireNameFieldEncoder) Encode(value *WireNameField) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -505,6 +525,7 @@ func (encoder *WireNameFieldEncoder) Encode(value *WireNameField) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded name field data into a `WireNameField` struct, extracting either raw wire format bytes or parsed Name components, with optional support for ignoring critical unrecognized fields.
 func (context *WireNameFieldParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*WireNameField, error) {
 
 	var handled_Wire bool = false
@@ -580,16 +601,19 @@ func (context *WireNameFieldParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the WireNameField into a binary wire format for use in NDN protocol messages.
 func (value *WireNameField) Encode() enc.Wire {
 	encoder := WireNameFieldEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the wire-encoded byte slice representation of the name field by concatenating its encoded components.
 func (value *WireNameField) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded name field into a WireNameField structure, optionally ignoring critical TLV elements based on the ignoreCritical flag.
 func ParseWireNameField(reader enc.WireView, ignoreCritical bool) (*WireNameField, error) {
 	context := WireNameFieldParsingContext{}
 	context.Init()
@@ -616,6 +640,7 @@ type MarkersParsingContext struct {
 	endMarker int
 }
 
+// Initializes the encoder by calculating the total encoded length of the Markers structure, including TLV-encoded Wire and Name fields, and sets start/end markers for subsequent encoding operations.
 func (encoder *MarkersEncoder) Init(value *Markers) {
 
 	if value.Wire != nil {
@@ -650,10 +675,12 @@ func (encoder *MarkersEncoder) Init(value *Markers) {
 
 }
 
+// Initializes the parsing context, but currently does nothing as the implementation is empty.
 func (context *MarkersParsingContext) Init() {
 
 }
 
+// Encodes the provided *Markers value into the given byte buffer using a TLV (Type-Length-Value) format, with separate encoding for Wire and Name fields, marking their start and end positions in the encoder.
 func (encoder *MarkersEncoder) EncodeInto(value *Markers, buf []byte) {
 
 	pos := uint(0)
@@ -680,6 +707,7 @@ func (encoder *MarkersEncoder) EncodeInto(value *Markers, buf []byte) {
 	encoder.endMarker_pos = int(pos)
 }
 
+// Encodes the provided *Markers value into a byte slice of the encoder's predefined length and returns it as a single-element Wire structure.
 func (encoder *MarkersEncoder) Encode(value *Markers) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -690,6 +718,7 @@ func (encoder *MarkersEncoder) Encode(value *Markers) enc.Wire {
 	return wire
 }
 
+// Parses binary wire format into a Markers structure, handling specific fields (Wire, Name) and tracking start/end positions in context, with optional critical field tolerance.
 func (context *MarkersParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Markers, error) {
 
 	var handled_startMarker bool = false
@@ -807,6 +836,7 @@ type NoCopyStructEncoder struct {
 type NoCopyStructParsingContext struct {
 }
 
+// Initializes a NoCopyStructEncoder with the provided NoCopyStruct value, calculating the total encoded length and constructing a wire layout plan for efficient encoding of the struct's fields (Wire1, Number, and Wire2) without data copying.
 func (encoder *NoCopyStructEncoder) Init(value *NoCopyStruct) {
 	if value.Wire1 != nil {
 		encoder.Wire1_length = 0
@@ -867,10 +897,12 @@ func (encoder *NoCopyStructEncoder) Init(value *NoCopyStruct) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the NoCopyStructParsingContext for parsing operations that avoid data copying.
 func (context *NoCopyStructParsingContext) Init() {
 
 }
 
+// Encodes a NoCopyStruct into a wire format by sequentially writing type markers, encoded lengths, and field values (Wire1, Number, Wire2) into a pre-allocated slice of byte buffers, avoiding data copying where possible.
 func (encoder *NoCopyStructEncoder) EncodeInto(value *NoCopyStruct, wire enc.Wire) {
 
 	wireIdx := 0
@@ -929,6 +961,7 @@ func (encoder *NoCopyStructEncoder) EncodeInto(value *NoCopyStruct, wire enc.Wir
 	}
 }
 
+// Encodes a NoCopyStruct into a non-copying wire representation by pre-allocating a byte slice according to the encoder's wirePlan and populating it with the struct's data.
 func (encoder *NoCopyStructEncoder) Encode(value *NoCopyStruct) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -948,6 +981,7 @@ func (encoder *NoCopyStructEncoder) Encode(value *NoCopyStruct) enc.Wire {
 	return wire
 }
 
+// Parses a binary wire-format structure into a NoCopyStruct, handling required 'Number' (as uint64) and optional 'Wire1/Wire2' fields, with critical-type validation controlled by ignoreCritical.
 func (context *NoCopyStructParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*NoCopyStruct, error) {
 
 	var handled_Wire1 bool = false
@@ -1045,16 +1079,19 @@ func (context *NoCopyStructParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the NoCopyStruct value into its wire representation using the NoCopyStructEncoder.
 func (value *NoCopyStruct) Encode() enc.Wire {
 	encoder := NoCopyStructEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the concatenated byte slice representation of the encoded NoCopyStruct.
 func (value *NoCopyStruct) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a NoCopyStruct from the provided WireView reader, using the specified flag to determine whether to ignore critical fields during parsing.
 func ParseNoCopyStruct(reader enc.WireView, ignoreCritical bool) (*NoCopyStruct, error) {
 	context := NoCopyStructParsingContext{}
 	context.Init()
@@ -1068,6 +1105,7 @@ type StrFieldEncoder struct {
 type StrFieldParsingContext struct {
 }
 
+// Calculates the total encoded length of a StrField, including mandatory Str1 and optional Str2, and sets it on the encoder for subsequent serialization.
 func (encoder *StrFieldEncoder) Init(value *StrField) {
 
 	l := uint(0)
@@ -1083,10 +1121,12 @@ func (encoder *StrFieldEncoder) Init(value *StrField) {
 
 }
 
+// Initializes the string field parsing context with default settings.
 func (context *StrFieldParsingContext) Init() {
 
 }
 
+// Encodes a StrField struct into a binary buffer using a TLV (Type-Length-Value) format, where Str1 is required (tag 1) and Str2 is optional (tag 2) with presence indicated by inclusion.
 func (encoder *StrFieldEncoder) EncodeInto(value *StrField, buf []byte) {
 
 	pos := uint(0)
@@ -1105,6 +1145,7 @@ func (encoder *StrFieldEncoder) EncodeInto(value *StrField, buf []byte) {
 	}
 }
 
+// Encodes a string field into a byte slice of the specified length, returning it as a wire structure.
 func (encoder *StrFieldEncoder) Encode(value *StrField) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1115,6 +1156,7 @@ func (encoder *StrFieldEncoder) Encode(value *StrField) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded StrField from the provided WireView reader, handling required fields Str1 (type 1) and optional Str2 (type 2), with critical field validation controlled by ignoreCritical.
 func (context *StrFieldParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*StrField, error) {
 
 	var handled_Str1 bool = false
@@ -1201,16 +1243,19 @@ func (context *StrFieldParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the string field value into a wire format using a StrFieldEncoder.
 func (value *StrField) Encode() enc.Wire {
 	encoder := StrFieldEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// "Returns the byte representation of the string field by encoding its value and concatenating the resulting byte slices."
 func (value *StrField) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a string field from wire-format data, with an option to ignore critical fields that cannot be parsed.
 func ParseStrField(reader enc.WireView, ignoreCritical bool) (*StrField, error) {
 	context := StrFieldParsingContext{}
 	context.Init()
@@ -1224,6 +1269,7 @@ type FixedUintFieldEncoder struct {
 type FixedUintFieldParsingContext struct {
 }
 
+// Initializes the encoder's length by calculating the total size required to encode the FixedUintField, accounting for mandatory overhead and optional fields (U32, U64, BytePtr) when present.
 func (encoder *FixedUintFieldEncoder) Init(value *FixedUintField) {
 
 	l := uint(0)
@@ -1245,10 +1291,12 @@ func (encoder *FixedUintFieldEncoder) Init(value *FixedUintField) {
 
 }
 
+// Initializes the parsing context for fixed unsigned integer fields, serving as a base method that may be overridden by subclasses to provide specific initialization logic.
 func (context *FixedUintFieldParsingContext) Init() {
 
 }
 
+// Encodes the FixedUintField into the provided buffer using a TLV (Type-Length-Value) format, including optional U32, U64, and BytePtr fields when present.
 func (encoder *FixedUintFieldEncoder) EncodeInto(value *FixedUintField, buf []byte) {
 
 	pos := uint(0)
@@ -1281,6 +1329,7 @@ func (encoder *FixedUintFieldEncoder) EncodeInto(value *FixedUintField, buf []by
 	}
 }
 
+// Encodes a fixed-size unsigned integer field into a byte slice of length specified by the encoder and returns it as an NDN wire format structure.
 func (encoder *FixedUintFieldEncoder) Encode(value *FixedUintField) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1291,6 +1340,7 @@ func (encoder *FixedUintFieldEncoder) Encode(value *FixedUintField) enc.Wire {
 	return wire
 }
 
+// Parses a binary-encoded FixedUintField structure, decoding required and optional unsigned integer fields (Byte, U32, U64, BytePtr) based on TLV-type identifiers, with critical field validation controlled by the ignoreCritical flag.
 func (context *FixedUintFieldParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*FixedUintField, error) {
 
 	var handled_Byte bool = false
@@ -1428,16 +1478,19 @@ func (context *FixedUintFieldParsingContext) Parse(reader enc.WireView, ignoreCr
 	return value, nil
 }
 
+// Encodes the FixedUintField value into a wire format by initializing and executing a FixedUintFieldEncoder.
 func (value *FixedUintField) Encode() enc.Wire {
 	encoder := FixedUintFieldEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the concatenated byte representation of the encoded fixed unsigned integer field.
 func (value *FixedUintField) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a fixed unsigned integer field from the provided encoded data using a parsing context, returning the parsed field and any encountered error.
 func ParseFixedUintField(reader enc.WireView, ignoreCritical bool) (*FixedUintField, error) {
 	context := FixedUintFieldParsingContext{}
 	context.Init()

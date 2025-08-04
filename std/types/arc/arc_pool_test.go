@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Tests the ArcPool's reference counting and object reuse by verifying that objects are correctly initialized, modified, and reset upon retrieval and release, ensuring proper reference tracking and deterministic value restoration.
 func TestArcPool(t *testing.T) {
 
 	pool := arc.NewArcPool(

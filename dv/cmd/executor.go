@@ -14,6 +14,7 @@ type DvExecutor struct {
 	router *dv.Router
 }
 
+// Constructs a DvExecutor instance by validating configuration, initializing an NDN engine with a default face, and creating a distance-vector router.
 func NewDvExecutor(config *config.Config) (*DvExecutor, error) {
 	dve := new(DvExecutor)
 
@@ -35,6 +36,7 @@ func NewDvExecutor(config *config.Config) (*DvExecutor, error) {
 	return dve, nil
 }
 
+// Starts the DV engine and router, initializing the engine first and deferring its cleanup, then running the router indefinitely until an error occurs or the program exits.
 func (dve *DvExecutor) Start() {
 	err := dve.engine.Start()
 	if err != nil {
@@ -48,10 +50,12 @@ func (dve *DvExecutor) Start() {
 	}
 }
 
+// Stops the router associated with the DvExecutor by invoking its Stop method.
 func (dve *DvExecutor) Stop() {
 	dve.router.Stop()
 }
 
+// Returns the router instance associated with this DvExecutor.
 func (dve *DvExecutor) Router() *dv.Router {
 	return dve.router
 }

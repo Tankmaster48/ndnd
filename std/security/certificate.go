@@ -93,6 +93,7 @@ func SelfSign(args SignCertArgs) (wire enc.Wire, err error) {
 	return SignCert(args)
 }
 
+// Checks whether a certificate's validity period (as specified in its signature) has expired based on the current time, considering both notBefore and notAfter timestamps.
 func CertIsExpired(cert ndn.Data) bool {
 	if cert.Signature() == nil {
 		return true

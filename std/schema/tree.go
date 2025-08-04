@@ -19,14 +19,17 @@ type Tree struct {
 	engine ndn.Engine
 }
 
+// Returns the string "schema" representing the Tree structure.
 func (t *Tree) String() string {
 	return "schema"
 }
 
+// Returns the NDN engine associated with this tree instance.
 func (t *Tree) Engine() ndn.Engine {
 	return t.engine
 }
 
+// Returns the root node of the tree.
 func (t *Tree) Root() *Node {
 	return t.root
 }

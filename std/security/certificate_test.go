@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Tests that signing a certificate with invalid parameters (nil Signer, nil Data) correctly returns an error.
 func TestSignCertInvalid(t *testing.T) {
 	tu.SetT(t)
 
@@ -24,6 +25,7 @@ func TestSignCertInvalid(t *testing.T) {
 	require.Error(t, err)
 }
 
+// Constructs and validates a self-signed NDN certificate for Alice's key, verifying its name structure, content integrity, signature format, and validity period according to the 2022 specification.
 func TestSignCertSelf(t *testing.T) {
 	tu.SetT(t)
 
@@ -71,6 +73,7 @@ func TestSignCertSelf(t *testing.T) {
 	require.True(t, tu.NoErr(signer.ValidateData(cert, certSigCov, cert)))
 }
 
+// TestSignCertOther verifies that the SignCert function correctly generates a signed certificate for non-key data (such as a root certificate) using a specified signer's key, ensuring proper certificate structure, content, signature validity, and metadata alignment with expected parameters.
 func TestSignCertOther(t *testing.T) {
 	tu.SetT(t)
 

@@ -18,14 +18,17 @@ type NlsrReadvertiser struct {
 	mutex sync.Mutex
 }
 
+// Constructs a new NlsrReadvertiser initialized with the provided Thread.
 func NewNlsrReadvertiser(m *Thread) *NlsrReadvertiser {
 	return &NlsrReadvertiser{m: m}
 }
 
+// Implements the Stringer interface for NlsrReadvertiser, returning the fixed string "mgmt-nlsr-readvertiser" as its human-readable identifier.
 func (r *NlsrReadvertiser) String() string {
 	return "mgmt-nlsr-readvertiser"
 }
 
+// Announces a client-originated route to the NLSR RIB by sending a signed Interest with route parameters to the NLSR register endpoint.
 func (r *NlsrReadvertiser) Announce(name enc.Name, route *table.Route) {
 	if route.Origin != uint64(spec_mgmt.RouteOriginClient) {
 		return
@@ -53,6 +56,7 @@ func (r *NlsrReadvertiser) Announce(name enc.Name, route *table.Route) {
 	r.m.sendInterest(cmd, enc.Wire{})
 }
 
+// Constructs and sends an Interest to the NLSR daemon to unregister a client-originated route with the specified name and face ID, ensuring thread-safe parameter setup.
 func (r *NlsrReadvertiser) Withdraw(name enc.Name, route *table.Route) {
 	if route.Origin != uint64(spec_mgmt.RouteOriginClient) {
 		return

@@ -35,6 +35,7 @@ func MakeNullTransport() *NullTransport {
 	return t
 }
 
+// Returns a string representation of the NullTransport object including its face ID, remote URI, and local URI.
 func (t *NullTransport) String() string {
 	return fmt.Sprintf("null-transport (faceid=%d remote=%s local=%s)", t.faceID, t.remoteURI, t.localURI)
 }
@@ -58,15 +59,18 @@ func (t *NullTransport) GetSendQueueSize() uint64 {
 	return 0
 }
 
+// This method discards the provided byte slice without performing any action, serving as a no-op implementation for the NullTransport's sendFrame operation.
 func (t *NullTransport) sendFrame([]byte) {
 	// Do nothing
 }
 
+// Waits for the transport to be closed by blocking on the close channel after marking it as running.
 func (t *NullTransport) runReceive() {
 	t.running.Store(true)
 	<-t.close
 }
 
+// Closes the NullTransport by stopping its operation and signaling any active goroutines to terminate if it was running.
 func (t *NullTransport) Close() {
 	if t.running.Swap(false) {
 		t.close <- true

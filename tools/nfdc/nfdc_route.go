@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Lists all routes in the Routing Information Base (RIB) of an NDN node, displaying each route's prefix, next hop, origin, cost, flags, and expiration time in a human-readable format.
 func (t *Tool) ExecRouteList(_ *cobra.Command, args []string) {
 	t.Start()
 	defer t.Stop()
@@ -55,6 +56,7 @@ func (t *Tool) ExecRouteList(_ *cobra.Command, args []string) {
 	}
 }
 
+// Fetches and displays the current Forwarding Information Base (FIB) entries from an NDN daemon, listing each entry's name along with next-hop face IDs and their associated costs.
 func (t *Tool) ExecFibList(_ *cobra.Command, args []string) {
 	t.Start()
 	defer t.Stop()

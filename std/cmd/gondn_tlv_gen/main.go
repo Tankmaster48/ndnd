@@ -30,6 +30,7 @@ func Usage() {
 	flag.PrintDefaults()
 }
 
+// Generates code by parsing Go source files in the specified input directory, processing their ASTs to collect declaration information, and writing the generated output to a file in the specified output path.
 func main() {
 	flag.Usage = Usage
 	err := flag.CommandLine.Parse(os.Args[1:])

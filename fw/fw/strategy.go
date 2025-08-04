@@ -63,6 +63,7 @@ func (s *StrategyBase) NewStrategyBase(
 	s.logName = name
 }
 
+// Returns a string representation of the StrategyBase instance, including its log name, version, and thread ID for identification and debugging purposes.
 func (s *StrategyBase) String() string {
 	return fmt.Sprintf("%s (v=%d t=%d)", s.logName, s.version, s.threadID)
 }

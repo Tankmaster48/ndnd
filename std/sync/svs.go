@@ -167,6 +167,7 @@ func (s *SvSync) Start() (err error) {
 	return nil
 }
 
+// Manages the synchronization process by initializing event handlers, sending initial sync requests, and continuously processing incoming state vectors, timer events, and shutdown signals until the service is stopped.
 func (s *SvSync) main() {
 	// Cleanup on exit
 	defer s.o.Client.Engine().DetachHandler(s.prefix)
@@ -266,10 +267,12 @@ func (s *SvSync) IncrSeqNo(name enc.Name) uint64 {
 	return entry
 }
 
+// Returns the boot time of the SvSync instance as a 64-bit unsigned integer.
 func (s *SvSync) GetBootTime() uint64 {
 	return s.o.BootTime
 }
 
+// Returns a slice containing all names currently stored in the synchronization state, ensuring thread-safety through mutual exclusion during access.
 func (s *SvSync) GetNames() []enc.Name {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -282,6 +285,7 @@ func (s *SvSync) GetNames() []enc.Name {
 	return names
 }
 
+// Handles the reception of a state vector by updating local synchronization state, suppressing redundant updates based on time thresholds, and triggering application callbacks for new or modified data entries while managing suppression states and passive wire buffering.
 func (s *SvSync) onReceiveStateVector(args svSyncRecvSvArgs) {
 	// Deliver the updates after this call is done
 	// This ensures the mutex is not held during the callback
@@ -396,6 +400,7 @@ func (s *SvSync) onReceiveStateVector(args svSyncRecvSvArgs) {
 	s.ticker.Reset(s.getSuppressionTimeout())
 }
 
+// Handles timer expiration by checking if the local state vector is inconsistent with the merged state vector; if so, triggers a synchronization by sending a Sync Interest, otherwise transitions to a steady state to avoid redundant synchronization.
 func (s *SvSync) timerExpired() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
@@ -416,6 +421,7 @@ func (s *SvSync) timerExpired() {
 	go s.sendSyncInterest()
 }
 
+// Sends synchronization Interest packets by either broadcasting buffered state updates in passive mode or encoding and transmitting the current state vector in active mode, contingent on the service being active.
 func (s *SvSync) sendSyncInterest() {
 	if !s.running.Load() {
 		return
@@ -434,6 +440,7 @@ func (s *SvSync) sendSyncInterest() {
 	s.sendSyncInterestWith(wire)
 }
 
+// Constructs and sends an NDN Interest packet with the specified `dataWire` content, configured with a 1-second lifetime and a generated nonce, following the Sync Ack Policy by omitting acknowledgment of Sync Interests.
 func (s *SvSync) sendSyncInterestWith(dataWire enc.Wire) {
 	if dataWire == nil {
 		return
@@ -456,6 +463,7 @@ func (s *SvSync) sendSyncInterestWith(dataWire enc.Wire) {
 	}
 }
 
+// Encodes the current synchronization state vector into a signed NDN Data packet with a versioned name for dissemination in the Sync protocol.
 func (s *SvSync) encodeSyncData() enc.Wire {
 	// Critical section
 	sv := func() *spec_svs.StateVector {
@@ -490,6 +498,7 @@ func (s *SvSync) encodeSyncData() enc.Wire {
 	return data.Wire
 }
 
+// Handles an incoming Interest by checking if the service is running and the Interest contains application parameters, then processes the Sync Data from the parameters.
 func (s *SvSync) onSyncInterest(interest ndn.Interest) {
 	if !s.running.Load() {
 		return
@@ -505,6 +514,7 @@ func (s *SvSync) onSyncInterest(interest ndn.Interest) {
 	s.onSyncData(interest.AppParam())
 }
 
+// Validates an incoming SyncData packet's signature and extracts its state vector for further processing if valid.
 func (s *SvSync) onSyncData(dataWire enc.Wire) {
 	data, sigCov, err := spec.Spec{}.ReadData(enc.NewWireView(dataWire))
 	if err != nil {
@@ -546,6 +556,7 @@ func (s *SvSync) enterSteadyState() {
 	s.ticker.Reset(s.getPeriodicTimeout())
 }
 
+// Generates a random timeout duration with ±10% uniform jitter applied to the configured periodic timeout value.
 func (s *SvSync) getPeriodicTimeout() time.Duration {
 	// [Spec] ±10% uniform jitter
 	jitter := s.o.PeriodicTimeout / 10
@@ -554,6 +565,7 @@ func (s *SvSync) getPeriodicTimeout() time.Duration {
 	return time.Duration(rand.Int64N(int64(max-min))) + min
 }
 
+// Computes a randomized suppression timeout using an exponential decay formula with the configured SuppressionPeriod and a decay factor, ensuring probabilistically distributed backoff intervals to mitigate concurrent updates.
 func (s *SvSync) getSuppressionTimeout() time.Duration {
 	// [Spec] Exponential decay function
 	// [Spec] c = SuppressionPeriod  // constant factor

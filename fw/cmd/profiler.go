@@ -14,14 +14,17 @@ type Profiler struct {
 	block   *pprof.Profile
 }
 
+// Constructs a new Profiler with the provided configuration.
 func NewProfiler(config *core.Config) *Profiler {
 	return &Profiler{config: config}
 }
 
+// Returns the string representation of the Profiler, which is "profiler".
 func (p *Profiler) String() string {
 	return "profiler"
 }
 
+// Starts CPU and blocking operation profiling based on the configuration, writing CPU profiles to the specified file and enabling block profile data collection at a rate of 1 event per operation.
 func (p *Profiler) Start() (err error) {
 	if p.config.Core.CpuProfile != "" {
 		p.cpuFile, err = os.Create(p.config.Core.CpuProfile)
@@ -42,6 +45,7 @@ func (p *Profiler) Start() (err error) {
 	return
 }
 
+// Stops the profiler and writes block, memory, and CPU profiles to their respective output files, handling errors by logging and terminating on failure.
 func (p *Profiler) Stop() {
 	if p.block != nil {
 		blockProfileFile, err := os.Create(p.config.Core.BlockProfile)

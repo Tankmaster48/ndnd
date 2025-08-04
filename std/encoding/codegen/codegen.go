@@ -24,6 +24,7 @@ type Generator struct {
 	imports map[string]string
 }
 
+// Constructs a new Generator with an empty models slice, empty imports map, and a pre-compiled regex for parsing TLV type annotations in struct tags.
 func NewGenerator() *Generator {
 	return &Generator{
 		models:  make([]TlvModel, 0),
@@ -32,6 +33,7 @@ func NewGenerator() *Generator {
 	}
 }
 
+// Parses the value of a tag using a regular expression to extract and convert its numeric portion into an unsigned 64-bit integer, returning 0 if parsing fails or no match is found.
 func (g *Generator) parseTag(tag *ast.BasicLit) uint64 {
 	if tag == nil {
 		return 0
@@ -47,6 +49,7 @@ func (g *Generator) parseTag(tag *ast.BasicLit) uint64 {
 	return typVal
 }
 
+// Extracts the first comment line from a Go AST comment group that matches a specified documentation indicator format (e.g., `//+INDICATOR:` or `// +INDICATOR:`), returning the text following the indicator.
 func (g *Generator) parseDoc(doc *ast.CommentGroup, indicator string) string {
 	if doc == nil {
 		return ""
@@ -67,6 +70,7 @@ func (g *Generator) parseDoc(doc *ast.CommentGroup, indicator string) string {
 	return ""
 }
 
+// Parses a TLV field definition string into a type and optional annotation, then constructs and returns a corresponding TLV field using the provided model.
 func ParseField(name string, typeNum uint64, fieldStr string, model *TlvModel) (TlvField, error) {
 	fieldType := fieldStr
 	annotation := ""
@@ -159,6 +163,7 @@ func (g *Generator) ProcessDecl(node ast.Node) bool {
 	return false
 }
 
+// Generates Go source code for a package that implements TLV encoding/decoding logic for NDN data structures, using the provided models and imports.
 func (g *Generator) Generate(packName string) {
 	if packName == "" {
 		packName = g.pkgName

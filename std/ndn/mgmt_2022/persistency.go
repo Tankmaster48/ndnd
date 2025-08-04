@@ -16,6 +16,7 @@ var PersistencyList = map[Persistency]string{
 	PersistencyPermanent:  "permanent",
 }
 
+// Returns the string representation of the Persistency value, or "unknown" if it is not found in the predefined PersistencyList map.
 func (p Persistency) String() string {
 	if s, ok := PersistencyList[p]; ok {
 		return s
@@ -23,6 +24,7 @@ func (p Persistency) String() string {
 	return "unknown"
 }
 
+// Parses a string representation into a Persistency value by matching it against predefined string mappings, returning an error if no match is found.
 func ParsePersistency(s string) (Persistency, error) {
 	for k, v := range PersistencyList {
 		if v == s {

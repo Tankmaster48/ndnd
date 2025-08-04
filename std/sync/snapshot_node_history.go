@@ -55,10 +55,12 @@ type SnapshotNodeHistory struct {
 	prevSeq uint64
 }
 
+// Returns a string representation of the SnapshotNodeHistory type, which is "snapshot-node-history".
 func (s *SnapshotNodeHistory) String() string {
 	return "snapshot-node-history"
 }
 
+// Returns the current SnapshotNodeHistory instance as a Snapshot interface.
 func (s *SnapshotNodeHistory) Snapshot() Snapshot {
 	return s
 }
@@ -149,6 +151,7 @@ func (s *SnapshotNodeHistory) snapName(node enc.Name, boot uint64) enc.Name {
 		Append(enc.NewKeywordComponent("HIST"))
 }
 
+// Constructs a unique name component for a node's history index by appending the node name, a timestamp derived from the boot time, and the "HIDX" keyword to a group prefix.
 func (s *SnapshotNodeHistory) idxName(node enc.Name, boot uint64) enc.Name {
 	return s.pss.groupPrefix.
 		Append(node...).
@@ -392,6 +395,7 @@ func (s *SnapshotNodeHistory) takeSnap(seqNo uint64) {
 	}
 }
 
+// Retrieves the latest local history index name and parsed index data for the node's snapshot history.
 func (s *SnapshotNodeHistory) getIndex() (enc.Name, *svs_ps.HistoryIndex, error) {
 	idxName := s.idxName(s.pss.nodePrefix, s.pss.bootTime)
 

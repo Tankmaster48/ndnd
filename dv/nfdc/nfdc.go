@@ -25,6 +25,7 @@ type NfdMgmtThread struct {
 	stop chan bool
 }
 
+// Constructs a new NfdMgmtThread with the provided ndn.Engine, initializing a buffered channel for management commands (capacity 4096) and an unbuffered stop channel for termination signaling.
 func NewNfdMgmtThread(engine ndn.Engine) *NfdMgmtThread {
 	return &NfdMgmtThread{
 		engine:  engine,
@@ -33,10 +34,12 @@ func NewNfdMgmtThread(engine ndn.Engine) *NfdMgmtThread {
 	}
 }
 
+// Returns the string representation "dv-nfdc" for the NFD management thread when printed.
 func (m *NfdMgmtThread) String() string {
 	return "dv-nfdc"
 }
 
+// Starts a loop to process NFD management commands from a channel, retrying failed commands up to a specified limit (or indefinitely if retries are negative), and exits gracefully when a stop signal is received.
 func (m *NfdMgmtThread) Start() {
 	for {
 		select {
@@ -58,10 +61,12 @@ func (m *NfdMgmtThread) Start() {
 	}
 }
 
+// Signals the NFD management thread to terminate by sending a termination notification through its stop channel.
 func (m *NfdMgmtThread) Stop() {
 	m.stop <- true
 }
 
+// Sends the provided management command to the internal channel, allowing the NFD management thread to process it asynchronously.
 func (m *NfdMgmtThread) Exec(mgmt_cmd NfdMgmtCmd) {
 	m.channel <- mgmt_cmd
 }

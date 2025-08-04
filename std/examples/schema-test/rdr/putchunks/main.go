@@ -65,6 +65,7 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 `
 
+// This function initializes an NDN producer application using a predefined schema, attaches it to a network engine with a specified prefix, generates data packets according to the schema's "Provide" logic, and runs until interrupted by a termination signal.
 func main() {
 	// Setup schema tree
 	tree := schema.CreateFromJson(SchemaJson, map[string]any{

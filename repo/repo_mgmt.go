@@ -8,6 +8,7 @@ import (
 	"github.com/named-data/ndnd/std/log"
 )
 
+// Handles incoming management commands by parsing wire data, triggering asynchronous handling for SyncJoin commands, and logging warnings for parsing errors or unrecognized command types.
 func (r *Repo) onMgmtCmd(_ enc.Name, wire enc.Wire, reply func(enc.Wire) error) {
 	cmd, err := tlv.ParseRepoCmd(enc.NewWireView(wire), false)
 	if err != nil {
@@ -23,6 +24,7 @@ func (r *Repo) onMgmtCmd(_ enc.Name, wire enc.Wire, reply func(enc.Wire) error) 
 	log.Warn(r, "Unknown management command received")
 }
 
+// Handles a SyncJoin command by initiating the SVSv3 synchronization protocol if specified, returning appropriate status codes and logging errors or warnings based on protocol validity and operation success.
 func (r *Repo) handleSyncJoin(cmd *tlv.SyncJoin, reply func(enc.Wire) error) {
 	res := tlv.RepoCmdRes{Status: 200}
 
@@ -40,6 +42,7 @@ func (r *Repo) handleSyncJoin(cmd *tlv.SyncJoin, reply func(enc.Wire) error) {
 	reply(res.Encode())
 }
 
+// Initializes and starts a synchronization service for the specified group if not already active, using the provided SyncJoin command, ensuring thread-safe creation and error handling for missing group names.
 func (r *Repo) startSvs(cmd *tlv.SyncJoin) error {
 	if cmd.Group == nil || len(cmd.Group.Name) == 0 {
 		return fmt.Errorf("missing group name")

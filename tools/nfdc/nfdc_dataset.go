@@ -6,6 +6,7 @@ import (
 	"github.com/named-data/ndnd/std/object"
 )
 
+// Fetches a status dataset by consuming a Data packet with the given suffix appended to the tool's prefix, returning the packet's content or an error.
 func (t *Tool) fetchStatusDataset(suffix enc.Name) (enc.Wire, error) {
 	// consume-only client, no need for a store
 	client := object.NewClient(t.engine, nil, nil)

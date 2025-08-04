@@ -19,6 +19,7 @@ import (
 var app ndn.Engine
 var pib *sec_pib.SqlitePib
 
+// Constructs a signed Data packet with "Hello, world!" content, 10s freshness, and Blob content type using the /test identity's certificate, then replies to the Interest and logs the exchange details.
 func onInterest(args ndn.InterestHandlerArgs) {
 	interest := args.Interest
 
@@ -52,6 +53,7 @@ func onInterest(args ndn.InterestHandlerArgs) {
 	fmt.Printf("\n")
 }
 
+// Initializes and starts an NDN application with security modules, registers an interest handler for the "/example/testApp" prefix, and runs until interrupted.
 func main() {
 	app = engine.NewBasicEngine(engine.NewDefaultFace())
 	err := app.Start()

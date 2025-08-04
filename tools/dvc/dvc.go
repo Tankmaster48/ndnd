@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Constructs and returns a slice of Cobra commands for managing a router's status and neighbor links, including creating, destroying, and querying link status.
 func Cmds() []*cobra.Command {
 	t := Tool{}
 
@@ -34,6 +35,7 @@ type Tool struct {
 	engine ndn.Engine
 }
 
+// Initializes and starts the NDN engine with a default face, terminating the tool if the engine fails to start.
 func (t *Tool) Start() {
 	t.engine = engine.NewBasicEngine(engine.NewDefaultFace())
 
@@ -45,6 +47,7 @@ func (t *Tool) Start() {
 	}
 }
 
+// Stops the tool's engine.
 func (t *Tool) Stop() {
 	t.engine.Stop()
 }

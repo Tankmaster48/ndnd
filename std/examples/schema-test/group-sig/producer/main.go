@@ -76,6 +76,7 @@ occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim 
 `
 const HmacKey = "Hello, World!"
 
+// Initializes an NDN schema-based producer with HMAC signing, attaches it to a network engine under the `/example/schema/groupSigApp` prefix, generates timestamped data packets using the provided schema and content, and waits for termination signals.
 func main() {
 	// Setup schema tree
 	tree := schema.CreateFromJson(SchemaJson, map[string]any{

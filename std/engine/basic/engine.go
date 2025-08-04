@@ -70,6 +70,7 @@ type Engine struct {
 	OnDataHook func(data ndn.Data, raw enc.Wire, sigCov enc.Wire) error
 }
 
+// Constructs and initializes a new NDN forwarding engine with the provided face and timer, setting up internal data structures (FIB, PIT), concurrency controls, and asynchronous processing channels for handling network traffic and tasks.
 func NewEngine(face ndn.Face, timer ndn.Timer) *Engine {
 	if face == nil || timer == nil {
 		return nil
@@ -95,26 +96,32 @@ func NewEngine(face ndn.Face, timer ndn.Timer) *Engine {
 	}
 }
 
+// Returns a string representation of the Engine instance, which is "basic-engine", for identification or logging purposes.
 func (e *Engine) String() string {
 	return "basic-engine"
 }
 
+// Returns the Engine instance as an ndn.Engine interface, allowing the concrete type to satisfy the ndn.Engine interface contract.
 func (e *Engine) EngineTrait() ndn.Engine {
 	return e
 }
 
+// Returns a new ndn.Spec instance with default values.
 func (*Engine) Spec() ndn.Spec {
 	return spec.Spec{}
 }
 
+// Returns the Engine's internal timer for managing time-based operations.
 func (e *Engine) Timer() ndn.Timer {
 	return e.timer
 }
 
+// Returns the engine's network face for communication with the NDN network.
 func (e *Engine) Face() ndn.Face {
 	return e.face
 }
 
+// Attaches an Interest handler to a specified prefix in the Forwarding Information Base (FIB), returning an error if another handler is already registered for that prefix.
 func (e *Engine) AttachHandler(prefix enc.Name, handler ndn.InterestHandler) error {
 	e.fibLock.Lock()
 	defer e.fibLock.Unlock()
@@ -126,6 +133,9 @@ func (e *Engine) AttachHandler(prefix enc.Name, handler ndn.InterestHandler) err
 	return nil
 }
 
+// Detaches a handler associated with the specified prefix from the Forwarding Information Base (FIB), removing any associated routing entries and cleaning up the node if necessary.  
+
+Example: Detaches a previously registered handler for the given NDN name prefix from the FIB.
 func (e *Engine) DetachHandler(prefix enc.Name) error {
 	e.fibLock.Lock()
 	defer e.fibLock.Unlock()
@@ -139,6 +149,7 @@ func (e *Engine) DetachHandler(prefix enc.Name) error {
 	return nil
 }
 
+// Processes incoming NDN packets by parsing L3/L2 formats, handling LpPacket fragmentation, extracting Nack/Interest/Data content, and routing to appropriate handler functions (onInterest, onData, or onNack) with contextual metadata like PIT tokens and signature coverage.
 func (e *Engine) onPacket(frame []byte) error {
 	reader := enc.NewBufferView(frame)
 
@@ -227,6 +238,7 @@ func (e *Engine) onPacket(frame []byte) error {
 	return nil
 }
 
+// Processes an incoming Interest by determining the appropriate handler via FIB longest-prefix matching, configuring a reply callback with PIT token, and invoking the handler to generate a Data response.
 func (e *Engine) onInterest(args ndn.InterestHandlerArgs) {
 	name := args.Interest.Name()
 
@@ -265,6 +277,7 @@ func (e *Engine) onInterest(args ndn.InterestHandlerArgs) {
 	handler(args)
 }
 
+// Constructs a WireReplyFunc that sends a Data packet (with optional LP PIT token wrapping) through the Engine's face, returning an error if the face is not running.
 func (e *Engine) newDataReplyFunc(pitToken []byte) ndn.WireReplyFunc {
 	return func(dataWire enc.Wire) error {
 		if dataWire == nil {
@@ -301,6 +314,7 @@ func (e *Engine) newDataReplyFunc(pitToken []byte) ndn.WireReplyFunc {
 	}
 }
 
+// Handles incoming Data packets by finding and removing matching PIT entries based on name prefix, CanBePrefix flag, and implicit digest validation, returning satisfied entries for further processing.
 func (e *Engine) onDataMatch(pkt *spec.Data, raw enc.Wire) pitEntry {
 	e.pitLock.Lock()
 	defer e.pitLock.Unlock()
@@ -349,6 +363,7 @@ func (e *Engine) onDataMatch(pkt *spec.Data, raw enc.Wire) pitEntry {
 	return ret
 }
 
+// Handles an incoming Data packet by invoking registered hooks, canceling corresponding PIT entries, and notifying their callbacks with the Data or any hook-generated errors.
 func (e *Engine) onData(pkt *spec.Data, sigCovered enc.Wire, raw enc.Wire, pitToken []byte) {
 	var hookErr error = nil
 	if e.OnDataHook != nil {
@@ -379,6 +394,7 @@ func (e *Engine) onData(pkt *spec.Data, sigCovered enc.Wire, raw enc.Wire, pitTo
 	}
 }
 
+// Handles a received Nack by removing the corresponding PIT entry and invoking the associated callback with the Nack reason and InterestResultNack status.
 func (e *Engine) onNack(name enc.Name, reason uint64) {
 	entries := func() []*pendInt {
 		e.pitLock.Lock()
@@ -410,6 +426,7 @@ func (e *Engine) onNack(name enc.Name, reason uint64) {
 	}
 }
 
+// Starts the engine's processing loop, initializing the network face, handling incoming packets and tasks asynchronously, and returning an error if the face is already running or fails to open.
 func (e *Engine) Start() error {
 	if e.face.IsRunning() {
 		return fmt.Errorf("face is already running")
@@ -455,6 +472,7 @@ func (e *Engine) Start() error {
 	return nil
 }
 
+// Stops the engine by sending a close signal to terminate its operation and close the associated face, returning an error if the engine is not running.
 func (e *Engine) Stop() error {
 	if !e.IsRunning() {
 		return fmt.Errorf("engine is not running")
@@ -464,10 +482,12 @@ func (e *Engine) Stop() error {
 	return nil
 }
 
+// Returns whether the engine is currently running.
 func (e *Engine) IsRunning() bool {
 	return e.running.Load()
 }
 
+// Handles timeout of pending interest entries by removing expired entries from the PIT, invoking their callbacks with a timeout result, and pruning the NameTrie node if empty.
 func (e *Engine) onExpressTimeout(n *NameTrie[pitEntry]) {
 	now := e.timer.Now()
 
@@ -508,6 +528,7 @@ func (e *Engine) onExpressTimeout(n *NameTrie[pitEntry]) {
 	}
 }
 
+// Sends an Interest packet with specified parameters, processes implicit digest components, schedules timeout handling in the PIT (Pending Interest Table), and prepares to invoke a callback upon receiving a matching Data packet or timeout.
 func (e *Engine) Express(interest *ndn.EncodedInterest, callback ndn.ExpressCallbackFunc) error {
 	var impSha256 []byte = nil
 
@@ -575,6 +596,7 @@ func (e *Engine) Express(interest *ndn.EncodedInterest, callback ndn.ExpressCall
 	return err
 }
 
+// ExecMgmtCmd executes a signed NDN management command by constructing and expressing a signed Interest, validating the received Data packet's signature, and returning the parsed ControlResponse or error.
 func (e *Engine) ExecMgmtCmd(module string, cmd string, args any) (any, error) {
 	cmdArgs, ok := args.(*mgmt.ControlArgs)
 	if !ok {
@@ -647,11 +669,13 @@ func (e *Engine) ExecMgmtCmd(module string, cmd string, args any) (any, error) {
 	return resp.val, resp.err
 }
 
+// Sets the signer for generating command signatures and the validation function for verifying signatures on incoming commands in the Engine.
 func (e *Engine) SetCmdSec(signer ndn.Signer, validator func(enc.Name, enc.Wire, ndn.Signature) bool) {
 	e.mgmtConf.SetSigner(signer)
 	e.cmdChecker = validator
 }
 
+// Registers a prefix with the Routing Information Base (RIB) by executing a management command, returning an error if the registration fails.
 func (e *Engine) RegisterRoute(prefix enc.Name) error {
 	_, err := e.ExecMgmtCmd("rib", "register", &mgmt.ControlArgs{Name: prefix})
 	if err != nil {
@@ -663,6 +687,7 @@ func (e *Engine) RegisterRoute(prefix enc.Name) error {
 	return nil
 }
 
+// Unregisters a route with the specified prefix from the Routing Information Base (RIB) using a management command.
 func (e *Engine) UnregisterRoute(prefix enc.Name) error {
 	_, err := e.ExecMgmtCmd("rib", "unregister", &mgmt.ControlArgs{Name: prefix})
 	if err != nil {
@@ -674,6 +699,7 @@ func (e *Engine) UnregisterRoute(prefix enc.Name) error {
 	return nil
 }
 
+// Schedules a task for execution by adding it to the engine's task queue, or spawns a goroutine to enqueue the task if the queue is full to prevent blocking the caller (typically the main goroutine).
 func (e *Engine) Post(task func()) {
 	select {
 	case e.taskQueue <- task:
@@ -684,6 +710,7 @@ func (e *Engine) Post(task func()) {
 	}
 }
 
+// Returns true if the default logger's level is set to trace, indicating that trace-level logging is enabled.
 func hasLogTrace() bool {
 	return log.Default().Level() <= log.LevelTrace
 }

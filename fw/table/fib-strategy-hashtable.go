@@ -225,6 +225,7 @@ func (f *FibStrategyHashTable) pruneTables(entry *baseFibStrategyEntry) {
 
 // FindNextHops returns the longest-prefix matching nexthop(s) matching the specified name.
 
+// Returns the next-hop entries for the given encoded name by finding the longest prefix match in the FIB and searching backward through prefix hashes to locate the first applicable entry with non-empty next-hop information.
 func (f *FibStrategyHashTable) FindNextHopsEnc(name enc.Name) []*FibNextHopEntry {
 	f.fibStrategyRWMutex.RLock()
 	defer f.fibStrategyRWMutex.RUnlock()
@@ -250,6 +251,7 @@ func (f *FibStrategyHashTable) FindNextHopsEnc(name enc.Name) []*FibNextHopEntry
 
 // FindStrategy returns the longest-prefix matching strategy choice entry for the specified name.
 
+// Returns the strategy associated with the longest prefix match for the given name, checking each prefix level in reverse order until a strategy is found, or nil if no strategy exists.
 func (f *FibStrategyHashTable) FindStrategyEnc(name enc.Name) enc.Name {
 	f.fibStrategyRWMutex.RLock()
 	defer f.fibStrategyRWMutex.RUnlock()
@@ -310,6 +312,7 @@ func (f *FibStrategyHashTable) ClearNextHopsEnc(name enc.Name) {
 
 // RemoveNextHop removes the specified nexthop entry from the specified prefix
 
+// Removes the specified next hop from the Forwarding Information Base (FIB) entry corresponding to the given encoded name in the FibStrategyHashTable.
 func (f *FibStrategyHashTable) RemoveNextHopEnc(name enc.Name, nexthop uint64) {
 	f.fibStrategyRWMutex.Lock()
 	defer f.fibStrategyRWMutex.Unlock()
@@ -359,6 +362,7 @@ func (f *FibStrategyHashTable) GetAllFIBEntries() []FibStrategyEntry {
 
 // SetStrategy sets the strategy for the specified prefix.
 
+// Sets the forwarding strategy for the specified encoded name in the FIB, inserting the entry if necessary, with thread-safe operations.
 func (f *FibStrategyHashTable) SetStrategyEnc(name enc.Name, strategy enc.Name) {
 	f.fibStrategyRWMutex.Lock()
 	defer f.fibStrategyRWMutex.Unlock()

@@ -47,6 +47,7 @@ type SignCertOptions struct {
 	NotAfter  time.Time
 }
 
+// Signs a Data packet using the provided signer and options, returning the signed certificate, its parsed Data structure, and the signature-covered portion of the wire encoding.
 func signCert(signer ndn.Signer, wire enc.Wire, opts SignCertOptions) (enc.Wire, ndn.Data, enc.Wire) {
 	data, _, _ := spec.Spec{}.ReadData(enc.NewWireView(wire))
 	cert, _ := sec.SignCert(sec.SignCertArgs{
@@ -685,6 +686,7 @@ func testTrustConfig(t *testing.T, schema ndn.TrustSchema) {
 	}))
 }
 
+// Initializes an in-memory keychain and LVS schema for testing, then executes trust configuration validation tests using the specified schema.
 func TestTrustConfigLvs(t *testing.T) {
 	tu.SetT(t)
 

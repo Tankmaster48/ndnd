@@ -18,6 +18,7 @@ type StreamFace struct {
 	conn    net.Conn
 }
 
+// Constructs a new StreamFace configured with the specified network, address, and local setting, defaulting to exit the application with code 106 when the face becomes unavailable.
 func NewStreamFace(network string, addr string, local bool) *StreamFace {
 	s := &StreamFace{
 		baseFace: newBaseFace(local),
@@ -31,10 +32,12 @@ func NewStreamFace(network string, addr string, local bool) *StreamFace {
 	return s
 }
 
+// Returns a string representation of the StreamFace in the format "stream-face (network://address)", combining the underlying network type and address.
 func (f *StreamFace) String() string {
 	return fmt.Sprintf("stream-face (%s://%s)", f.network, f.addr)
 }
 
+// Opens a network connection for the StreamFace, verifies required callbacks are set, and initiates packet reception in a goroutine.
 func (f *StreamFace) Open() error {
 	if f.IsRunning() {
 		return fmt.Errorf("face is already running")
@@ -56,6 +59,7 @@ func (f *StreamFace) Open() error {
 	return nil
 }
 
+// Closes the StreamFace by transitioning its state to closed and closing the underlying connection if it exists, returning any error encountered during the connection close.
 func (f *StreamFace) Close() error {
 	if f.setStateClosed() {
 		if f.conn != nil {
@@ -66,6 +70,7 @@ func (f *StreamFace) Close() error {
 	return nil
 }
 
+// Sends a wire-encoded packet through the StreamFace if it is active, using a mutex to ensure thread-safe transmission and returning an error if the send fails or the face is not running.
 func (f *StreamFace) Send(pkt enc.Wire) error {
 	if !f.IsRunning() {
 		return fmt.Errorf("face is not running")
@@ -82,6 +87,7 @@ func (f *StreamFace) Send(pkt enc.Wire) error {
 	return nil
 }
 
+// Receives and processes incoming TLV-encoded packets from the stream connection until the face stops running, handling errors and ensuring the face state is set to down upon completion.
 func (f *StreamFace) receive() {
 	defer f.setStateDown()
 

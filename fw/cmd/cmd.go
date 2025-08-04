@@ -23,12 +23,14 @@ var CmdYaNFD = &cobra.Command{
 	Run:     run,
 }
 
+// Registers command-line flags for enabling CPU, memory, and block profiling in the Core configuration by specifying output file paths.
 func init() {
 	CmdYaNFD.Flags().StringVar(&config.Core.CpuProfile, "cpu-profile", "", "Write CPU profile to file")
 	CmdYaNFD.Flags().StringVar(&config.Core.MemProfile, "mem-profile", "", "Write memory profile to file")
 	CmdYaNFD.Flags().StringVar(&config.Core.BlockProfile, "block-profile", "", "Write block profile to file")
 }
 
+// Initializes and starts a YaNFD daemon using the provided configuration file, handles graceful shutdown on interrupt signals, and logs the exit.
 func run(cmd *cobra.Command, args []string) {
 	configfile := args[0]
 	config.Core.BaseDir = filepath.Dir(configfile)

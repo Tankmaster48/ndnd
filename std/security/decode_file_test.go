@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Tests the `DecodeFile` function's ability to correctly parse and validate cryptographic keys and certificates in TLV/PEM formats, including handling multiple entries, partial validity, and error cases.
 func TestDecodeFile(t *testing.T) {
 	tu.SetT(t)
 

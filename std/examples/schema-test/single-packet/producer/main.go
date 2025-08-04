@@ -42,6 +42,7 @@ const SchemaJson = `{
   ]
 }`
 
+// Responds to an Interest by generating a Data packet with "Hello, world!" content, logging the timestamp and metadata, and returning the packet to satisfy the Interest.
 func onInterest(event *schema.Event) any {
 	mNode := event.Target
 	timestamp, _, _ := enc.ParseNat(mNode.Matching["time"])
@@ -59,6 +60,7 @@ func onInterest(event *schema.Event) any {
 	return nil
 }
 
+// This function initializes and starts an NDN producer application that serves data according to a predefined schema under the "/example/testApp" prefix, handling incoming Interests via the specified onInterest callback.
 func main() {
 	// Setup schema tree
 	tree := schema.CreateFromJson(SchemaJson, map[string]any{

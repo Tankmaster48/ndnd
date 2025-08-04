@@ -7,6 +7,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+// Reads and parses a YAML configuration file into the provided destination structure, exiting on errors.
 func ReadYaml(dest any, file string) {
 	f, err := os.Open(file)
 	if err != nil {

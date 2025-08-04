@@ -20,6 +20,7 @@ var CmdDv = &cobra.Command{
 	Run:     run,
 }
 
+// Initializes a DvExecutor with a configuration loaded from a YAML file, starts it, and handles termination signals to ensure graceful shutdown.
 func run(cmd *cobra.Command, args []string) {
 	configfile := args[0]
 

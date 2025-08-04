@@ -82,6 +82,7 @@ func MakeMulticastUDPTransport(localURI *defn.URI) (*MulticastUDPTransport, erro
 	return t, nil
 }
 
+// Establishes a UDP connection for sending packets to the multicast group address using the transport's dialer and remote URI scheme, storing the connection for subsequent use.
 func (t *MulticastUDPTransport) connectSend() error {
 	sendConn, err := t.dialer.Dial(t.remoteURI.Scheme(), t.groupAddr.String())
 	if err != nil {
@@ -91,6 +92,7 @@ func (t *MulticastUDPTransport) connectSend() error {
 	return nil
 }
 
+// Sets up a UDP multicast receive connection on the network interface associated with the local URI's IP address and joins the multicast group specified by the remote URI's scheme.
 func (t *MulticastUDPTransport) connectRecv() error {
 	localIf, err := InterfaceByIP(net.ParseIP(t.localURI.PathHost()))
 	if err != nil || localIf == nil {
@@ -104,10 +106,12 @@ func (t *MulticastUDPTransport) connectRecv() error {
 	return nil
 }
 
+// Returns a string representation of the MulticastUDPTransport, including its face ID, remote URI, and local URI, typically used for debugging or logging.
 func (t *MulticastUDPTransport) String() string {
 	return fmt.Sprintf("multicast-udp-transport (faceid=%d remote=%s local=%s)", t.faceID, t.remoteURI, t.localURI)
 }
 
+// Sets the transport's persistency to Permanent, returning true if the persistency was updated or already set to Permanent, otherwise false.
 func (t *MulticastUDPTransport) SetPersistency(persistency spec_mgmt.Persistency) bool {
 	if persistency == t.persistency {
 		return true
@@ -121,6 +125,7 @@ func (t *MulticastUDPTransport) SetPersistency(persistency spec_mgmt.Persistency
 	return false
 }
 
+// Returns the current size of the send queue on the transport's socket by retrieving low-level socket information via a system call.
 func (t *MulticastUDPTransport) GetSendQueueSize() uint64 {
 	rawConn, err := t.recvConn.SyscallConn()
 	if err != nil {
@@ -129,6 +134,7 @@ func (t *MulticastUDPTransport) GetSendQueueSize() uint64 {
 	return impl.SyscallGetSocketSendQueueSize(rawConn)
 }
 
+// Sends a frame via a UDP multicast connection, ensuring it adheres to the MTU limit, reconnects on send failure if the transport is still active, and tracks total transmitted bytes.
 func (t *MulticastUDPTransport) sendFrame(frame []byte) {
 	if !t.running.Load() {
 		return
@@ -156,6 +162,7 @@ func (t *MulticastUDPTransport) sendFrame(frame []byte) {
 	t.nOutBytes += uint64(len(frame))
 }
 
+// Continuously receives and processes incoming multicast UDP data packets, updating byte counters and forwarding frames to the link service, while automatically re-establishing the connection if errors occur and gracefully cleaning up resources upon termination.
 func (t *MulticastUDPTransport) runReceive() {
 	defer t.Close()
 
@@ -180,6 +187,7 @@ func (t *MulticastUDPTransport) runReceive() {
 	}
 }
 
+// Closes the transport's send and receive connections if the transport is running, ensuring idempotent behavior by atomically checking and updating the running state.
 func (t *MulticastUDPTransport) Close() {
 	if t.running.Swap(false) {
 		if t.sendConn != nil {

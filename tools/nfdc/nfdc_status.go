@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Fetches and displays general status information from an NFD (Named Data Forwarding Daemon) instance, including version, uptime, and counts of entries in data structures like the name tree, FIB, PIT, and statistics on Interest/Data/NACK traffic.
 func (t *Tool) ExecStatusGeneral(_ *cobra.Command, args []string) {
 	t.Start()
 	defer t.Stop()

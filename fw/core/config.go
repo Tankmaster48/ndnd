@@ -165,6 +165,7 @@ type Config struct {
 	} `json:"tables"`
 }
 
+// Returns a default configuration for a Named Data Networking (NDN) node, pre-setting core logging, transport faces (UDP/TCP/Unix/WebSocket/HTTP3), forwarding parameters, and table capacities with standard values for operation.
 func DefaultConfig() *Config {
 	c := &Config{}
 	c.Core.LogLevel = "INFO"

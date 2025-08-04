@@ -14,6 +14,7 @@ import (
 	"github.com/named-data/ndnd/std/sync"
 )
 
+// Implements an SVS (Synchronized Versioning Service) node that announces a multicast-synced group prefix and periodically increments/publishes sequence numbers for synchronization under `/ndn/svs`.
 func main() {
 	// Before running this example, make sure the strategy is correctly setup
 	// to multicast for the sync prefix. For example, using the following:

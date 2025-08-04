@@ -49,6 +49,7 @@ type Markers struct {
 	endMarker enc.PlaceHolder
 }
 
+// Encodes the Markers into a byte slice using the provided argument, validating that the encoded data has correct start and end markers before returning the result.
 func (m *Markers) Encode(arg int) []byte {
 	enc := MarkersEncoder{}
 	enc.Init(m)
@@ -64,6 +65,7 @@ func (m *Markers) Encode(arg int) []byte {
 	return ret
 }
 
+// Parses a byte buffer into a Markers structure using the provided argument as parsing context, returning the result only if the entire buffer is successfully consumed without errors.
 func ParseMarkers(buf []byte, arg int) *Markers {
 	cont := MarkersParsingContext{
 		argument: arg,

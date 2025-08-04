@@ -19,6 +19,7 @@ type SvMapVal[V any] struct {
 	Value V
 }
 
+// Compares two SvMapVal values by their Boot field, returning -1, 0, or 1 if a's Boot is less than, equal to, or greater than b's Boot.
 func (*SvMapVal[V]) Cmp(a, b SvMapVal[V]) int {
 	return cmp.Compare(a.Boot, b.Boot)
 }
@@ -38,6 +39,7 @@ func (m SvMap[V]) Get(hash string, boot uint64) (value V) {
 	return value
 }
 
+// Sets the value for the specified hash and boot time in the SvMap, maintaining sorted order of entries by boot time through binary search and insertion.
 func (m SvMap[V]) Set(hash string, boot uint64, value V) {
 	entry := SvMapVal[V]{boot, value}
 	i, match := slices.BinarySearchFunc(m[hash], entry, entry.Cmp)
@@ -48,6 +50,7 @@ func (m SvMap[V]) Set(hash string, boot uint64, value V) {
 	m[hash] = slices.Insert(m[hash], i, entry)
 }
 
+// Clears all entries from the SvMap if it is not nil, preventing panic when the map is nil.
 func (m SvMap[V]) Clear() {
 	if m != nil {
 		clear(m)
@@ -115,6 +118,7 @@ func (m SvMap[V]) Encode(seq func(V) uint64) *spec_svs.StateVector {
 	return &spec_svs.StateVector{Entries: entries}
 }
 
+// Returns an iterator that converts TLV-encoded name strings in the SvMap to enc.Name objects and yields each key-value pair, skipping and logging invalid names.
 func (m SvMap[V]) Iter() iter.Seq2[enc.Name, []SvMapVal[V]] {
 	return func(yield func(enc.Name, []SvMapVal[V]) bool) {
 		for hash, val := range m {

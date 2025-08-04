@@ -105,6 +105,7 @@ const (
 	}`
 )
 
+// This function implements an NDN consumer that verifies data integrity using a pre-enrolled trust anchor, constructs a schema-based data retrieval pipeline, and fetches node-specific data from a producer while handling potential errors like NACKs, timeouts, and validation failures.
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal(nil, "Insufficient argument. Please input the version number given by the producer.")

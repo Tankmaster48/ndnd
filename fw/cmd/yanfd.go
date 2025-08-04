@@ -47,6 +47,8 @@ func NewYaNFD(config *core.Config) *YaNFD {
 	}
 }
 
+// **Function:** `String() string`  
+**Description:** Returns the string `'yanfd'` as the string representation of a `YanFD` object.
 func (y *YaNFD) String() string {
 	return "yanfd"
 }

@@ -20,6 +20,7 @@ type RepoSvs struct {
 	svsalo *ndn_sync.SvsALO
 }
 
+// Constructs a new RepoSvs instance initialized with the provided configuration, NDN client, and SyncJoin command.
 func NewRepoSvs(config *Config, client ndn.Client, cmd *tlv.SyncJoin) *RepoSvs {
 	return &RepoSvs{
 		config: config,
@@ -29,10 +30,12 @@ func NewRepoSvs(config *Config, client ndn.Client, cmd *tlv.SyncJoin) *RepoSvs {
 	}
 }
 
+// Returns a string representation of the RepoSvs instance, including the name of its associated command group.
 func (r *RepoSvs) String() string {
 	return fmt.Sprintf("repo-svs (%s)", r.cmd.Group.Name)
 }
 
+// Initializes and starts a Named Data Networking (NDN) synchronization service (SVS ALO) for the repository, configuring snapshot handling, multicast prefix announcements, and publisher subscriptions to manage data synchronization and state updates.
 func (r *RepoSvs) Start() (err error) {
 	log.Info(r, "Starting SVS")
 
@@ -130,6 +133,7 @@ func (r *RepoSvs) Start() (err error) {
 	return nil
 }
 
+// Stops the SVS service by withdrawing advertised prefixes and terminating the underlying ALO component.
 func (r *RepoSvs) Stop() (err error) {
 	log.Info(r, "Stopping SVS")
 	if r.svsalo == nil {
@@ -152,11 +156,13 @@ func (r *RepoSvs) Stop() (err error) {
 	return nil
 }
 
+// Saves the provided state data under a repository-specific name constructed by appending "alo-state" to the group name.
 func (r *RepoSvs) commitState(state enc.Wire) {
 	name := r.cmd.Group.Name.Append(enc.NewKeywordComponent("alo-state"))
 	r.client.Store().Put(name, state.Join())
 }
 
+// Retrieves the stored state associated with the group's name and "alo-state" key from the repository's storage, returning it wrapped in an enc.Wire if found.
 func (r *RepoSvs) readState() enc.Wire {
 	name := r.cmd.Group.Name.Append(enc.NewKeywordComponent("alo-state"))
 	if stateWire, _ := r.client.Store().Get(name, false); stateWire != nil {

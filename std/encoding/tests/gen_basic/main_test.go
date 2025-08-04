@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This function tests the serialization and deserialization of a `FakeMetaInfo` structure using TLV (Type-Length-Value) encoding, validating correct byte output, parsing behavior, and error handling for invalid or malformed inputs in the Named-Data Networking (NDN) context.
 func TestFakeMetaInfo(t *testing.T) {
 	tu.SetT(t)
 
@@ -71,6 +72,7 @@ func TestFakeMetaInfo(t *testing.T) {
 	tu.Err(gen_basic.ParseFakeMetaInfo(enc.NewBufferView(buf2), false))
 }
 
+// This function tests the serialization and deserialization of a `gen_basic.OptField` structure, verifying that optional fields (Number, Time, Binary, Bool) are correctly encoded into a TLV (Type-Length-Value) format and that parsing the resulting bytes reconstructs the original structure, including handling of presence/absence and zero values.
 func TestOptField(t *testing.T) {
 	tu.SetT(t)
 
@@ -122,6 +124,7 @@ func TestOptField(t *testing.T) {
 	require.Equal(t, f, *f2)
 }
 
+// This function tests the serialization and deserialization of a `WireNameField` struct, verifying correct TLV encoding of a combined wire format and NDN name, including edge cases like empty inputs.
 func TestWireName(t *testing.T) {
 	tu.SetT(t)
 
@@ -155,6 +158,7 @@ func TestWireName(t *testing.T) {
 	require.Equal(t, []byte{}, f2.Wire.Join())
 }
 
+// Tests the correct encoding and parsing of a `Markers` structure containing wire data and a name, verifying that the parsed result matches the original input after serialization.
 func TestMarkers(t *testing.T) {
 	tu.SetT(t)
 
@@ -177,6 +181,7 @@ func TestMarkers(t *testing.T) {
 	require.Equal(t, f.Wire.Join(), f2.Wire.Join())
 }
 
+// Tests that a NoCopyStruct is encoded and parsed correctly without copying underlying byte slices, ensuring data integrity and efficient memory usage during TLV encoding/decoding.
 func TestNoCopy(t *testing.T) {
 	tu.SetT(t)
 
@@ -207,6 +212,7 @@ func TestNoCopy(t *testing.T) {
 	require.Equal(t, f.Wire2.Join(), f2.Wire2.Join())
 }
 
+// Tests the serialization and deserialization of a `StrField` struct containing two string fields (one optional), verifying correct byte encoding, parsing, and round-trip equality for both populated and empty/omitted values.
 func TestStrField(t *testing.T) {
 	tu.SetT(t)
 
@@ -232,6 +238,7 @@ func TestStrField(t *testing.T) {
 	tu.Err(gen_basic.ParseStrField(enc.NewBufferView(buf), false))
 }
 
+// This function tests the serialization and deserialization of a `FixedUintField` structure containing various unsigned integer fields (uint8, uint32, uint64, and pointer to uint8), verifying correct TLV encoding/decoding, optional field handling, and pointer behavior.
 func TestFixedUintField(t *testing.T) {
 	tu.SetT(t)
 

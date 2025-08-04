@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Tests the basic functionality of an NDN data store by inserting, retrieving, and removing data entries with exact and prefix-based lookups, verifying correct handling of multiple versions, subtree removal, and data persistence.
 func testStoreBasic(t *testing.T, store ndn.Store) {
 	name1, _ := enc.NameFromStr("/ndn/edu/ucla/test/packet/v1")
 	name2, _ := enc.NameFromStr("/ndn/edu/ucla/test/packet/v5")
@@ -121,6 +122,7 @@ func testStoreBasic(t *testing.T, store ndn.Store) {
 	require.Equal(t, wire5, data)
 }
 
+// Tests the `RemoveFlatRange` functionality of an NDN data store by inserting sequential data entries, removing specified numeric ranges, and validating that only the targeted entries are deleted while handling invalid ranges and single-element removals.
 func testStoreRemoveRange(t *testing.T, store ndn.Store) {
 	seq1, _ := enc.NameFromStr("/ndn/edu/wustl/test/packet/seq=1")
 	seq2, _ := enc.NameFromStr("/ndn/edu/wustl/test/packet/seq=2")
@@ -216,6 +218,7 @@ func testStoreRemoveRange(t *testing.T, store ndn.Store) {
 	require.Equal(t, wire7, data)
 }
 
+// Tests the transactional behavior of an ndn.Store implementation by verifying that data inserted within a transaction is not visible until committed, becomes visible after commit, and is discarded after rollback, while also confirming non-transactional puts work as expected.
 func testStoreTxn(t *testing.T, store ndn.Store) {
 	txname1, _ := enc.NameFromStr("/ndn/edu/memphis/test/packet/v1")
 	txname2, _ := enc.NameFromStr("/ndn/edu/memphis/test/packet/v5")
@@ -269,6 +272,7 @@ func testStoreTxn(t *testing.T, store ndn.Store) {
 	require.Equal(t, wire3, data)
 }
 
+// "TestMemoryStore initializes a memory-based storage instance and executes test cases for basic operations, range removal, and transaction handling in NDN Go."
 func TestMemoryStore(t *testing.T) {
 	tu.SetT(t)
 	store := storage.NewMemoryStore()

@@ -15,6 +15,7 @@ import (
 	"github.com/named-data/ndnd/std/sync"
 )
 
+// Creates an SVS passive synchronization instance that listens for updates on the `/ndn/svs` group prefix, uses Badger storage for data persistence, and buffers received updates without generating its own synchronization messages.
 func main() {
 	// ===========================================================
 	// IMPORTANT: Passive mode is not recommended for general use.

@@ -40,6 +40,7 @@ type Request struct {
 	Network string `schema:"network,omitempty"`
 }
 
+// Sets default values for the Server and Transport fields if unspecified, and ensures the Count is at least 1.
 func (req *Request) applyDefaults() {
 	if req.Server == "" {
 		req.Server = DefaultServer
@@ -50,6 +51,7 @@ func (req *Request) applyDefaults() {
 	}
 }
 
+// Constructs a URL for an NDNS request by parsing the server address and encoding the request parameters into the query string.
 func (req *Request) toURL() (u *url.URL, e error) {
 	if u, e = url.ParseRequestURI(req.Server); e != nil {
 		return nil, e

@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// This test function verifies the correct parsing and validation of various URI schemes (e.g., UDP, TCP, UNIX, QUIC) by the `DecodeURIString` function, checking canonical status, scheme identification, host/port extraction, and handling of special cases like IPv4/IPv6 zones and domain name resolution.
 func TestDecodeUri(t *testing.T) {
 	var uri *defn.URI
 

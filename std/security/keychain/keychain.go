@@ -8,6 +8,7 @@ import (
 	sec "github.com/named-data/ndnd/std/security"
 )
 
+// Constructs a key chain instance using the specified URI scheme (mem or dir) and public key store, returning an error for invalid schemes.
 func NewKeyChain(uri string, pubStore ndn.Store) (ndn.KeyChain, error) {
 	url, err := url.Parse(uri)
 	if err != nil {

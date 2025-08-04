@@ -28,6 +28,9 @@ type NeedResult struct {
 	Extra map[string]any
 }
 
+// Returns the Interest result status and encoded content from a NeedResult.  
+
+**Explanation**: This function retrieves two stored values from the `NeedResult` struct: `Status` (an `ndn.InterestResult` indicating the outcome of an Interest operation) and `Content` (an `enc.Wire` containing the encoded data payload). It is typically used to access the results of an Interest processing operation.
 func (r NeedResult) Get() (ndn.InterestResult, enc.Wire) {
 	return r.Status, r.Content
 }
@@ -48,14 +51,17 @@ type ExpressPoint struct {
 	SupressInt  bool
 }
 
+// Returns a string representation of the ExpressPoint as "express-point".
 func (n *ExpressPoint) String() string {
 	return "express-point"
 }
 
+// Returns the NodeImpl interface implementation of this ExpressPoint instance.
 func (n *ExpressPoint) NodeImplTrait() NodeImpl {
 	return n
 }
 
+// Searches the cache for a Data packet matching the Interest in the given event, using the Interest's freshness and prefix settings, and returns the cached Data if found.
 func (n *ExpressPoint) SearchCache(event *Event) enc.Wire {
 	// SearchCache can be triggered by both incoming Interest and outgoing Interest.
 	// To make the input unified, we set mustBeFresh and CanBePrefix here.
@@ -81,6 +87,7 @@ func (n *ExpressPoint) SearchCache(event *Event) enc.Wire {
 	}
 }
 
+// Handles incoming NDN Interest packets by validating, checking cached data, and dispatching to registered callbacks for further processing, ensuring efficient data retrieval and security checks.
 func (n *ExpressPoint) OnInterest(args ndn.InterestHandlerArgs, matching enc.Matching) {
 	node := n.Node
 	event := &Event{
@@ -361,6 +368,7 @@ func (n *ExpressPoint) NeedChan(
 	return ret
 }
 
+// Constructs an ExpressPoint node implementation with the given node, defaulting to a 4-second lifetime, requiring freshness, enabling prefix capability, and initializing event handlers for validation, storage, and interest suppression.
 func CreateExpressPoint(node *Node) NodeImpl {
 	return &ExpressPoint{
 		BaseNodeImpl: BaseNodeImpl{
@@ -383,6 +391,7 @@ func CreateExpressPoint(node *Node) NodeImpl {
 
 var ExpressPointDesc *NodeImplDesc
 
+// Initializes and registers the ExpressPoint node implementation with its properties, event handlers, functions, and creation logic for use in the NDN system.
 func initExpressPointDesc() {
 	ExpressPointDesc = &NodeImplDesc{
 		ClassName: "ExpressPoint",
@@ -486,6 +495,7 @@ func initExpressPointDesc() {
 	RegisterNodeImpl(ExpressPointDesc)
 }
 
+// Casts the ExpressPoint to the specified type, returning a pointer to itself if the target type is *ExpressPoint, a pointer to its BaseNodeImpl field if the target type is *BaseNodeImpl, or nil otherwise.
 func (n *ExpressPoint) CastTo(ptr any) any {
 	switch ptr.(type) {
 	case (*ExpressPoint):

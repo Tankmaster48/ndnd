@@ -9,6 +9,7 @@ import (
 
 var promiseGlobal = js.Global().Get("Promise")
 
+// Converts a synchronous Go function with error returns into a JavaScript function that executes the provided function asynchronously, returning a Promise which resolves with the result or rejects with an error message.
 func AsyncFunc(f func(this js.Value, p []js.Value) (any, error)) js.Func {
 	return js.FuncOf(func(this js.Value, p []js.Value) any {
 		promise, resolve, reject := Promise()
@@ -24,6 +25,7 @@ func AsyncFunc(f func(this js.Value, p []js.Value) (any, error)) js.Func {
 	})
 }
 
+// Creates a JavaScript Promise and returns the promise object along with Go functions to resolve or reject it.
 func Promise() (promise js.Value, resolve func(args ...any), reject func(args ...any)) {
 	var jsResolve, jsReject js.Value
 
@@ -41,6 +43,7 @@ func Promise() (promise js.Value, resolve func(args ...any), reject func(args ..
 	return
 }
 
+// Awaits the resolution or rejection of a JavaScript promise, returning the resulting value or error in Go.
 func Await(promise js.Value) (val js.Value, err error) {
 	res := make(chan any, 1)
 

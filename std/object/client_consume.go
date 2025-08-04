@@ -42,6 +42,7 @@ func (c *Client) ConsumeExt(args ndn.ConsumeExtArgs) {
 	})
 }
 
+// Consumes a data object by fetching metadata if the name lacks a version component, or directly processing the object if the name is versioned, handling errors and configuration options like metadata retrieval disablement.
 func (c *Client) consumeObject(state *ConsumeState) {
 	name := state.fetchName
 

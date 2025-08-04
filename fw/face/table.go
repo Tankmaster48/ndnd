@@ -27,6 +27,7 @@ type Table struct {
 	nextFaceID atomic.Uint64 // starts at 1
 }
 
+// Returns a string representation of the Table, which is 'face-table'.
 func (t *Table) String() string {
 	return "face-table"
 }

@@ -25,15 +25,18 @@ type BestRoute struct {
 	StrategyBase
 }
 
+// Registers the BestRoute strategy with version 1 for NDN forwarding.
 func init() {
 	strategyInit = append(strategyInit, func() Strategy { return &BestRoute{} })
 	StrategyVersions["best-route"] = []uint64{1}
 }
 
+// Initializes the BestRoute forwarding strategy with the given thread, naming it "best-route" and version 1.
 func (s *BestRoute) Instantiate(fwThread *Thread) {
 	s.NewStrategyBase(fwThread, "best-route", 1)
 }
 
+// Handles a ContentStore hit by sending the cached Data packet through the specified incoming face, marking the ContentStore as the source of the data.
 func (s *BestRoute) AfterContentStoreHit(
 	packet *defn.Pkt,
 	pitEntry table.PitEntry,
@@ -43,6 +46,7 @@ func (s *BestRoute) AfterContentStoreHit(
 	s.SendData(packet, pitEntry, inFace, 0) // 0 indicates ContentStore is source
 }
 
+// Forwards the received Data packet to all incoming faces recorded in the PIT entry to satisfy pending Interests.
 func (s *BestRoute) AfterReceiveData(
 	packet *defn.Pkt,
 	pitEntry table.PitEntry,
@@ -55,6 +59,7 @@ func (s *BestRoute) AfterReceiveData(
 	}
 }
 
+// Forwards an incoming Interest packet to the lowest-cost next hop, suppressing redundant retransmissions via existing out records, while ensuring no loops or excessive redundant traffic.
 func (s *BestRoute) AfterReceiveInterest(
 	packet *defn.Pkt,
 	pitEntry table.PitEntry,
@@ -100,6 +105,7 @@ func (s *BestRoute) AfterReceiveInterest(
 	core.Log.Debug(s, "No usable nexthop for Interest - DROP", "name", packet.Name)
 }
 
+// This function is a no-op in the BestRoute implementation, serving as a hook for potential pre-satisfaction processing (e.g., validation or logging) before fulfilling an Interest with a Data packet, though no action is taken here.
 func (s *BestRoute) BeforeSatisfyInterest(pitEntry table.PitEntry, inFace uint64) {
 	// This does nothing in BestRoute
 }

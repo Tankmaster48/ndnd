@@ -6,6 +6,7 @@ import (
 	"text/template"
 )
 
+// Generates a code snippet that appends the number of bytes required to encode a TLV type number in NDN, based on its value range (1, 3, 5, or 9 bytes).
 func GenTypeNumLen(typeNum uint64) (string, error) {
 	var ret uint
 	switch {
@@ -21,6 +22,7 @@ func GenTypeNumLen(typeNum uint64) (string, error) {
 	return fmt.Sprintf("\tl += %d", ret), nil
 }
 
+// Generates Go code to encode a type number into a byte buffer using variable-length encoding (1, 3, 5, or 9 bytes) based on its value, following TLV format conventions for efficient serialization.
 func GenEncodeTypeNum(typeNum uint64) (string, error) {
 	ret := ""
 	switch {
@@ -43,6 +45,9 @@ func GenEncodeTypeNum(typeNum uint64) (string, error) {
 	return ret, nil
 }
 
+// Generates Go code to calculate the encoding length of a natural number field, either as TLV-encoded length (if `isTlv=true`) or with a 1-byte header plus value length (if `isTlv=false`), using the provided variable name.  
+
+Example: For `code="n"` and `isTlv=true`, returns `l += uint(enc.TLNum(n).EncodingLength())`.
 func GenNaturalNumberLen(code string, isTlv bool) (string, error) {
 	var temp string
 	if isTlv {
@@ -56,6 +61,7 @@ func GenNaturalNumberLen(code string, isTlv bool) (string, error) {
 	return b.String(), err
 }
 
+// Generates Go code for encoding a natural number into a byte buffer using either TLV (Type-Length-Value) format or variable-length encoding, based on the provided `isTlv` flag.
 func GenNaturalNumberEncode(code string, isTlv bool) (string, error) {
 	var temp string
 	if isTlv {
@@ -72,6 +78,7 @@ func GenNaturalNumberEncode(code string, isTlv bool) (string, error) {
 	return b.String(), err
 }
 
+// Generates a code snippet for decoding a TLV number into a specified variable with error handling, returning the generated code and any template execution errors.
 func GenTlvNumberDecode(code string) (string, error) {
 	const Temp = `{{.}}, err = reader.ReadTLNum()
 	if err != nil {
@@ -83,6 +90,7 @@ func GenTlvNumberDecode(code string) (string, error) {
 	return b.String(), err
 }
 
+// Generates Go code to decode a natural number (unsigned integer) from a byte stream into the specified variable, handling byte-by-byte reading, bit shifting, and error checking for unexpected EOF.
 func GenNaturalNumberDecode(code string) (string, error) {
 	const Temp = `{{.}} = uint64(0)
 	{
@@ -104,11 +112,13 @@ func GenNaturalNumberDecode(code string) (string, error) {
 	return b.String(), err
 }
 
+// Generates a code snippet for appending a value `l` to a wire plan and resetting `l` to zero, typically used in encoding or packet construction workflows.
 func GenSwitchWirePlan() (string, error) {
 	return `wirePlan = append(wirePlan, l)
 	l = 0`, nil
 }
 
+// Generates code to advance to the next buffer in a wire array, resetting the position counter and handling end-of-wire conditions by setting the buffer to nil when the index exceeds the wire length.
 func GenSwitchWire() (string, error) {
 	return `wireIdx ++
 	pos = 0

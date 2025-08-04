@@ -20,6 +20,7 @@ type InstanceStateParsingContext struct {
 	StateVector_context svs.StateVectorParsingContext
 }
 
+// Initializes the InstanceStateEncoder with the encoded length of the provided InstanceState, accounting for the name components, bootstrap time, and state vector to prepare for serialization.
 func (encoder *InstanceStateEncoder) Init(value *InstanceState) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -49,11 +50,13 @@ func (encoder *InstanceStateEncoder) Init(value *InstanceState) {
 
 }
 
+// Initializes the `StateVector_context` field of the `InstanceStateParsingContext` by calling its own `Init()` method.
 func (context *InstanceStateParsingContext) Init() {
 
 	context.StateVector_context.Init()
 }
 
+// Encodes an `InstanceState` object into a binary buffer using TLV (Type-Length-Value) format, serializing optional name components (type 7), bootstrap time (type 212), and state vector data (type 201) as specified by the NDN encoding scheme.
 func (encoder *InstanceStateEncoder) EncodeInto(value *InstanceState, buf []byte) {
 
 	pos := uint(0)
@@ -82,6 +85,7 @@ func (encoder *InstanceStateEncoder) EncodeInto(value *InstanceState, buf []byte
 	}
 }
 
+// Encodes the given InstanceState into a wire representation using a pre-allocated buffer of size specified by the encoder.
 func (encoder *InstanceStateEncoder) Encode(value *InstanceState) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -92,6 +96,7 @@ func (encoder *InstanceStateEncoder) Encode(value *InstanceState) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded instance state data into an `InstanceState` struct, requiring the `BootstrapTime` field and handling critical fields according to the `ignoreCritical` flag.
 func (context *InstanceStateParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*InstanceState, error) {
 
 	var handled_Name bool = false
@@ -190,16 +195,19 @@ func (context *InstanceStateParsingContext) Parse(reader enc.WireView, ignoreCri
 	return value, nil
 }
 
+// Encodes the instance state into a wire-format representation using the InstanceStateEncoder.
 func (value *InstanceState) Encode() enc.Wire {
 	encoder := InstanceStateEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the instance state by encoding its components and concatenating the resulting byte slices.
 func (value *InstanceState) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses an InstanceState object from encoded wire data, with an option to ignore critical fields that cannot be processed.
 func ParseInstanceState(reader enc.WireView, ignoreCritical bool) (*InstanceState, error) {
 	context := InstanceStateParsingContext{}
 	context.Init()
@@ -220,6 +228,7 @@ type HistorySnapParsingContext struct {
 	Entries_context HistorySnapEntryParsingContext
 }
 
+// Initializes a HistorySnap encoder by setting up sub-encoders for each entry, calculating the total encoded length, and building a wire plan for efficient TLV-based encoding of the structured data.
 func (encoder *HistorySnapEncoder) Init(value *HistorySnap) {
 	{
 		Entries_l := len(value.Entries)
@@ -309,10 +318,12 @@ func (encoder *HistorySnapEncoder) Init(value *HistorySnap) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the internal entries context within the history snapshot parsing context for parsing operations.
 func (context *HistorySnapParsingContext) Init() {
 	context.Entries_context.Init()
 }
 
+// Encodes a HistorySnap object into a TLV-based wire format by serializing its Entries field using a subencoder for each entry's length and value.
 func (encoder *HistorySnapEncoder) EncodeInto(value *HistorySnap, wire enc.Wire) {
 
 	wireIdx := 0
@@ -372,6 +383,7 @@ func (encoder *HistorySnapEncoder) EncodeInto(value *HistorySnap, wire enc.Wire)
 	}
 }
 
+// Encodes a HistorySnap object into a byte-structured wire format as defined by the encoder's pre-planned segment lengths, preparing it for NDN data transmission.
 func (encoder *HistorySnapEncoder) Encode(value *HistorySnap) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -391,6 +403,7 @@ func (encoder *HistorySnapEncoder) Encode(value *HistorySnap) enc.Wire {
 	return wire
 }
 
+// Parses a HistorySnap structure from TLV-encoded data, processing entries of type 130 and handling unrecognized or critical fields according to the ignoreCritical flag.
 func (context *HistorySnapParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*HistorySnap, error) {
 
 	var handled_Entries bool = false
@@ -469,16 +482,19 @@ func (context *HistorySnapParsingContext) Parse(reader enc.WireView, ignoreCriti
 	return value, nil
 }
 
+// Encodes the HistorySnap instance into a binary wire format using the HistorySnapEncoder for transmission or storage.
 func (value *HistorySnap) Encode() enc.Wire {
 	encoder := HistorySnapEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the HistorySnap value into a byte slice by serializing its components and concatenating them.
 func (value *HistorySnap) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a HistorySnap from encoded data using a parsing context, with an option to ignore critical parsing errors.
 func ParseHistorySnap(reader enc.WireView, ignoreCritical bool) (*HistorySnap, error) {
 	context := HistorySnapParsingContext{}
 	context.Init()
@@ -496,6 +512,7 @@ type HistorySnapEntryEncoder struct {
 type HistorySnapEntryParsingContext struct {
 }
 
+// Initializes the encoder with the given HistorySnapEntry, calculating the total encoded length and generating a wire format plan that tracks offsets and sizes for each component (such as sequence number and content fields) to facilitate efficient binary serialization.
 func (encoder *HistorySnapEntryEncoder) Init(value *HistorySnapEntry) {
 
 	if value.Content != nil {
@@ -535,10 +552,12 @@ func (encoder *HistorySnapEntryEncoder) Init(value *HistorySnapEntry) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the HistorySnapEntryParsingContext for parsing a history snapshot entry.
 func (context *HistorySnapEntryParsingContext) Init() {
 
 }
 
+// Encodes a HistorySnapEntry into a TLV (Type-Length-Value) wire format, writing the sequence number as a variable-length integer and including optional content as a nested TLV block if present.
 func (encoder *HistorySnapEntryEncoder) EncodeInto(value *HistorySnapEntry, wire enc.Wire) {
 
 	wireIdx := 0
@@ -575,6 +594,7 @@ func (encoder *HistorySnapEntryEncoder) EncodeInto(value *HistorySnapEntry, wire
 	}
 }
 
+// Encodes a HistorySnapEntry into a structured wire format by allocating and populating byte slices according to the encoder's predefined length plan.
 func (encoder *HistorySnapEntryEncoder) Encode(value *HistorySnapEntry) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -594,6 +614,7 @@ func (encoder *HistorySnapEntryEncoder) Encode(value *HistorySnapEntry) enc.Wire
 	return wire
 }
 
+// Parses a HistorySnapEntry from TLV-encoded data, handling critical fields (SeqNo, Content) and allowing optional skipping of unrecognized critical fields based on the ignoreCritical flag.
 func (context *HistorySnapEntryParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*HistorySnapEntry, error) {
 
 	var handled_SeqNo bool = false
@@ -681,16 +702,19 @@ func (context *HistorySnapEntryParsingContext) Parse(reader enc.WireView, ignore
 	return value, nil
 }
 
+// Encodes the HistorySnapEntry into a wire format using a HistorySnapEntryEncoder.
 func (value *HistorySnapEntry) Encode() enc.Wire {
 	encoder := HistorySnapEntryEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Serializes the HistorySnapEntry into a contiguous byte slice by encoding its components and joining them.
 func (value *HistorySnapEntry) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a HistorySnapEntry from wire-format data, optionally ignoring unknown critical fields.
 func ParseHistorySnapEntry(reader enc.WireView, ignoreCritical bool) (*HistorySnapEntry, error) {
 	context := HistorySnapEntryParsingContext{}
 	context.Init()
@@ -709,6 +733,7 @@ type HistoryIndexEncoder struct {
 type HistoryIndexParsingContext struct {
 }
 
+// Initializes the HistoryIndexEncoder with the provided HistoryIndex value, calculates the total encoded length of the sequence numbers (SeqNos), and prepares a wire encoding plan for serializing the data.
 func (encoder *HistoryIndexEncoder) Init(value *HistoryIndex) {
 	{
 		SeqNos_l := len(value.SeqNos)
@@ -778,10 +803,12 @@ func (encoder *HistoryIndexEncoder) Init(value *HistoryIndex) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the HistoryIndexParsingContext, preparing it for parsing operations.
 func (context *HistoryIndexParsingContext) Init() {
 
 }
 
+// Encodes the sequence numbers from a HistoryIndex into a binary wire format using a TLV-like structure with type byte 132 and variable-length encoding for each value.
 func (encoder *HistoryIndexEncoder) EncodeInto(value *HistoryIndex, wire enc.Wire) {
 
 	wireIdx := 0
@@ -812,6 +839,7 @@ func (encoder *HistoryIndexEncoder) EncodeInto(value *HistoryIndex, wire enc.Wir
 	}
 }
 
+// Encodes a HistoryIndex into a pre-allocated byte buffer structured according to the encoder's wire plan, returning the segmented wire representation.
 func (encoder *HistoryIndexEncoder) Encode(value *HistoryIndex) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -831,6 +859,7 @@ func (encoder *HistoryIndexEncoder) Encode(value *HistoryIndex) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded HistoryIndex structure, extracting sequence numbers (type 132) into a slice and handling unknown fields according to the ignoreCritical flag.
 func (context *HistoryIndexParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*HistoryIndex, error) {
 
 	var handled_SeqNos bool = false
@@ -922,16 +951,19 @@ func (context *HistoryIndexParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the HistoryIndex into its wire format representation using the HistoryIndexEncoder.
 func (value *HistoryIndex) Encode() enc.Wire {
 	encoder := HistoryIndexEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the HistoryIndex by encoding its components and joining them into a single byte slice.
 func (value *HistoryIndex) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a HistoryIndex from the provided wire format, optionally ignoring critical errors during parsing.
 func ParseHistoryIndex(reader enc.WireView, ignoreCritical bool) (*HistoryIndex, error) {
 	context := HistoryIndexParsingContext{}
 	context.Init()

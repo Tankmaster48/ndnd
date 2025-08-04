@@ -46,6 +46,7 @@ type retxEntry struct {
 	retries int
 }
 
+// Constructs a new round-robin segment fetcher initialized with the provided client, a fixed congestion window of 100 segments, 3 maximum retransmission attempts, and default concurrency controls for managing data stream consumption.
 func newRrSegFetcher(client *Client) rrSegFetcher {
 	return rrSegFetcher{
 		mutex:       sync.RWMutex{},
@@ -147,6 +148,7 @@ func (s *rrSegFetcher) findWork() *ConsumeState {
 	return state
 }
 
+// The `check` function manages the generation and transmission of Interest packets for segment fetching in Named-Data Networking, prioritizing retransmissions when possible, handling congestion control, and queuing new segment requests while respecting flow control constraints.
 func (s *rrSegFetcher) check() {
 	for {
 		log.Debug(nil, "Checking for work")
@@ -297,6 +299,7 @@ func (s *rrSegFetcher) handleData(args ndn.ExpressCallbackArgs, state *ConsumeSt
 	})
 }
 
+// This function processes a validated Data packet by extracting and assembling its segment into a content buffer, updating the retrieval state, managing transmission counters, and triggering completion/progress callbacks when appropriate.
 func (s *rrSegFetcher) handleValidatedData(args ndn.ExpressCallbackArgs, state *ConsumeState) {
 	// get the final block id if we don't know the segment count
 	if state.segCnt == -1 { // TODO: can change?
@@ -394,18 +397,21 @@ func (s *rrSegFetcher) enqueueForRetransmission(state *ConsumeState, seg uint64,
 	s.retxQueue.PushBack(&retxEntry{state, seg, retries})
 }
 
+// Increments the outstanding counter in a thread-safe manner using a mutex to ensure concurrent access safety.
 func (s *rrSegFetcher) incrementOutstanding() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.outstanding++
 }
 
+// Decrements the thread-safe counter of outstanding operations by one.
 func (s *rrSegFetcher) decrementOutstanding() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 	s.outstanding--
 }
 
+// Decrements the transmission counter associated with the given ConsumeState in a thread-safe manner using a mutex lock.
 func (s *rrSegFetcher) decrementTxCounter(state *ConsumeState) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()

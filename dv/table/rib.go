@@ -39,6 +39,7 @@ type RibEntry struct {
 	dirty bool
 }
 
+// Constructs a new RIB (Routing Information Base) with the provided configuration, initializing empty maps for storing routing entries and neighbor names.
 func NewRib(config *config.Config) *Rib {
 	return &Rib{
 		config:    config,
@@ -182,10 +183,12 @@ func (r *Rib) Advert() *tlv.Advertisement {
 	return advert
 }
 
+// Returns the name associated with this RIB entry as an `enc.Name` structure.
 func (e *RibEntry) Name() enc.Name {
 	return e.name
 }
 
+// Updates the cost for the given next hop in the routing entry and triggers a refresh if the cost differs from the existing value; returns false if no change occurs to avoid unnecessary refreshes.
 func (e *RibEntry) Set(nextHop uint64, cost uint64) bool {
 	if known, ok := e.costs[nextHop]; !ok || known != cost {
 		e.costs[nextHop] = cost

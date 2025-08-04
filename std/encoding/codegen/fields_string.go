@@ -9,6 +9,7 @@ type StringField struct {
 	opt bool
 }
 
+// Constructs a TLV string field with the given name, type number, and optional status determined by the "optional" annotation.
 func NewStringField(name string, typeNum uint64, annotation string, _ *TlvModel) (TlvField, error) {
 	return &StringField{
 		BaseTlvField: BaseTlvField{
@@ -19,6 +20,7 @@ func NewStringField(name string, typeNum uint64, annotation string, _ *TlvModel)
 	}, nil
 }
 
+// Generates code to calculate the total encoding length for a string field, including type number, natural number length encoding, and the string's byte length, with optional presence checking if the field is marked optional.
 func (f *StringField) GenEncodingLength() (string, error) {
 	g := strErrBuf{}
 	if f.opt {
@@ -35,10 +37,12 @@ func (f *StringField) GenEncodingLength() (string, error) {
 	return g.output()
 }
 
+// Generates the wire encoding plan for a string field by calculating and returning its length as part of the encoding process.
 func (f *StringField) GenEncodingWirePlan() (string, error) {
 	return f.GenEncodingLength()
 }
 
+// Generates code to encode a string field (optional or required) into a buffer, including type number, length, and value, for Named-Data Networking data structures.
 func (f *StringField) GenEncodeInto() (string, error) {
 	g := strErrBuf{}
 	if f.opt {
@@ -57,6 +61,7 @@ func (f *StringField) GenEncodeInto() (string, error) {
 	return g.output()
 }
 
+// Generates code to read a string field from a data stream into a struct, handling optional fields and using a specified length for the read operation.
 func (f *StringField) GenReadFrom() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("{")
@@ -73,6 +78,7 @@ func (f *StringField) GenReadFrom() (string, error) {
 	return g.output()
 }
 
+// Generates code to handle skipping an optional string field (by unsetting it) or returns an error for skipping a required field, including the field name and type number.
 func (f *StringField) GenSkipProcess() (string, error) {
 	if f.opt {
 		return fmt.Sprintf("value.%s.Unset()", f.name), nil

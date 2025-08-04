@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Tests the serialization and deserialization of an IntArray, verifying correct byte encoding and parsing for both non-empty and empty integer arrays.
 func TestIntArray(t *testing.T) {
 	tu.SetT(t)
 
@@ -30,6 +31,7 @@ func TestIntArray(t *testing.T) {
 	require.Equal(t, 0, len(f2.Words))
 }
 
+// "Tests the serialization and parsing of a NameArray containing two names, ensuring correct TLV encoding and reconstruction."
 func TestNameArray(t *testing.T) {
 	tu.SetT(t)
 
@@ -47,6 +49,7 @@ func TestNameArray(t *testing.T) {
 	require.Equal(t, f, *f2)
 }
 
+// Serializes and deserializes a Nested structure with an Inner value, including handling of nil Val fields.
 func TestNested(t *testing.T) {
 	tu.SetT(t)
 
@@ -69,6 +72,7 @@ func TestNested(t *testing.T) {
 	require.True(t, f2.Val == nil)
 }
 
+// Tests the correct serialization and deserialization of a NestedSeq structure containing a sequence of Inner elements with numeric values, verifying both standard cases and empty sequences.
 func TestNestedSeq(t *testing.T) {
 	tu.SetT(t)
 
@@ -97,6 +101,7 @@ func TestNestedSeq(t *testing.T) {
 	require.Equal(t, 0, len(f2.Vals))
 }
 
+// Tests the encoding and decoding of a `NestedWire` structure containing optional and nested `Wire` fields, verifying correct serialization/deserialization of byte arrays, optional values, and nil pointers in various configurations.
 func TestNestedWire(t *testing.T) {
 	tu.SetT(t)
 

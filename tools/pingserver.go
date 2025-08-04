@@ -25,6 +25,7 @@ type PingServer struct {
 	expose bool
 }
 
+// Constructs a CLI command to start an NDN ping server under a specified name prefix, with an optional flag to use the client's origin for prefix registration.
 func CmdPingServer() *cobra.Command {
 	ps := PingServer{}
 
@@ -41,10 +42,12 @@ func CmdPingServer() *cobra.Command {
 	return cmd
 }
 
+// Returns a string representation of the PingServer as "ping-server".
 func (ps *PingServer) String() string {
 	return "ping-server"
 }
 
+// Starts a PingServer that listens for Interests on a specified NDN name prefix, appending a "ping" component, and responds with signed Data packets until interrupted, while managing network stack resources and prefix announcements.
 func (ps *PingServer) run(_ *cobra.Command, args []string) {
 	name, err := enc.NameFromStr(args[0])
 	if err != nil {
@@ -89,11 +92,13 @@ func (ps *PingServer) run(_ *cobra.Command, args []string) {
 	<-sigchan
 }
 
+// Outputs statistics for the PingServer, including the number of processed Interests and the server name.
 func (ps *PingServer) stats() {
 	fmt.Printf("\n--- %s ping server statistics ---\n", ps.name)
 	fmt.Printf("%d Interests processed\n", ps.nRecv)
 }
 
+// Handles an incoming Interest by generating a signed Data packet with the same name, included app parameters, and a ContentType of Blob, then replies with the encoded Data.
 func (ps *PingServer) onInterest(args ndn.InterestHandlerArgs) {
 	fmt.Printf("interest received: %s\n", args.Interest.Name())
 	ps.nRecv++

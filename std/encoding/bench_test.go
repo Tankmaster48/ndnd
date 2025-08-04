@@ -12,6 +12,7 @@ import (
 	tu "github.com/named-data/ndnd/std/utils/testutils"
 )
 
+// Generates `count` unsigned Data packets with random names of length `nameSize`, random payloads of size `payloadSize`, and predefined MetaInfo (Blob content type, 4s freshness) and SignatureInfo (Ed25519, key locator).
 func encodeDataCases(count int, payloadSize int, nameSize int) (ret []*spec.Data) {
 	keyName := tu.NoErrB(enc.NameFromStr("/go-ndn/bench/signer/KEY"))
 
@@ -34,6 +35,7 @@ func encodeDataCases(count int, payloadSize int, nameSize int) (ret []*spec.Data
 	return ret
 }
 
+// Constructs a Data packet with the provided data and initializes a 32-byte signature buffer in the wire format for subsequent signing.
 func encodeData(data *spec.Data) enc.Wire {
 	packet := &spec.Packet{Data: data}
 	encoder := spec.PacketEncoder{
@@ -48,6 +50,7 @@ func encodeData(data *spec.Data) enc.Wire {
 	return wire
 }
 
+// Benchmarks the encoding of multiple Data packets with specified payload and name sizes by generating test cases and measuring the performance of the encoding operation.
 func encodeDataBench(b *testing.B, payloadSize, nameSize int) {
 	count := b.N
 	data := encodeDataCases(count, payloadSize, nameSize)
@@ -58,22 +61,30 @@ func encodeDataBench(b *testing.B, payloadSize, nameSize int) {
 	}
 }
 
+// **Description:**  
+Performs a benchmark test for encoding a small Data packet with a specified size and parameters.
 func BenchmarkDataEncodeSmall(b *testing.B) {
 	encodeDataBench(b, 100, 5)
 }
 
+// "Runs a benchmark for encoding Data packets with a medium-sized payload (1000 bytes) and 10 name components."
 func BenchmarkDataEncodeMedium(b *testing.B) {
 	encodeDataBench(b, 1000, 10)
 }
 
+// **Description:**  
+Benchmarks the encoding performance of a Data packet with a medium-long name (1000 components) and 20-byte content.
 func BenchmarkDataEncodeMediumLongName(b *testing.B) {
 	encodeDataBench(b, 1000, 20)
 }
 
+// **Description:**  
+Benchmark test that measures the performance of encoding a large Data packet with a specified size and content length.
 func BenchmarkDataEncodeLarge(b *testing.B) {
 	encodeDataBench(b, 8000, 10)
 }
 
+// This function benchmarks the decoding of NDN Data packets with specified payload and name sizes by generating encoded test data, then measuring the performance of reading and validating those packets.
 func decodeDataBench(b *testing.B, payloadSize, nameSize int) {
 	count := b.N
 	buffers := make([][]byte, count)
@@ -91,18 +102,22 @@ func decodeDataBench(b *testing.B, payloadSize, nameSize int) {
 	}
 }
 
+// This function benchmarks the decoding of a small Data packet with a 100-byte content size and 5 name components.
 func BenchmarkDataDecodeSmall(b *testing.B) {
 	decodeDataBench(b, 100, 5)
 }
 
+// "Runs a benchmark test for decoding a medium-sized Data packet with 1000 iterations and 10 samples using the decodeDataBench helper function."
 func BenchmarkDataDecodeMedium(b *testing.B) {
 	decodeDataBench(b, 1000, 10)
 }
 
+// Runs a benchmark for decoding a Data packet with a name of 20 components and 1000-byte content to measure performance.
 func BenchmarkDataDecodeMediumLongName(b *testing.B) {
 	decodeDataBench(b, 1000, 20)
 }
 
+// Benchmarks decoding a large Data packet with 8000-byte content and 10 segments.
 func BenchmarkDataDecodeLarge(b *testing.B) {
 	decodeDataBench(b, 8000, 10)
 }

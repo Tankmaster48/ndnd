@@ -12,6 +12,7 @@ import (
 	"github.com/named-data/ndnd/std/utils"
 )
 
+// Sends a timestamped Interest for `/example/testApp/randomData` with freshness and timeout requirements, handling Data responses or NACKs via a callback.
 func main() {
 	app := engine.NewBasicEngine(engine.NewDefaultFace())
 	err := app.Start()

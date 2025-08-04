@@ -53,6 +53,7 @@ func RegisterInternalTransport() (LinkService, *InternalTransport) {
 	return link, transport
 }
 
+// Returns a string representation of the internal transport, including its face ID, remote URI, and local URI.
 func (t *InternalTransport) String() string {
 	return fmt.Sprintf("internal-transport (faceid=%d remote=%s local=%s)", t.faceID, t.remoteURI, t.localURI)
 }
@@ -110,6 +111,7 @@ func (t *InternalTransport) Receive() *spec.LpPacket {
 	return nil
 }
 
+// Sends a frame if it is within the MTU limit and the transport is running, copying the frame to avoid data races and queuing it for transmission.
 func (t *InternalTransport) sendFrame(frame []byte) {
 	if len(frame) > t.MTU() {
 		core.Log.Warn(t, "Attempted to send frame larger than MTU")
@@ -127,6 +129,7 @@ func (t *InternalTransport) sendFrame(frame []byte) {
 	t.recvQueue <- frameCopy
 }
 
+// Processes frames from the send queue by validating their size, updating byte counters, and passing them to the link service for transmission.
 func (t *InternalTransport) runReceive() {
 	for frame := range t.sendQueue {
 		if len(frame) > defn.MaxNDNPacketSize {
@@ -139,6 +142,7 @@ func (t *InternalTransport) runReceive() {
 	}
 }
 
+// Closes the internal transport, closing the receive queue and allowing the send queue to be garbage collected if the transport was running.
 func (t *InternalTransport) Close() {
 	if t.running.Swap(false) {
 		// do not close the send queue, let it be garbage collected

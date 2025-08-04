@@ -18,6 +18,7 @@ type YiQueue[T any] struct {
 	size   atomic.Int32
 }
 
+// Constructs a new YiQueue with a buffered notification channel and an underlying queue for elements of type T.
 func NewYiQueue[T any]() *YiQueue[T] {
 	return &YiQueue[T]{
 		Notify: make(chan struct{}, 1),
@@ -25,6 +26,7 @@ func NewYiQueue[T any]() *YiQueue[T] {
 	}
 }
 
+// Adds an element to the YiQueue and non-blockingly notifies a consumer via a channel if this element is the first in the queue.
 func (yq *YiQueue[T]) Push(v T) {
 	sizenow := yq.size.Add(1)
 	yq.queue.Push(v)
@@ -38,6 +40,7 @@ func (yq *YiQueue[T]) Push(v T) {
 	}
 }
 
+// Removes and returns the next element from the queue, spinning until a value is available if initially not present, or returns false if the queue is empty.
 func (yq *YiQueue[T]) Pop() (val T, ok bool) {
 	for yq.size.Load() > 0 {
 		val, ok = yq.queue.Pop()
@@ -54,6 +57,7 @@ func (yq *YiQueue[T]) Pop() (val T, ok bool) {
 	return val, false
 }
 
+// Returns an iterator that sequentially pops elements from the YiQueue, yielding each value until the queue is empty or the yield function returns false.
 func (yq *YiQueue[T]) Iter() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for {

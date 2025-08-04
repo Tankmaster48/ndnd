@@ -63,6 +63,7 @@ const SchemaJson = `{
 }`
 const HmacKey = "Hello, World!"
 
+// This function implements an NDN consumer application that fetches and decrypts versioned encrypted data from `/example/schema/encryptionApp/randomData/<v=time>` using a schema-defined decryption process with a provided HMAC key.
 func main() {
 	if len(os.Args) < 2 {
 		log.Fatal(nil, "Insufficient argument. Please input the version number given by the producer.")

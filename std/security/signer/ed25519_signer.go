@@ -16,30 +16,37 @@ type ed25519Signer struct {
 	key  ed25519.PrivateKey
 }
 
+// Returns the Ed25519 signature type for the signer.
 func (s *ed25519Signer) Type() ndn.SigType {
 	return ndn.SignatureEd25519
 }
 
+// Returns the name of the Ed25519 key associated with this signer.
 func (s *ed25519Signer) KeyName() enc.Name {
 	return s.name
 }
 
+// Returns the NDN name of the Ed25519 key used as a KeyLocator for signed packets.
 func (s *ed25519Signer) KeyLocator() enc.Name {
 	return s.name
 }
 
+// Returns the size in bytes of the Ed25519 signature produced by this signer.
 func (s *ed25519Signer) EstimateSize() uint {
 	return ed25519.SignatureSize
 }
 
+// Signs the concatenated wire-encoded data using the Ed25519 private key, returning the digital signature.
 func (s *ed25519Signer) Sign(covered enc.Wire) ([]byte, error) {
 	return ed25519.Sign(s.key, covered.Join()), nil
 }
 
+// Returns the public key associated with the ED25519 signer, encoded in PKIX/X.509 format as a byte slice.
 func (s *ed25519Signer) Public() ([]byte, error) {
 	return x509.MarshalPKIXPublicKey(s.key.Public())
 }
 
+// Returns the Ed25519 private key in PKCS#8 encoding for cryptographic operations.
 func (s *ed25519Signer) Secret() ([]byte, error) {
 	return x509.MarshalPKCS8PrivateKey(s.key)
 }

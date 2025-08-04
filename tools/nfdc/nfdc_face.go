@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Fetches and displays detailed status information for all network faces, including identifiers, connection details, congestion metrics, MTU, packet counters, and persistence flags in a human-readable format.
 func (t *Tool) ExecFaceList(_ *cobra.Command, args []string) {
 	t.Start()
 	defer t.Stop()

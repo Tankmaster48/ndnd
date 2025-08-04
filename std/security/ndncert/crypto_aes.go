@@ -21,6 +21,7 @@ type AeadMessage struct {
 	CipherText []byte
 }
 
+// Constructs a TLV-encoded CipherMsg from the AEAD message, including the initialization vector, authentication tag, and cipher text.
 func (m *AeadMessage) TLV() *tlv.CipherMsg {
 	return &tlv.CipherMsg{
 		InitVec:  m.IV[:],
@@ -29,6 +30,23 @@ func (m *AeadMessage) TLV() *tlv.CipherMsg {
 	}
 }
 
+// Initializer for AEAD message using parameters from a TLV cipher structure.  
+
+**Description:**  
+Initializes the AEAD message with the provided TLV cipher message's initialization vector, authentication tag, and encrypted payload.  
+
+**Function Signature:**  
+```go
+func (m *AeadMessage) FromTLV(t *tlv.CipherMsg)
+```  
+
+**Semantics:**  
+- Converts the TLV `InitVec` and `AuthNTag` fields into fixed-size byte arrays (`[AeadSizeNonce]byte` and `[AeadSizeTag]byte`, respectively).  
+- Assigns the `Payload` field of the TLV structure to the `CipherText` field of the AEAD message.  
+- Assumes the input TLV structure is properly formatted and does not perform validation.  
+
+**Example Use Case:**  
+Reconstructing an AEAD-encrypted message from raw TLV-encoded data.
 func (m *AeadMessage) FromTLV(t *tlv.CipherMsg) {
 	m.IV = [AeadSizeNonce]byte(t.InitVec)
 	m.AuthTag = [AeadSizeTag]byte(t.AuthNTag)
@@ -40,6 +58,7 @@ type AeadCounter struct {
 	random [AeadSizeRand]byte
 }
 
+// Constructs a new AEAD counter instance initialized with a cryptographically secure random nonce and a zero-based block counter for encryption operations.
 func NewAeadCounter() *AeadCounter {
 	randomBytes := make([]byte, AeadSizeRand)
 	if _, randReadErr := io.ReadFull(rand.Reader, randomBytes); randReadErr != nil {
@@ -51,6 +70,7 @@ func NewAeadCounter() *AeadCounter {
 	}
 }
 
+// Encrypts plaintext using AES-GCM with the provided key and additional authenticated data, generating an IV from the counter and returning an AEAD message containing the ciphertext, authentication tag, and IV.
 func AeadEncrypt(
 	key [AeadSizeTag]byte,
 	plaintext []byte,
@@ -83,6 +103,7 @@ func AeadEncrypt(
 	}, nil
 }
 
+// Decrypts an AES-GCM encrypted message using the provided key, message's IV and ciphertext, and additional authentication data (info), returning the plaintext or an error if decryption fails.
 func AeadDecrypt(
 	key [AeadSizeTag]byte,
 	message AeadMessage,

@@ -9,6 +9,7 @@ import (
 	"github.com/named-data/ndnd/std/ndn"
 )
 
+// Reads a TLV-encoded stream from the given reader, processes each complete TLV block via the onFrame callback, and handles errors using the ignoreError callback until EOF or an unignorable error occurs.
 func ReadTlvStream(
 	reader io.Reader,
 	onFrame func([]byte) bool,

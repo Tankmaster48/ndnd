@@ -17,6 +17,7 @@ type HTTP3Transport struct {
 	c *webtransport.Session
 }
 
+// Constructs an HTTP3Transport using the provided WebTransport session, initializing it with remote and local address-port pairs along with default transport parameters for persistency, scope, and capacity.
 func NewHTTP3Transport(remote, local netip.AddrPort, c *webtransport.Session) (t *HTTP3Transport) {
 	t = &HTTP3Transport{c: c}
 	t.makeTransportBase(defn.MakeQuicFaceURI(remote), defn.MakeQuicFaceURI(local), spec_mgmt.PersistencyOnDemand, defn.NonLocal, defn.PointToPoint, 1000)
@@ -24,18 +25,22 @@ func NewHTTP3Transport(remote, local netip.AddrPort, c *webtransport.Session) (t
 	return
 }
 
+// Returns a string representation of the HTTP3Transport containing face ID, remote URI, and local URI for identification.
 func (t *HTTP3Transport) String() string {
 	return fmt.Sprintf("http3-transport (faceid=%d remote=%s local=%s)", t.faceID, t.remoteURI, t.localURI)
 }
 
+// Returns true if the persistency is set to OnDemand.
 func (t *HTTP3Transport) SetPersistency(persistency spec_mgmt.Persistency) bool {
 	return persistency == spec_mgmt.PersistencyOnDemand
 }
 
+// Returns the current number of bytes queued for transmission in the HTTP/3 transport send buffer.
 func (t *HTTP3Transport) GetSendQueueSize() uint64 {
 	return 0
 }
 
+// Sends a frame over the HTTP3Transport if the transport is active and the frame size is within the MTU, handling errors by closing the connection and updating transmission statistics.
 func (t *HTTP3Transport) sendFrame(frame []byte) {
 	if !t.running.Load() {
 		return
@@ -56,6 +61,7 @@ func (t *HTTP3Transport) sendFrame(frame []byte) {
 	t.nOutBytes += uint64(len(frame))
 }
 
+// Handles incoming WebTransport datagrams by receiving and validating NDN packets, updating byte counters, and forwarding valid packets to the link service for processing, while terminating on errors or oversized packets.
 func (t *HTTP3Transport) runReceive() {
 	defer t.Close()
 
@@ -76,6 +82,7 @@ func (t *HTTP3Transport) runReceive() {
 	}
 }
 
+// Shuts down the HTTP/3 transport by stopping its operation and closing the underlying connection without reporting an error.
 func (t *HTTP3Transport) Close() {
 	t.running.Store(false)
 	t.c.CloseWithError(0, "")

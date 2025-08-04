@@ -22,6 +22,7 @@ type RepoCmdParsingContext struct {
 	BlobFetch_context BlobFetchParsingContext
 }
 
+// Initializes the encoder with the provided RepoCmd value, setting up sub-encoders for SyncJoin and BlobFetch if present, and calculates the total encoded length by summing fixed overhead, length metadata, and payload sizes for each field.
 func (encoder *RepoCmdEncoder) Init(value *RepoCmd) {
 	if value.SyncJoin != nil {
 		encoder.SyncJoin_encoder.Init(value.SyncJoin)
@@ -45,11 +46,13 @@ func (encoder *RepoCmdEncoder) Init(value *RepoCmd) {
 
 }
 
+// Initializes the SyncJoin and BlobFetch sub-contexts within the RepoCmdParsingContext.
 func (context *RepoCmdParsingContext) Init() {
 	context.SyncJoin_context.Init()
 	context.BlobFetch_context.Init()
 }
 
+// Encodes a RepoCmd object into a binary buffer using TLV (Type-Length-Value) format, handling SyncJoin and BlobFetch commands with specific type numbers (7600 and 7602) by serializing their encoded lengths and values sequentially.
 func (encoder *RepoCmdEncoder) EncodeInto(value *RepoCmd, buf []byte) {
 
 	pos := uint(0)
@@ -76,6 +79,7 @@ func (encoder *RepoCmdEncoder) EncodeInto(value *RepoCmd, buf []byte) {
 	}
 }
 
+// Encodes a RepoCmd into a binary wire format using the encoder's predefined length, returning a slice containing the serialized byte data.
 func (encoder *RepoCmdEncoder) Encode(value *RepoCmd) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -86,6 +90,7 @@ func (encoder *RepoCmdEncoder) Encode(value *RepoCmd) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded RepoCmd, extracting SyncJoin and BlobFetch sub-structures while handling unknown fields according to the ignoreCritical flag.
 func (context *RepoCmdParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*RepoCmd, error) {
 
 	var handled_SyncJoin bool = false
@@ -160,16 +165,20 @@ func (context *RepoCmdParsingContext) Parse(reader enc.WireView, ignoreCritical 
 	return value, nil
 }
 
+// Encodes the repository command into a wire format for transmission or storage using the associated encoder.
 func (value *RepoCmd) Encode() enc.Wire {
 	encoder := RepoCmdEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// **Description:**  
+Serializes the RepoCmd into a byte slice by encoding and joining its components.
 func (value *RepoCmd) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-format representation of a repository command into a RepoCmd object, using a parsing context and optionally ignoring critical fields if specified.
 func ParseRepoCmd(reader enc.WireView, ignoreCritical bool) (*RepoCmd, error) {
 	context := RepoCmdParsingContext{}
 	context.Init()
@@ -183,6 +192,7 @@ type RepoCmdResEncoder struct {
 type RepoCmdResParsingContext struct {
 }
 
+// Calculates the total encoded length of a RepoCmdRes message (including TLV overhead for status and message fields) and sets it on the encoder.
 func (encoder *RepoCmdResEncoder) Init(value *RepoCmdRes) {
 
 	l := uint(0)
@@ -195,10 +205,12 @@ func (encoder *RepoCmdResEncoder) Init(value *RepoCmdRes) {
 
 }
 
+// Initializes the repository command response parsing context, preparing it for processing command responses.
 func (context *RepoCmdResParsingContext) Init() {
 
 }
 
+// Encodes a RepoCmdRes object into a binary TLV format in the provided buffer, including a status code (TLV type 657) and an optional message (TLV type 658).
 func (encoder *RepoCmdResEncoder) EncodeInto(value *RepoCmdRes, buf []byte) {
 
 	pos := uint(0)
@@ -217,6 +229,7 @@ func (encoder *RepoCmdResEncoder) EncodeInto(value *RepoCmdRes, buf []byte) {
 	pos += uint(len(value.Message))
 }
 
+// Encodes a RepoCmdRes object into a pre-allocated byte buffer of the encoder's specified length and returns it as a single-element enc.Wire slice.
 func (encoder *RepoCmdResEncoder) Encode(value *RepoCmdRes) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -227,6 +240,7 @@ func (encoder *RepoCmdResEncoder) Encode(value *RepoCmdRes) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded RepoCmdRes from a binary wire format, extracting required Status and Message fields, and handling unrecognized or critical fields based on the ignoreCritical flag.
 func (context *RepoCmdResParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*RepoCmdRes, error) {
 
 	var handled_Status bool = false
@@ -320,16 +334,19 @@ func (context *RepoCmdResParsingContext) Parse(reader enc.WireView, ignoreCritic
 	return value, nil
 }
 
+// Encodes the RepoCmdRes object into a wire format using a dedicated encoder for serialization or network transmission.
 func (value *RepoCmdRes) Encode() enc.Wire {
 	encoder := RepoCmdResEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the RepoCmdRes value into its wire format and joins the resulting segments into a single byte slice.
 func (value *RepoCmdRes) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a RepoCmdRes structure from encoded wire data, using a parsing context and an option to ignore critical errors during decoding.
 func ParseRepoCmdRes(reader enc.WireView, ignoreCritical bool) (*RepoCmdRes, error) {
 	context := RepoCmdResParsingContext{}
 	context.Init()
@@ -352,6 +369,7 @@ type SyncJoinParsingContext struct {
 	HistorySnapshot_context HistorySnapshotConfigParsingContext
 }
 
+// Initializes the SyncJoinEncoder with the provided SyncJoin value, setting up sub-encoders for non-nil fields and calculating the total encoded length including TLV type/length overhead for each field.
 func (encoder *SyncJoinEncoder) Init(value *SyncJoin) {
 	if value.Protocol != nil {
 		encoder.Protocol_encoder.Init(value.Protocol)
@@ -391,6 +409,7 @@ func (encoder *SyncJoinEncoder) Init(value *SyncJoin) {
 
 }
 
+// Initializes the SyncJoinParsingContext by initializing its protocol, group, multicast prefix, and history snapshot sub-contexts.
 func (context *SyncJoinParsingContext) Init() {
 	context.Protocol_context.Init()
 	context.Group_context.Init()
@@ -398,6 +417,7 @@ func (context *SyncJoinParsingContext) Init() {
 	context.HistorySnapshot_context.Init()
 }
 
+// Encodes a SyncJoin object into a TLV (Type-Length-Value)-formatted byte slice, writing non-nil fields (Protocol, Group, MulticastPrefix, HistorySnapshot) with their respective type codes and encoded values into the provided buffer.
 func (encoder *SyncJoinEncoder) EncodeInto(value *SyncJoin, buf []byte) {
 
 	pos := uint(0)
@@ -444,6 +464,7 @@ func (encoder *SyncJoinEncoder) EncodeInto(value *SyncJoin, buf []byte) {
 	}
 }
 
+// Encodes a SyncJoin object into a byte slice of the encoder's specified length and returns it as a Wire.
 func (encoder *SyncJoinEncoder) Encode(value *SyncJoin) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -454,6 +475,7 @@ func (encoder *SyncJoinEncoder) Encode(value *SyncJoin) enc.Wire {
 	return wire
 }
 
+// Parses a SyncJoin object from a TLV-encoded wire format using the provided parsing contexts, handling critical and non-critical fields according to the ignoreCritical flag.
 func (context *SyncJoinParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*SyncJoin, error) {
 
 	var handled_Protocol bool = false
@@ -548,16 +570,19 @@ func (context *SyncJoinParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the SyncJoin value into a wire format using a SyncJoinEncoder for serialization.
 func (value *SyncJoin) Encode() enc.Wire {
 	encoder := SyncJoinEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the SyncJoin value and returns its joined byte representation.
 func (value *SyncJoin) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a SyncJoin message from encoded data using a parsing context and specified critical field handling.
 func ParseSyncJoin(reader enc.WireView, ignoreCritical bool) (*SyncJoin, error) {
 	context := SyncJoinParsingContext{}
 	context.Init()
@@ -571,6 +596,7 @@ type HistorySnapshotConfigEncoder struct {
 type HistorySnapshotConfigParsingContext struct {
 }
 
+// Initializes the encoder by calculating the total encoded length of the HistorySnapshotConfig, combining a fixed 3-byte overhead with the variable-length encoding of the Threshold field (1 byte for type plus the size needed to encode the threshold value as a natural number).
 func (encoder *HistorySnapshotConfigEncoder) Init(value *HistorySnapshotConfig) {
 
 	l := uint(0)
@@ -580,10 +606,12 @@ func (encoder *HistorySnapshotConfigEncoder) Init(value *HistorySnapshotConfig) 
 
 }
 
+// Initializes the HistorySnapshotConfigParsingContext, preparing it for parsing configuration data.
 func (context *HistorySnapshotConfigParsingContext) Init() {
 
 }
 
+// Encodes a HistorySnapshotConfig into a binary buffer using a TLV-like format, writing a fixed type (253) and length (421) header followed by the Threshold field encoded as a variable-length natural number.
 func (encoder *HistorySnapshotConfigEncoder) EncodeInto(value *HistorySnapshotConfig, buf []byte) {
 
 	pos := uint(0)
@@ -596,6 +624,7 @@ func (encoder *HistorySnapshotConfigEncoder) EncodeInto(value *HistorySnapshotCo
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes a HistorySnapshotConfig into a wire-format byte slice using the encoder's precomputed length to allocate the buffer.
 func (encoder *HistorySnapshotConfigEncoder) Encode(value *HistorySnapshotConfig) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -606,6 +635,7 @@ func (encoder *HistorySnapshotConfigEncoder) Encode(value *HistorySnapshotConfig
 	return wire
 }
 
+// Parses a TLV-encoded HistorySnapshotConfig, extracting the required Threshold field (type 421) and handling critical/unrecognized fields according to the ignoreCritical flag.
 func (context *HistorySnapshotConfigParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*HistorySnapshotConfig, error) {
 
 	var handled_Threshold bool = false
@@ -683,16 +713,19 @@ func (context *HistorySnapshotConfigParsingContext) Parse(reader enc.WireView, i
 	return value, nil
 }
 
+// Encodes the HistorySnapshotConfig into its wire format representation using a dedicated encoder.
 func (value *HistorySnapshotConfig) Encode() enc.Wire {
 	encoder := HistorySnapshotConfigEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the HistorySnapshotConfig into a byte slice by joining its encoded components.
 func (value *HistorySnapshotConfig) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a HistorySnapshotConfig from the provided wire format reader, with an option to ignore critical parsing errors.
 func ParseHistorySnapshotConfig(reader enc.WireView, ignoreCritical bool) (*HistorySnapshotConfig, error) {
 	context := HistorySnapshotConfigParsingContext{}
 	context.Init()
@@ -711,6 +744,7 @@ type BlobFetchParsingContext struct {
 	Name_context spec.NameContainerParsingContext
 }
 
+// Initializes the BlobFetchEncoder with the provided BlobFetch's name and byte slice data, calculating the total encoded length by summing TLV header overhead, length field sizes, and payload lengths for each component.
 func (encoder *BlobFetchEncoder) Init(value *BlobFetch) {
 	if value.Name != nil {
 		encoder.Name_encoder.Init(value.Name)
@@ -767,11 +801,13 @@ func (encoder *BlobFetchEncoder) Init(value *BlobFetch) {
 
 }
 
+// Initializes the `Name_context` field of the `BlobFetchParsingContext`, preparing it for parsing operations.
 func (context *BlobFetchParsingContext) Init() {
 	context.Name_context.Init()
 
 }
 
+// Encodes a BlobFetch object into a TLV-based wire format, writing the Name as a type-440 TLV element and each Data slice entry as a type-442 TLV element into the provided buffer.
 func (encoder *BlobFetchEncoder) EncodeInto(value *BlobFetch, buf []byte) {
 
 	pos := uint(0)
@@ -812,6 +848,7 @@ func (encoder *BlobFetchEncoder) EncodeInto(value *BlobFetch, buf []byte) {
 	}
 }
 
+// Encodes a BlobFetch value into a byte slice using the encoder's specified length, returning it as a wire-format structure.
 func (encoder *BlobFetchEncoder) Encode(value *BlobFetch) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -822,6 +859,7 @@ func (encoder *BlobFetchEncoder) Encode(value *BlobFetch) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded BlobFetch object from a WireView reader, extracting Name components via a nested context and collecting raw Data bytes while handling critical/unrecognized fields according to the ignoreCritical flag.
 func (context *BlobFetchParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*BlobFetch, error) {
 
 	var handled_Name bool = false
@@ -911,16 +949,19 @@ func (context *BlobFetchParsingContext) Parse(reader enc.WireView, ignoreCritica
 	return value, nil
 }
 
+// Encodes the BlobFetch value into its wire representation for network transmission or persistence.
 func (value *BlobFetch) Encode() enc.Wire {
 	encoder := BlobFetchEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded bytes of the BlobFetch as a single byte slice by concatenating its encoded components.
 func (value *BlobFetch) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a BlobFetch structure from encoded NDN data using a parsing context, with an option to ignore critical fields if specified.
 func ParseBlobFetch(reader enc.WireView, ignoreCritical bool) (*BlobFetch, error) {
 	context := BlobFetchParsingContext{}
 	context.Init()

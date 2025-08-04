@@ -47,22 +47,27 @@ func NewKeyChainJS(api js.Value, pubStore ndn.Store) (ndn.KeyChain, error) {
 	return kc, nil
 }
 
+// Returns a string representation of the KeyChainJS object, specifically "keychain-js", for human-readable identification.
 func (kc *KeyChainJS) String() string {
 	return "keychain-js"
 }
 
+// Returns the key store associated with this key chain.
 func (kc *KeyChainJS) Store() ndn.Store {
 	return kc.mem.Store()
 }
 
+// Returns a list of all identities stored in the key chain.
 func (kc *KeyChainJS) Identities() []ndn.KeyChainIdentity {
 	return kc.mem.Identities()
 }
 
+// Returns the key chain identity associated with the specified name.
 func (kc *KeyChainJS) IdentityByName(name enc.Name) ndn.KeyChainIdentity {
 	return kc.mem.IdentityByName(name)
 }
 
+// Inserts a cryptographic key into the key chain and persists its secret component to a file with the specified key file extension.
 func (kc *KeyChainJS) InsertKey(signer ndn.Signer) error {
 	err := kc.mem.InsertKey(signer)
 	if err != nil {
@@ -77,6 +82,7 @@ func (kc *KeyChainJS) InsertKey(signer ndn.Signer) error {
 	return kc.writeFile(secret.Join(), EXT_KEY)
 }
 
+// Inserts a certificate into the key chain's memory and writes it to a file with the certificate extension.
 func (kc *KeyChainJS) InsertCert(wire []byte) error {
 	err := kc.mem.InsertCert(wire)
 	if err != nil {
@@ -86,6 +92,7 @@ func (kc *KeyChainJS) InsertCert(wire []byte) error {
 	return kc.writeFile(wire, EXT_CERT)
 }
 
+// Writes the given byte data to a file using the JavaScript API, with a filename derived from the SHA-256 hash of the content and the specified extension.
 func (kc *KeyChainJS) writeFile(wire []byte, ext string) error {
 	hash := sha256.Sum256(wire)
 	filename := hex.EncodeToString(hash[:])

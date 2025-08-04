@@ -18,6 +18,7 @@ type SignatureField struct {
 	noCopy     bool
 }
 
+// Generates Go struct fields for encoding a signature field, including an integer `wireIdx` for tracking the wire format position and an unsigned integer `estLen` for estimating encoded length.
 func (f *SignatureField) GenEncoderStruct() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("%s_wireIdx int", f.name)
@@ -25,6 +26,7 @@ func (f *SignatureField) GenEncoderStruct() (string, error) {
 	return g.output()
 }
 
+// Generates encoder initialization code for a signature field, setting its wire index to -1 to indicate an uninitialized state in the encoding process.
 func (f *SignatureField) GenInitEncoder() (string, error) {
 	// SignatureInfo is set in Data/Interest.Encode()
 	// {{.}}_estLen is required as an input to the encoder
@@ -35,14 +37,20 @@ func (f *SignatureField) GenInitEncoder() (string, error) {
 	return g.output()
 }
 
+// Generates a parsing context struct for the SignatureField, returning an empty string as no additional context is required for this field.
 func (f *SignatureField) GenParsingContextStruct() (string, error) {
 	return "", nil
 }
 
+// Generates a code snippet initializing a signature field's context variable as an empty `enc.Wire` slice for encoding/decoding operations.
 func (f *SignatureField) GenInitContext() (string, error) {
 	return fmt.Sprintf("context.%s = make(enc.Wire, 0)", f.sigCovered), nil
 }
 
+// Generates code to calculate the total encoding length for a signature field, including type number, variable-length encoding of the estimated length, and the field's content length.  
+
+Example:  
+`GenEncodingLength() generates Go code that computes the TLV-encoded length for a signature field, incorporating its type, variable-length size, and content length.`
 func (f *SignatureField) GenEncodingLength() (string, error) {
 	var g strErrBuf
 	g.printlnf("if encoder.%s_estLen > 0 {", f.name)
@@ -53,6 +61,9 @@ func (f *SignatureField) GenEncodingLength() (string, error) {
 	return g.output()
 }
 
+// Generates code for encoding a signature field's wire plan by calculating type/length components and updating the wire plan index, returning the generated code string or error. 
+
+Example: Generates code to compute and append wire encoding plan steps for a signature field's type number, length, and value segments.
 func (f *SignatureField) GenEncodingWirePlan() (string, error) {
 	var g strErrBuf
 	g.printlnf("if encoder.%s_estLen > 0 {", f.name)
@@ -65,6 +76,7 @@ func (f *SignatureField) GenEncodingWirePlan() (string, error) {
 	return g.output()
 }
 
+// Generates code to encode a signature field into a TLV-encoded NDN packet, handling the covered data (data to be signed) by either copying or referencing existing buffer regions based on the `noCopy` flag.
 func (f *SignatureField) GenEncodeInto() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("if encoder.%s_estLen > 0 {", f.name)
@@ -100,6 +112,7 @@ func (f *SignatureField) GenEncodeInto() (string, error) {
 	return g.output()
 }
 
+// Generates code to read a signature field from a reader, appending the covered data to the context's signature coverage buffer if reading is successful.
 func (f *SignatureField) GenReadFrom() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("value.%s, err = reader.ReadWire(int(l))", f.name)
@@ -110,10 +123,12 @@ func (f *SignatureField) GenReadFrom() (string, error) {
 	return g.output()
 }
 
+// Generates code to skip processing a specific field by setting it to nil in the data structure, typically used to exclude it during signature calculation.
 func (f *SignatureField) GenSkipProcess() (string, error) {
 	return "value." + f.name + " = nil", nil
 }
 
+// Constructs a new Signature TLV field with specified name, type number, and annotation-derived start point/covered data, using the model's NoCopy setting.
 func NewSignatureField(name string, typeNum uint64, annotation string, model *TlvModel) (TlvField, error) {
 	strs := strings.Split(annotation, ":")
 	if len(strs) < 2 || strs[0] == "" || strs[1] == "" {
@@ -139,6 +154,7 @@ type InterestNameField struct {
 	sigCovered string
 }
 
+// Generates a struct definition with fields for tracking encoding state (length, digest need, wire index, and position) during Interest name encoding in Named-Data Networking.
 func (f *InterestNameField) GenEncoderStruct() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("%s_length uint", f.name)
@@ -148,6 +164,7 @@ func (f *InterestNameField) GenEncoderStruct() (string, error) {
 	return g.output()
 }
 
+// Initializes the encoder for the Interest Name field by adjusting components (removing a trailing SHA-256 digest component if present, adding a new one if required) and calculating the total encoded length for wire transmission.
 func (f *InterestNameField) GenInitEncoder() (string, error) {
 	var g strErrBuf
 	const Temp = `
@@ -173,6 +190,7 @@ func (f *InterestNameField) GenInitEncoder() (string, error) {
 	return g.output()
 }
 
+// Generates a struct definition for parsing context, including a wire index and position field, specific to the InterestNameField.
 func (f *InterestNameField) GenParsingContextStruct() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("%s_wireIdx int", f.name)
@@ -180,10 +198,12 @@ func (f *InterestNameField) GenParsingContextStruct() (string, error) {
 	return g.output()
 }
 
+// Generates an empty initialization context string for the InterestNameField, indicating no additional data is needed for context initialization.
 func (f *InterestNameField) GenInitContext() (string, error) {
 	return "", nil
 }
 
+// Generates code to calculate the total encoding length of an InterestNameField, including type number and natural number length, when the field is non-nil.
 func (f *InterestNameField) GenEncodingLength() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("if value.%s != nil {", f.name)
@@ -194,10 +214,12 @@ func (f *InterestNameField) GenEncodingLength() (string, error) {
 	return g.output()
 }
 
+// Generates the wire encoding plan for the InterestNameField by computing and returning the hexadecimal string representation of its encoded length.
 func (f *InterestNameField) GenEncodingWirePlan() (string, error) {
 	return f.GenEncodingLength()
 }
 
+// Generates code to encode an Interest Name field into a binary buffer, handling component-wise encoding, signature coverage tracking, and buffer position management for NDN packet serialization.
 func (f *InterestNameField) GenEncodeInto() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("if value.%s != nil {", f.name)
@@ -228,6 +250,7 @@ func (f *InterestNameField) GenEncodeInto() (string, error) {
 	return g.output()
 }
 
+// Generates Go code to read a Name field from a binary stream into a struct, parsing each component's type and value while handling errors and tracking signature coverage for validation.
 func (f *InterestNameField) GenReadFrom() (string, error) {
 	var g strErrBuf
 
@@ -269,10 +292,12 @@ func (f *InterestNameField) GenReadFrom() (string, error) {
 	return g.output()
 }
 
+// Generates a string assignment to set the Interest Name field to nil, effectively skipping its processing during packet generation.
 func (f *InterestNameField) GenSkipProcess() (string, error) {
 	return fmt.Sprintf("value.%s = nil", f.name), nil
 }
 
+// Constructs an InterestNameField TLV field with the given name, type number, and non-empty annotation for signature coverage.
 func NewInterestNameField(name string, typeNum uint64, annotation string, _ *TlvModel) (TlvField, error) {
 	if annotation == "" {
 		return nil, ErrInvalidField

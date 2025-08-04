@@ -29,6 +29,7 @@ type T1 struct {
 	H3 optional.Optional[uint64] `tlv:"0x06"`
 }
 
+// Encodes a signed data structure (e.g., Data packet) with the provided signature value, adjusting the signature field's length and returning both the full encoded wire and the signature-covered portion.
 func (v *T1) Encode(estLen uint, value []byte) (enc.Wire, enc.Wire) {
 	encoder := T1Encoder{
 		Sig_estLen: estLen,
@@ -46,6 +47,7 @@ func (v *T1) Encode(estLen uint, value []byte) (enc.Wire, enc.Wire) {
 	return wire, encoder.sigCovered
 }
 
+// Parses a T1 object from the provided wire format, returning the parsed structure, the covered signature data, and any error encountered.
 func ReadT1(reader enc.WireView) (*T1, enc.Wire, error) {
 	context := T1ParsingContext{}
 	context.Init()
@@ -75,6 +77,7 @@ type T2 struct {
 	sigCovered enc.PlaceHolder
 }
 
+// Encodes a T2 packet into NDN wire format, computing cryptographic signatures and name digests as specified.
 func (v *T2) Encode(estLen uint, value []byte, needDigest bool) (enc.Wire, enc.Wire) {
 	if v.Name == nil {
 		return nil, nil
@@ -128,6 +131,7 @@ func (v *T2) Encode(estLen uint, value []byte, needDigest bool) (enc.Wire, enc.W
 	return wire, encoder.sigCovered
 }
 
+// Parses a T2 structure from the provided wire format, verifies the SHA-256 digest in the name component if required, and returns the parsed T2 object along with the covered signature data.
 func ReadT2(reader enc.WireView, digestRequired bool) (*T2, enc.Wire, error) {
 	context := T2ParsingContext{}
 	context.Init()

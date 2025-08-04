@@ -24,6 +24,7 @@ type CaProfileParsingContext struct {
 	CaPrefix_context spec.NameContainerParsingContext
 }
 
+// Initializes a CaProfileEncoder with the provided CaProfile value, calculating the total encoded length by aggregating the sizes of all fields (including nested structures like CaPrefix, ParamKey, CaCert, and CaInfo) according to TLV encoding rules.
 func (encoder *CaProfileEncoder) Init(value *CaProfile) {
 	if value.CaPrefix != nil {
 		encoder.CaPrefix_encoder.Init(value.CaPrefix)
@@ -96,11 +97,13 @@ func (encoder *CaProfileEncoder) Init(value *CaProfile) {
 
 }
 
+// Initializes the embedded `CaPrefix_context` field by calling its own `Init()` method as part of setting up the `CaProfileParsingContext`.
 func (context *CaProfileParsingContext) Init() {
 	context.CaPrefix_context.Init()
 
 }
 
+// Encodes a CA profile structure into a binary TLV (Type-Length-Value) format in the provided byte buffer, handling optional fields, string slices, and nested data elements according to NDN encoding rules.
 func (encoder *CaProfileEncoder) EncodeInto(value *CaProfile, buf []byte) {
 
 	pos := uint(0)
@@ -156,6 +159,7 @@ func (encoder *CaProfileEncoder) EncodeInto(value *CaProfile, buf []byte) {
 	}
 }
 
+// Encodes the provided CaProfile into a single TLV wire element using the encoder's predefined length.
 func (encoder *CaProfileEncoder) Encode(value *CaProfile) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -166,6 +170,7 @@ func (encoder *CaProfileEncoder) Encode(value *CaProfile) enc.Wire {
 	return wire
 }
 
+// Parses a CA profile from TLV-encoded input, validating required fields (CaInfo, MaxValidPeriod) and processing optional/critical components (CaPrefix, ParamKey, CaCert) according to the provided parsing context and ignoreCritical flag.
 func (context *CaProfileParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*CaProfile, error) {
 
 	var handled_CaPrefix bool = false
@@ -309,16 +314,19 @@ func (context *CaProfileParsingContext) Parse(reader enc.WireView, ignoreCritica
 	return value, nil
 }
 
+// Encodes the CaProfile instance into a wire-compatible format using the CaProfileEncoder for transmission or storage.
 func (value *CaProfile) Encode() enc.Wire {
 	encoder := CaProfileEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the concatenated byte slice of the encoded CA profile components.
 func (value *CaProfile) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a CA profile from the provided wire-format input, using the specified flag to determine whether to ignore critical fields that cannot be processed.
 func ParseCaProfile(reader enc.WireView, ignoreCritical bool) (*CaProfile, error) {
 	context := CaProfileParsingContext{}
 	context.Init()
@@ -335,6 +343,7 @@ type ProbeReqEncoder struct {
 type ProbeReqParsingContext struct {
 }
 
+// Initializes the ProbeReqEncoder with the provided ProbeReq value, calculating the total encoded length by summing the TLV-encoded sizes of all key-value pairs in the Params map.
 func (encoder *ProbeReqEncoder) Init(value *ProbeReq) {
 	{
 		Params_l := len(value.Params)
@@ -390,10 +399,12 @@ func (encoder *ProbeReqEncoder) Init(value *ProbeReq) {
 
 }
 
+// Initializes the ProbeReqParsingContext for parsing probe request data.
 func (context *ProbeReqParsingContext) Init() {
 
 }
 
+// Encodes a ProbeReq's parameters into a binary buffer using TLV (Type-Length-Value) format, with type 0x85 for parameter keys and 0x87 for their corresponding byte string values.
 func (encoder *ProbeReqEncoder) EncodeInto(value *ProbeReq, buf []byte) {
 
 	pos := uint(0)
@@ -430,6 +441,7 @@ func (encoder *ProbeReqEncoder) EncodeInto(value *ProbeReq, buf []byte) {
 	}
 }
 
+// Encodes a ProbeReq object into a binary wire format slice using the encoder's specified length.
 func (encoder *ProbeReqEncoder) Encode(value *ProbeReq) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -440,6 +452,7 @@ func (encoder *ProbeReqEncoder) Encode(value *ProbeReq) enc.Wire {
 	return wire
 }
 
+// Parses a ProbeReq structure from a binary-encoded wire format, extracting parameters into a map and handling critical/unknown fields based on the ignoreCritical flag.
 func (context *ProbeReqParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ProbeReq, error) {
 
 	var handled_Params bool = false
@@ -540,16 +553,19 @@ func (context *ProbeReqParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the ProbeReq into a wire representation using a ProbeReqEncoder.
 func (value *ProbeReq) Encode() enc.Wire {
 	encoder := ProbeReqEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the ProbeReq structure into a contiguous byte slice for network transmission.
 func (value *ProbeReq) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a ProbeReq from wire format data, optionally ignoring critical parsing errors.
 func ParseProbeReq(reader enc.WireView, ignoreCritical bool) (*ProbeReq, error) {
 	context := ProbeReqParsingContext{}
 	context.Init()
@@ -565,6 +581,7 @@ type ProbeResValsEncoder struct {
 type ProbeResValsParsingContext struct {
 }
 
+// Initializes the encoder by calculating the total encoded length of the ProbeResVals, including the Response and MaxSuffixLength fields, to set the overall encoding length required for TLV serialization.
 func (encoder *ProbeResValsEncoder) Init(value *ProbeResVals) {
 	if value.Response != nil {
 		encoder.Response_length = 0
@@ -587,10 +604,12 @@ func (encoder *ProbeResValsEncoder) Init(value *ProbeResVals) {
 
 }
 
+// Initializes the ProbeResValsParsingContext for parsing probe response values.
 func (context *ProbeResValsParsingContext) Init() {
 
 }
 
+// Encodes a ProbeResVals structure into a byte buffer using TLV (Type-Length-Value) format, including a list of response values (type 7) and an optional max suffix length (type 143).
 func (encoder *ProbeResValsEncoder) EncodeInto(value *ProbeResVals, buf []byte) {
 
 	pos := uint(0)
@@ -613,6 +632,7 @@ func (encoder *ProbeResValsEncoder) EncodeInto(value *ProbeResVals, buf []byte) 
 	}
 }
 
+// Encodes the provided ProbeResVals value into a byte slice of the encoder's specified length, returning it as a Wire structure containing the serialized data.
 func (encoder *ProbeResValsEncoder) Encode(value *ProbeResVals) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -623,6 +643,7 @@ func (encoder *ProbeResValsEncoder) Encode(value *ProbeResVals) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded ProbeResVals structure, extracting the Response name and MaxSuffixLength fields while handling critical and non-critical unknown fields according to the ignoreCritical flag.
 func (context *ProbeResValsParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ProbeResVals, error) {
 
 	var handled_Response bool = false
@@ -715,16 +736,19 @@ func (context *ProbeResValsParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the ProbeResVals instance into a wire-encoded format using a dedicated encoder for network transmission or storage.
 func (value *ProbeResVals) Encode() enc.Wire {
 	encoder := ProbeResValsEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns a byte slice representation of the ProbeResVals by encoding its fields and concatenating the resulting components.
 func (value *ProbeResVals) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses encoded probe response values into a ProbeResVals object using the provided WireView reader, with an option to ignore critical parsing errors.
 func ParseProbeResVals(reader enc.WireView, ignoreCritical bool) (*ProbeResVals, error) {
 	context := ProbeResValsParsingContext{}
 	context.Init()
@@ -745,6 +769,7 @@ type ProbeResParsingContext struct {
 	RedirectPrefix_context spec.NameContainerParsingContext
 }
 
+// Initializes the encoder for a ProbeRes object by setting up sub-encoders for its Vals slice and RedirectPrefix, then calculates the total encoded length including TLV overhead for each component.
 func (encoder *ProbeResEncoder) Init(value *ProbeRes) {
 	{
 		Vals_l := len(value.Vals)
@@ -804,11 +829,13 @@ func (encoder *ProbeResEncoder) Init(value *ProbeRes) {
 
 }
 
+// Initializes the ProbeResParsingContext by initializing its Vals_context and RedirectPrefix_context sub-contexts.
 func (context *ProbeResParsingContext) Init() {
 	context.Vals_context.Init()
 	context.RedirectPrefix_context.Init()
 }
 
+// Encodes a ProbeRes structure into a binary buffer using TLV (Type-Length-Value) encoding for its fields, including a slice of ProbeResVals and an optional RedirectPrefix.
 func (encoder *ProbeResEncoder) EncodeInto(value *ProbeRes, buf []byte) {
 
 	pos := uint(0)
@@ -849,6 +876,7 @@ func (encoder *ProbeResEncoder) EncodeInto(value *ProbeRes, buf []byte) {
 	}
 }
 
+// Serializes a ProbeRes value into a byte slice of size determined by the encoder's Length field and returns it as an enc.Wire structure.
 func (encoder *ProbeResEncoder) Encode(value *ProbeRes) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -859,6 +887,7 @@ func (encoder *ProbeResEncoder) Encode(value *ProbeRes) enc.Wire {
 	return wire
 }
 
+// Parses a ProbeRes structure from TLV-encoded wire data, handling nested Vals and RedirectPrefix fields while respecting critical field constraints based on the ignoreCritical flag.
 func (context *ProbeResParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ProbeRes, error) {
 
 	var handled_Vals bool = false
@@ -947,16 +976,19 @@ func (context *ProbeResParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the ProbeRes object into a wire format using the ProbeResEncoder.
 func (value *ProbeRes) Encode() enc.Wire {
 	encoder := ProbeResEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the ProbeRes by encoding its components and concatenating them into a single byte slice.
 func (value *ProbeRes) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a ProbeRes object from wire format data using a newly initialized parsing context, with an option to ignore critical parsing errors.
 func ParseProbeRes(reader enc.WireView, ignoreCritical bool) (*ProbeRes, error) {
 	context := ProbeResParsingContext{}
 	context.Init()
@@ -972,6 +1004,7 @@ type NewReqEncoder struct {
 type NewReqParsingContext struct {
 }
 
+// Calculates the total encoded length of the NewReq message components (EcdhPub and CertReq) and sets the encoder's Length field to prepare for serialization.
 func (encoder *NewReqEncoder) Init(value *NewReq) {
 
 	if value.CertReq != nil {
@@ -996,10 +1029,12 @@ func (encoder *NewReqEncoder) Init(value *NewReq) {
 
 }
 
+// Initializes the parsing context, serving as a customizable hook for subclasses to set up specific parsing logic or state.
 func (context *NewReqParsingContext) Init() {
 
 }
 
+// Encodes a NewReq object into a binary buffer using TLV (Type-Length-Value) format, writing the ECDH public key (type 145) and certificate request components (type 147) with their respective lengths and values.
 func (encoder *NewReqEncoder) EncodeInto(value *NewReq, buf []byte) {
 
 	pos := uint(0)
@@ -1022,6 +1057,7 @@ func (encoder *NewReqEncoder) EncodeInto(value *NewReq, buf []byte) {
 	}
 }
 
+// Encodes a NewReq request into a wire-format byte slice using the encoder's precomputed length.
 func (encoder *NewReqEncoder) Encode(value *NewReq) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1032,6 +1068,7 @@ func (encoder *NewReqEncoder) Encode(value *NewReq) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded wire format into a NewReq structure, handling ECDH public key (type 145) and certificate request (type 147) fields, while skipping or rejecting unknown critical fields based on the ignoreCritical flag.
 func (context *NewReqParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*NewReq, error) {
 
 	var handled_EcdhPub bool = false
@@ -1107,16 +1144,19 @@ func (context *NewReqParsingContext) Parse(reader enc.WireView, ignoreCritical b
 	return value, nil
 }
 
+// Encodes the NewReq object into a wire format representation using a NewReqEncoder for transmission or storage.
 func (value *NewReq) Encode() enc.Wire {
 	encoder := NewReqEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the NewReq object into a TLV-encoded byte slice for network transmission.
 func (value *NewReq) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a NewReq object from wire-format input, optionally ignoring critical parsing errors.
 func ParseNewReq(reader enc.WireView, ignoreCritical bool) (*NewReq, error) {
 	context := NewReqParsingContext{}
 	context.Init()
@@ -1133,6 +1173,7 @@ type NewResEncoder struct {
 type NewResParsingContext struct {
 }
 
+// Initializes the encoder by calculating the total encoded length of a NewRes structure, accounting for optional fields (EcdhPub, Salt, ReqId) and a sequence of Challenge strings using TLV encoding rules.
 func (encoder *NewResEncoder) Init(value *NewRes) {
 
 	{
@@ -1195,10 +1236,12 @@ func (encoder *NewResEncoder) Init(value *NewRes) {
 
 }
 
+// Initializes a NewResParsingContext, preparing it for resource parsing operations.
 func (context *NewResParsingContext) Init() {
 
 }
 
+// Encodes a NewRes struct into a binary TLV (Type-Length-Value) format in the provided buffer, handling optional fields (EcdhPub, Salt, ReqId) and a slice of Challenge strings by sequentially writing their type identifiers, encoded lengths, and raw values.
 func (encoder *NewResEncoder) EncodeInto(value *NewRes, buf []byte) {
 
 	pos := uint(0)
@@ -1247,6 +1290,7 @@ func (encoder *NewResEncoder) EncodeInto(value *NewRes, buf []byte) {
 	}
 }
 
+// Encodes a `NewRes` object into a byte slice using the encoder's precomputed length, returning it as a `enc.Wire` structure for packet serialization.
 func (encoder *NewResEncoder) Encode(value *NewRes) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1257,6 +1301,7 @@ func (encoder *NewResEncoder) Encode(value *NewRes) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded wire format into a NewRes structure, handling optional fields like ECDH public key, salt, request ID, and challenges, with optional skipping of unrecognized critical fields based on the ignoreCritical flag.
 func (context *NewResParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*NewRes, error) {
 
 	var handled_EcdhPub bool = false
@@ -1374,16 +1419,19 @@ func (context *NewResParsingContext) Parse(reader enc.WireView, ignoreCritical b
 	return value, nil
 }
 
+// Encodes the NewRes value into its wire format representation using a NewResEncoder.
 func (value *NewRes) Encode() enc.Wire {
 	encoder := NewResEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte representation of the NewRes value by joining the results of its Encode method.
 func (value *NewRes) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a NewRes structure from the provided encoded data, initializing a parsing context and allowing optional ignoring of critical fields.
 func ParseNewRes(reader enc.WireView, ignoreCritical bool) (*NewRes, error) {
 	context := NewResParsingContext{}
 	context.Init()
@@ -1397,6 +1445,7 @@ type CipherMsgEncoder struct {
 type CipherMsgParsingContext struct {
 }
 
+// Calculates the total encoded length of a CipherMsg by summing the size contributions of its optional fields (InitVec, AuthNTag, Payload) including TLV encoding overhead, and sets this length on the encoder.
 func (encoder *CipherMsgEncoder) Init(value *CipherMsg) {
 
 	l := uint(0)
@@ -1419,10 +1468,12 @@ func (encoder *CipherMsgEncoder) Init(value *CipherMsg) {
 
 }
 
+// Initializes the CipherMsgParsingContext, preparing it for parsing operations (currently a no-op in this implementation).
 func (context *CipherMsgParsingContext) Init() {
 
 }
 
+// Serializes a CipherMsg into a binary buffer, encoding non-nil fields (InitVec, AuthNTag, Payload) with type identifiers, length prefixes, and raw data.
 func (encoder *CipherMsgEncoder) EncodeInto(value *CipherMsg, buf []byte) {
 
 	pos := uint(0)
@@ -1450,6 +1501,7 @@ func (encoder *CipherMsgEncoder) EncodeInto(value *CipherMsg, buf []byte) {
 	}
 }
 
+// Encodes a `CipherMsg` into a pre-allocated byte buffer of size `encoder.Length` and returns it as a `Wire` structure containing the serialized data.
 func (encoder *CipherMsgEncoder) Encode(value *CipherMsg) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1460,6 +1512,7 @@ func (encoder *CipherMsgEncoder) Encode(value *CipherMsg) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded cipher message into a CipherMsg structure, extracting initialization vector (InitVec), authentication tag (AuthNTag), and payload, while handling unrecognized critical fields according to the ignoreCritical flag.
 func (context *CipherMsgParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*CipherMsg, error) {
 
 	var handled_InitVec bool = false
@@ -1547,16 +1600,19 @@ func (context *CipherMsgParsingContext) Parse(reader enc.WireView, ignoreCritica
 	return value, nil
 }
 
+// Encodes the CipherMsg value into a Wire format using a CipherMsgEncoder.
 func (value *CipherMsg) Encode() enc.Wire {
 	encoder := CipherMsgEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded cipher message as a concatenated byte slice.
 func (value *CipherMsg) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a cipher message from the provided encoded data using a parsing context, with an option to ignore critical fields not recognized during decoding.
 func ParseCipherMsg(reader enc.WireView, ignoreCritical bool) (*CipherMsg, error) {
 	context := CipherMsgParsingContext{}
 	context.Init()
@@ -1573,6 +1629,7 @@ type ChallengeReqEncoder struct {
 type ChallengeReqParsingContext struct {
 }
 
+// Initializes a ChallengeReqEncoder with the given ChallengeReq value, calculating the total encoded length required for the challenge and its parameters, including TLV encoding overhead.
 func (encoder *ChallengeReqEncoder) Init(value *ChallengeReq) {
 
 	{
@@ -1632,10 +1689,12 @@ func (encoder *ChallengeReqEncoder) Init(value *ChallengeReq) {
 
 }
 
+// Initializes the parsing context for a challenge request, establishing default state or configuration required for subsequent processing.
 func (context *ChallengeReqParsingContext) Init() {
 
 }
 
+// Serializes a ChallengeReq object into a TLV-encoded byte slice, including a challenge payload and optional key-value parameters with distinct type identifiers for each component.
 func (encoder *ChallengeReqEncoder) EncodeInto(value *ChallengeReq, buf []byte) {
 
 	pos := uint(0)
@@ -1677,6 +1736,7 @@ func (encoder *ChallengeReqEncoder) EncodeInto(value *ChallengeReq, buf []byte) 
 	}
 }
 
+// Encodes a ChallengeReq value into a wire-encoded byte slice using the encoder's specified length.
 func (encoder *ChallengeReqEncoder) Encode(value *ChallengeReq) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -1687,6 +1747,7 @@ func (encoder *ChallengeReqEncoder) Encode(value *ChallengeReq) enc.Wire {
 	return wire
 }
 
+// Parses a binary-encoded ChallengeReq structure from a WireView, extracting required Challenge field (type 161) and optional Params map (type 133) while handling TLV encoding and critical field validation based on ignoreCritical flag.
 func (context *ChallengeReqParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ChallengeReq, error) {
 
 	var handled_Challenge bool = false
@@ -1803,16 +1864,19 @@ func (context *ChallengeReqParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the ChallengeReq object into a wire format for transmission using a dedicated encoder.
 func (value *ChallengeReq) Encode() enc.Wire {
 	encoder := ChallengeReqEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte slice of the ChallengeReq by concatenating its encoded components.
 func (value *ChallengeReq) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a ChallengeReq structure from wire-encoded data using a parsing context, with an option to ignore critical fields if specified.
 func ParseChallengeReq(reader enc.WireView, ignoreCritical bool) (*ChallengeReq, error) {
 	context := ChallengeReqParsingContext{}
 	context.Init()
@@ -1833,6 +1897,7 @@ type ChallengeResParsingContext struct {
 	ForwardingHint_context spec.NameContainerParsingContext
 }
 
+// Initializes the encoder with the provided ChallengeRes data structure, computing the total encoded length by accounting for all mandatory and optional TLV-encoded fields, including nested elements like CertName, ForwardingHint, and key-value Params.
 func (encoder *ChallengeResEncoder) Init(value *ChallengeRes) {
 
 	if value.CertName != nil {
@@ -1920,6 +1985,7 @@ func (encoder *ChallengeResEncoder) Init(value *ChallengeRes) {
 
 }
 
+// Initializes the certificate name and forwarding hint sub-contexts of the ChallengeResParsingContext.
 func (context *ChallengeResParsingContext) Init() {
 
 	context.CertName_context.Init()
@@ -1927,6 +1993,7 @@ func (context *ChallengeResParsingContext) Init() {
 
 }
 
+// Encodes a ChallengeRes object into a TLV (Type-Length-Value) formatted byte slice, including optional fields like ChalStatus, RemainTries, and RemainTime, as well as nested structures such as CertName, ForwardingHint, and key-value parameter maps.
 func (encoder *ChallengeResEncoder) EncodeInto(value *ChallengeRes, buf []byte) {
 
 	pos := uint(0)
@@ -2009,6 +2076,7 @@ func (encoder *ChallengeResEncoder) EncodeInto(value *ChallengeRes, buf []byte) 
 	}
 }
 
+// Encodes a ChallengeRes value into a pre-allocated byte buffer of size determined by the encoder and returns it wrapped in a single-element enc.Wire slice.
 func (encoder *ChallengeResEncoder) Encode(value *ChallengeRes) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2019,6 +2087,7 @@ func (encoder *ChallengeResEncoder) Encode(value *ChallengeRes) enc.Wire {
 	return wire
 }
 
+// Parses a binary TLV-encoded ChallengeRes structure from a reader, decoding fields like status, challenge status, remaining attempts/time, certificate name, forwarding hint, and parameters, while enforcing required fields and handling critical extensions based on the ignoreCritical flag.
 func (context *ChallengeResParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ChallengeRes, error) {
 
 	var handled_Status bool = false
@@ -2232,16 +2301,19 @@ func (context *ChallengeResParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// "Encodes the ChallengeRes value into a wire format representation using the ChallengeResEncoder."
 func (value *ChallengeRes) Encode() enc.Wire {
 	encoder := ChallengeResEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the ChallengeRes value by encoding its components and joining them into a single byte slice.
 func (value *ChallengeRes) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a ChallengeRes from the provided wire format input, optionally ignoring unknown critical fields.
 func ParseChallengeRes(reader enc.WireView, ignoreCritical bool) (*ChallengeRes, error) {
 	context := ChallengeResParsingContext{}
 	context.Init()
@@ -2255,6 +2327,7 @@ type ErrorResEncoder struct {
 type ErrorResParsingContext struct {
 }
 
+// Initializes the ErrorResEncoder by calculating and setting the total encoded length of the ErrorRes message, accounting for fixed overhead, encoded error code, and variable-length error information.
 func (encoder *ErrorResEncoder) Init(value *ErrorRes) {
 
 	l := uint(0)
@@ -2267,10 +2340,12 @@ func (encoder *ErrorResEncoder) Init(value *ErrorRes) {
 
 }
 
+// Initializes the ErrorResParsingContext, preparing it for parsing error responses.
 func (context *ErrorResParsingContext) Init() {
 
 }
 
+// Encodes an ErrorRes object into a binary TLV format in the provided buffer, including an error code (as a variable-length integer) and error information (as a string with length prefix).
 func (encoder *ErrorResEncoder) EncodeInto(value *ErrorRes, buf []byte) {
 
 	pos := uint(0)
@@ -2287,6 +2362,7 @@ func (encoder *ErrorResEncoder) EncodeInto(value *ErrorRes, buf []byte) {
 	pos += uint(len(value.ErrInfo))
 }
 
+// Encodes an ErrorRes into a wire format by allocating a buffer of the encoder's specified length and populating it with the encoded data.
 func (encoder *ErrorResEncoder) Encode(value *ErrorRes) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -2297,6 +2373,7 @@ func (encoder *ErrorResEncoder) Encode(value *ErrorRes) enc.Wire {
 	return wire
 }
 
+// Parses a binary wire-encoded NDN Error Response (ErrorRes) by reading and validating the ErrCode (type 171) and ErrInfo (type 173) fields, with optional skipping of unrecognized critical fields based on the ignoreCritical flag.
 func (context *ErrorResParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ErrorRes, error) {
 
 	var handled_ErrCode bool = false
@@ -2390,16 +2467,21 @@ func (context *ErrorResParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes an ErrorRes into a wire format using ErrorResEncoder.
 func (value *ErrorRes) Encode() enc.Wire {
 	encoder := ErrorResEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the ErrorRes by encoding its components and joining them into a single byte slice.
 func (value *ErrorRes) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-format ErrorRes packet using the provided encoder and critical error handling flag.  
+
+**Example:** Parses a wire-format ErrorRes packet into a structured object, optionally ignoring critical parsing errors.
 func ParseErrorRes(reader enc.WireView, ignoreCritical bool) (*ErrorRes, error) {
 	context := ErrorResParsingContext{}
 	context.Init()

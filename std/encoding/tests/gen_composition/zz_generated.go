@@ -17,6 +17,7 @@ type IntArrayEncoder struct {
 type IntArrayParsingContext struct {
 }
 
+// Initializes an IntArrayEncoder by calculating the total encoded length of the provided IntArray, accounting for each uint64 word's variable-length encoding and sequence overhead.
 func (encoder *IntArrayEncoder) Init(value *IntArray) {
 	{
 		Words_l := len(value.Words)
@@ -62,10 +63,12 @@ func (encoder *IntArrayEncoder) Init(value *IntArray) {
 
 }
 
+// Initializes the IntArrayParsingContext, preparing it for parsing integer arrays.
 func (context *IntArrayParsingContext) Init() {
 
 }
 
+// Encodes the elements of an IntArray's Words slice into a binary buffer, with each element prefixed by a type marker (0x01) and variable-length encoded as a uint64.
 func (encoder *IntArrayEncoder) EncodeInto(value *IntArray, buf []byte) {
 
 	pos := uint(0)
@@ -93,6 +96,7 @@ func (encoder *IntArrayEncoder) EncodeInto(value *IntArray, buf []byte) {
 	}
 }
 
+// Encodes an IntArray into a byte slice of the specified length and returns it as a Wire structure.
 func (encoder *IntArrayEncoder) Encode(value *IntArray) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -103,6 +107,7 @@ func (encoder *IntArrayEncoder) Encode(value *IntArray) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded integer array, extracting sequences of bytes as uint64 words for type 1 fields and skipping or rejecting unrecognized/critical fields based on the ignoreCritical flag.
 func (context *IntArrayParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*IntArray, error) {
 
 	var handled_Words bool = false
@@ -194,16 +199,19 @@ func (context *IntArrayParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the integer array into a wire format using an IntArrayEncoder.
 func (value *IntArray) Encode() enc.Wire {
 	encoder := IntArrayEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the concatenated byte representation of the integer array by encoding each element and joining them.
 func (value *IntArray) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a wire-encoded integer array into an IntArray structure, optionally ignoring critical components based on the provided flag.
 func ParseIntArray(reader enc.WireView, ignoreCritical bool) (*IntArray, error) {
 	context := IntArrayParsingContext{}
 	context.Init()
@@ -221,6 +229,7 @@ type NameArrayEncoder struct {
 type NameArrayParsingContext struct {
 }
 
+// Initializes the NameArrayEncoder by computing the total encoded length of the provided NameArray, including TLV header overhead and individual name component lengths.
 func (encoder *NameArrayEncoder) Init(value *NameArray) {
 	{
 		Names_l := len(value.Names)
@@ -275,10 +284,12 @@ func (encoder *NameArrayEncoder) Init(value *NameArray) {
 
 }
 
+// Initializes the `NameArrayParsingContext`, setting up its state to begin parsing name arrays.
 func (context *NameArrayParsingContext) Init() {
 
 }
 
+// Encodes a sequence of names from a NameArray into a binary buffer using TLV (Type-Length-Value) format, where each name is prefixed by a type byte (7), its length, and then its encoded components.
 func (encoder *NameArrayEncoder) EncodeInto(value *NameArray, buf []byte) {
 
 	pos := uint(0)
@@ -309,6 +320,7 @@ func (encoder *NameArrayEncoder) EncodeInto(value *NameArray, buf []byte) {
 	}
 }
 
+// Encodes a NameArray into a TLV wire format by allocating a buffer of the encoder's specified length and populating it with the encoded array data.
 func (encoder *NameArrayEncoder) Encode(value *NameArray) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -319,6 +331,7 @@ func (encoder *NameArrayEncoder) Encode(value *NameArray) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded NameArray from a wire format, extracting Name components (type 7) into a slice and skipping or rejecting unknown critical types based on the ignoreCritical flag.
 func (context *NameArrayParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*NameArray, error) {
 
 	var handled_Names bool = false
@@ -398,16 +411,19 @@ func (context *NameArrayParsingContext) Parse(reader enc.WireView, ignoreCritica
 	return value, nil
 }
 
+// Encodes the NameArray into a wire-encoded format using a NameArrayEncoder.
 func (value *NameArray) Encode() enc.Wire {
 	encoder := NameArrayEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the NameArray by encoding each component and joining them into a single byte slice.
 func (value *NameArray) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a NameArray from encoded wire format data, with an option to ignore critical parsing errors.
 func ParseNameArray(reader enc.WireView, ignoreCritical bool) (*NameArray, error) {
 	context := NameArrayParsingContext{}
 	context.Init()
@@ -421,6 +437,7 @@ type InnerEncoder struct {
 type InnerParsingContext struct {
 }
 
+// Initializes the encoder's total length based on the encoded size of the Num field in the Inner value, including fixed overhead.
 func (encoder *InnerEncoder) Init(value *Inner) {
 
 	l := uint(0)
@@ -430,10 +447,12 @@ func (encoder *InnerEncoder) Init(value *Inner) {
 
 }
 
+// Initializes the inner parsing context for subsequent parsing operations.
 func (context *InnerParsingContext) Init() {
 
 }
 
+// Encodes the `Inner` struct into a binary buffer using NDN's TLV format, writing a fixed type byte (1) followed by the variable-length encoded natural number representation of the `Num` field.
 func (encoder *InnerEncoder) EncodeInto(value *Inner, buf []byte) {
 
 	pos := uint(0)
@@ -445,6 +464,7 @@ func (encoder *InnerEncoder) EncodeInto(value *Inner, buf []byte) {
 	pos += uint(1 + buf[pos])
 }
 
+// Encodes the provided Inner value into a byte slice of the pre-determined length using the encoder's buffer, returning a wire-ready representation for transmission.
 func (encoder *InnerEncoder) Encode(value *Inner) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -455,6 +475,7 @@ func (encoder *InnerEncoder) Encode(value *Inner) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded binary structure into an Inner object, decoding a required 'Num' field as a variable-length unsigned integer and conditionally skipping unrecognized or critical fields based on the ignoreCritical flag.
 func (context *InnerParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Inner, error) {
 
 	var handled_Num bool = false
@@ -532,16 +553,19 @@ func (context *InnerParsingContext) Parse(reader enc.WireView, ignoreCritical bo
 	return value, nil
 }
 
+// Encodes the Inner instance into its wire format representation using an InnerEncoder.
 func (value *Inner) Encode() enc.Wire {
 	encoder := InnerEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte slice formed by encoding the Inner value and concatenating the resulting components.
 func (value *Inner) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses wire-encoded data into an Inner structure, optionally ignoring critical fields based on the provided flag.
 func ParseInner(reader enc.WireView, ignoreCritical bool) (*Inner, error) {
 	context := InnerParsingContext{}
 	context.Init()
@@ -558,6 +582,7 @@ type NestedParsingContext struct {
 	Val_context InnerParsingContext
 }
 
+// Initializes the NestedEncoder with the provided Nested value, calculating its encoded length by summing the type byte, encoded length field size, and the length of the nested value's content.
 func (encoder *NestedEncoder) Init(value *Nested) {
 	if value.Val != nil {
 		encoder.Val_encoder.Init(value.Val)
@@ -573,10 +598,12 @@ func (encoder *NestedEncoder) Init(value *Nested) {
 
 }
 
+// Initializes the internal Val_context component of the NestedParsingContext by calling its Init method.
 func (context *NestedParsingContext) Init() {
 	context.Val_context.Init()
 }
 
+// Encodes a Nested object into a TLV (Type-Length-Value) format in the provided buffer, handling the presence of the Val field with a type indicator (byte 2), length encoding, and value serialization.
 func (encoder *NestedEncoder) EncodeInto(value *Nested, buf []byte) {
 
 	pos := uint(0)
@@ -592,6 +619,7 @@ func (encoder *NestedEncoder) EncodeInto(value *Nested, buf []byte) {
 	}
 }
 
+// Encodes a Nested object into a byte slice using the encoder's pre-allocated buffer size and returns it as a single-element Wire slice.
 func (encoder *NestedEncoder) Encode(value *Nested) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -602,6 +630,7 @@ func (encoder *NestedEncoder) Encode(value *Nested) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded Nested structure from the provided wire reader, handling the "Val" field with the associated context and skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *NestedParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*Nested, error) {
 
 	var handled_Val bool = false
@@ -666,16 +695,19 @@ func (context *NestedParsingContext) Parse(reader enc.WireView, ignoreCritical b
 	return value, nil
 }
 
+// Encodes the Nested value into a wire format using a NestedEncoder.
 func (value *Nested) Encode() enc.Wire {
 	encoder := NestedEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// **Returns the byte slice representing the wire-format encoding of the Nested value.**
 func (value *Nested) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a nested structure from the provided wire format data, using the given parsing context and optionally ignoring critical elements.
 func ParseNested(reader enc.WireView, ignoreCritical bool) (*Nested, error) {
 	context := NestedParsingContext{}
 	context.Init()
@@ -694,6 +726,7 @@ type NestedSeqParsingContext struct {
 	Vals_context InnerParsingContext
 }
 
+// Initializes sub-encoders for each element in a nested sequence structure and computes the total encoded length, including TLV encoding overhead, to prepare for efficient NDN data encoding.
 func (encoder *NestedSeqEncoder) Init(value *NestedSeq) {
 	{
 		Vals_l := len(value.Vals)
@@ -745,10 +778,12 @@ func (encoder *NestedSeqEncoder) Init(value *NestedSeq) {
 
 }
 
+// Initializes the internal Vals_context within the NestedSeqParsingContext to prepare for parsing operations.
 func (context *NestedSeqParsingContext) Init() {
 	context.Vals_context.Init()
 }
 
+// Encodes a sequence of values from a NestedSeq structure into a binary buffer using a TLV (Type-Length-Value) format, with each element encoded by its corresponding subencoder.
 func (encoder *NestedSeqEncoder) EncodeInto(value *NestedSeq, buf []byte) {
 
 	pos := uint(0)
@@ -780,6 +815,7 @@ func (encoder *NestedSeqEncoder) EncodeInto(value *NestedSeq, buf []byte) {
 	}
 }
 
+// Encodes the given NestedSeq value into a binary wire format using the pre-determined length of the encoder.
 func (encoder *NestedSeqEncoder) Encode(value *NestedSeq) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -790,6 +826,7 @@ func (encoder *NestedSeqEncoder) Encode(value *NestedSeq) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded NestedSeq structure from the provided wire reader, using the Vals_context to decode the Vals field and handling critical/unrecognized fields according to the ignoreCritical flag.
 func (context *NestedSeqParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*NestedSeq, error) {
 
 	var handled_Vals bool = false
@@ -868,16 +905,19 @@ func (context *NestedSeqParsingContext) Parse(reader enc.WireView, ignoreCritica
 	return value, nil
 }
 
+// Encodes the NestedSeq value into a wire format using a NestedSeqEncoder for serialization.
 func (value *NestedSeq) Encode() enc.Wire {
 	encoder := NestedSeqEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Encodes the NestedSeq into a contiguous byte slice by joining its encoded components.
 func (value *NestedSeq) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a nested TLV sequence from the provided wire format data into a `NestedSeq` structure, using the given parsing context and optionally ignoring critical elements based on the `ignoreCritical` flag.
 func ParseNestedSeq(reader enc.WireView, ignoreCritical bool) (*NestedSeq, error) {
 	context := NestedSeqParsingContext{}
 	context.Init()
@@ -895,6 +935,7 @@ type InnerWire1Encoder struct {
 type InnerWire1ParsingContext struct {
 }
 
+// Initializes the encoder with the total encoded length and a wire encoding plan for the InnerWire1 structure, accounting for optional fields and nested string lengths.
 func (encoder *InnerWire1Encoder) Init(value *InnerWire1) {
 	if value.Wire1 != nil {
 		encoder.Wire1_length = 0
@@ -937,10 +978,12 @@ func (encoder *InnerWire1Encoder) Init(value *InnerWire1) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the InnerWire1ParsingContext for parsing NDN packets.
 func (context *InnerWire1ParsingContext) Init() {
 
 }
 
+// Encodes an `InnerWire1` struct into a binary wire format using TLV (Type-Length-Value) encoding, handling a slice of wire elements (type 1) and an optional unsigned integer (type 2).
 func (encoder *InnerWire1Encoder) EncodeInto(value *InnerWire1, wire enc.Wire) {
 
 	wireIdx := 0
@@ -980,6 +1023,7 @@ func (encoder *InnerWire1Encoder) EncodeInto(value *InnerWire1, wire enc.Wire) {
 	}
 }
 
+// Encodes an `InnerWire1` value into a pre-allocated byte slice structure defined by the encoder's wire plan, returning a segmented wire representation.
 func (encoder *InnerWire1Encoder) Encode(value *InnerWire1) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -999,6 +1043,7 @@ func (encoder *InnerWire1Encoder) Encode(value *InnerWire1) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded binary structure into an `InnerWire1` object, handling specific fields (Wire1 and Num) and skipping or rejecting unknown critical types based on the `ignoreCritical` flag.
 func (context *InnerWire1ParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*InnerWire1, error) {
 
 	var handled_Wire1 bool = false
@@ -1101,6 +1146,7 @@ type InnerWire2Encoder struct {
 type InnerWire2ParsingContext struct {
 }
 
+// Initializes the encoder with length calculations and encoding plan for the `Wire2` field, accounting for variable-length encoding of its contents.
 func (encoder *InnerWire2Encoder) Init(value *InnerWire2) {
 	if value.Wire2 != nil {
 		encoder.Wire2_length = 0
@@ -1135,10 +1181,12 @@ func (encoder *InnerWire2Encoder) Init(value *InnerWire2) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the InnerWire2ParsingContext, preparing it for subsequent parsing operations (currently no implementation).
 func (context *InnerWire2ParsingContext) Init() {
 
 }
 
+// Encodes the `Wire2` field of the provided `InnerWire2` value into the given wire buffer using TLV (Type-Length-Value) encoding, writing a type byte `3`, the length of the `Wire2` slice, and its elements into sequential wire segments.
 func (encoder *InnerWire2Encoder) EncodeInto(value *InnerWire2, wire enc.Wire) {
 
 	wireIdx := 0
@@ -1170,6 +1218,7 @@ func (encoder *InnerWire2Encoder) EncodeInto(value *InnerWire2, wire enc.Wire) {
 	}
 }
 
+// Encodes the provided InnerWire2 value into a pre-allocated byte slice structure based on a predefined wire layout plan, returning the segmented encoded data as an enc.Wire.
 func (encoder *InnerWire2Encoder) Encode(value *InnerWire2) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -1189,6 +1238,7 @@ func (encoder *InnerWire2Encoder) Encode(value *InnerWire2) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded InnerWire2 object from the provided byte stream, extracting the Wire2 field (type 3) and skipping or rejecting unrecognized critical fields based on the ignoreCritical flag.
 func (context *InnerWire2ParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*InnerWire2, error) {
 
 	var handled_Wire2 bool = false
@@ -1269,6 +1319,7 @@ type NestedWireParsingContext struct {
 	W2_context InnerWire2ParsingContext
 }
 
+// Initializes the NestedWireEncoder with the provided NestedWire structure, calculates the total encoded length, and constructs a wire plan detailing the encoding offsets for each component (W1, N, W2) to facilitate structured wire format serialization.
 func (encoder *NestedWireEncoder) Init(value *NestedWire) {
 	if value.W1 != nil {
 		encoder.W1_encoder.Init(value.W1)
@@ -1335,12 +1386,14 @@ func (encoder *NestedWireEncoder) Init(value *NestedWire) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the nested wire parsing context by initializing its internal W1 and W2 sub-contexts for wire parsing operations.
 func (context *NestedWireParsingContext) Init() {
 	context.W1_context.Init()
 
 	context.W2_context.Init()
 }
 
+// Encodes a NestedWire structure into a binary wire format using TLV encoding, handling nested fields (W1, W2) by delegating to sub-encoders and managing buffer layout with type markers, length fields, and value serialization.
 func (encoder *NestedWireEncoder) EncodeInto(value *NestedWire, wire enc.Wire) {
 
 	wireIdx := 0
@@ -1423,6 +1476,7 @@ func (encoder *NestedWireEncoder) EncodeInto(value *NestedWire, wire enc.Wire) {
 	}
 }
 
+// Encodes a NestedWire value into a pre-allocated, segmented byte slice structure according to the encoder's wire plan, returning the structured wire representation.
 func (encoder *NestedWireEncoder) Encode(value *NestedWire) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -1442,6 +1496,7 @@ func (encoder *NestedWireEncoder) Encode(value *NestedWire) enc.Wire {
 	return wire
 }
 
+// Parses a binary TLV-encoded structure into a NestedWire object, handling nested W1 and W2 fields, a required uint64 N field, and managing critical vs non-critical TLV types based on the ignoreCritical flag.
 func (context *NestedWireParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*NestedWire, error) {
 
 	var handled_W1 bool = false
@@ -1539,16 +1594,19 @@ func (context *NestedWireParsingContext) Parse(reader enc.WireView, ignoreCritic
 	return value, nil
 }
 
+// Encodes the NestedWire value into a wire format using a NestedWireEncoder.
 func (value *NestedWire) Encode() enc.Wire {
 	encoder := NestedWireEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the encoded byte representation of the NestedWire value by encoding its components and joining them into a single byte slice.
 func (value *NestedWire) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a nested wire-encoded structure into a NestedWire object, optionally ignoring critical elements that cannot be processed.
 func ParseNestedWire(reader enc.WireView, ignoreCritical bool) (*NestedWire, error) {
 	context := NestedWireParsingContext{}
 	context.Init()

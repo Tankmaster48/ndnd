@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Sends an Interest to the localhost NLSR status endpoint, retrieves the corresponding Data packet, and parses it into a DV Status object.
 func (t *Tool) DvStatus() (*spec_dv.Status, error) {
 	name := enc.Name{
 		enc.LOCALHOST,
@@ -50,6 +51,7 @@ func (t *Tool) DvStatus() (*spec_dv.Status, error) {
 	return status, nil
 }
 
+// Retrieves and prints the current Distance Vector (DV) routing protocol status, including router version, network names, and routing table statistics.
 func (t *Tool) RunDvStatus(_ *cobra.Command, args []string) {
 	t.Start()
 	defer t.Stop()

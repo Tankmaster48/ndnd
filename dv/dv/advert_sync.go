@@ -26,10 +26,12 @@ type advertModule struct {
 	objDir *storage.MemoryFifoDir
 }
 
+// Returns the string identifier `'dv-advert'` for the advert module when converted to a string (implements `fmt.Stringer`).
 func (a *advertModule) String() string {
 	return "dv-advert"
 }
 
+// Sends synchronization Interests for both active (outgoing) and passive (incoming) connection prefixes to ensure network state consistency, logging and propagating any errors encountered during the process.
 func (a *advertModule) sendSyncInterest() (err error) {
 	// Sync Interests for our outgoing connections
 	err = a.sendSyncInterestImpl(a.dv.config.AdvertisementSyncActivePrefix())
@@ -46,6 +48,7 @@ func (a *advertModule) sendSyncInterest() (err error) {
 	return err
 }
 
+// Constructs and expresses a signed SVS Sync Interest with embedded state vector data to synchronize group state information in an NDN network.
 func (a *advertModule) sendSyncInterestImpl(syncName enc.Name) (err error) {
 	// State Vector for our group
 	sv := &spec_svs.SvsData{
@@ -98,6 +101,7 @@ func (a *advertModule) sendSyncInterestImpl(syncName enc.Name) (err error) {
 	return nil
 }
 
+// Handles an incoming Sync Interest by validating its signed data and processing the contained state vector to update synchronization state.
 func (a *advertModule) OnSyncInterest(args ndn.InterestHandlerArgs, active bool) {
 	// If there is no incoming face ID, we can't use this
 	if !args.IncomingFaceId.IsSet() {
@@ -144,6 +148,7 @@ func (a *advertModule) OnSyncInterest(args ndn.InterestHandlerArgs, active bool)
 	})
 }
 
+// Processes an incoming StateVector from a neighbor, updating local neighbor state tracking and triggering FIB updates if network face changes are detected, while debouncing data fetch requests for new or updated sequence numbers.
 func (a *advertModule) onStateVector(sv *spec_svs.StateVector, faceId uint64, active bool) {
 	// Process each entry in the state vector
 	a.dv.mutex.Lock()

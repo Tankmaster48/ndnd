@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Constructs a Data packet with the specified name, configuration (including content type), optional content, and signer, producing a wire-encoded packet with computed signature if signing is enabled.
 func TestMakeDataBasic(t *testing.T) {
 	tu.SetT(t)
 
@@ -86,6 +87,7 @@ func TestMakeDataBasic(t *testing.T) {
 		data.Wire.Join())
 }
 
+// Constructs a signed Data packet with the specified name, metadata (ContentType, Freshness, FinalBlockID), and empty content using SHA-256 signing.
 func TestMakeDataMetaInfo(t *testing.T) {
 	tu.SetT(t)
 	spec := spec_2022.Spec{}
@@ -111,31 +113,38 @@ func TestMakeDataMetaInfo(t *testing.T) {
 
 type testSigner struct{}
 
+// Returns a fixed Name object representing "/KEY", used to identify the test signer's key in the NDN namespace.
 func (testSigner) KeyName() enc.Name {
 	name, _ := enc.NameFromStr("/KEY")
 	return name
 }
 
+// Returns the key name associated with this signer as its KeyLocator.
 func (t testSigner) KeyLocator() enc.Name {
 	return t.KeyName()
 }
 
+// Returns the signature type associated with the test signer, which is defined as 200 for testing purposes.
 func (testSigner) Type() ndn.SigType {
 	return ndn.SigType(200)
 }
 
+// Returns an estimated size of 10 for the test signer's signature.
 func (testSigner) EstimateSize() uint {
 	return 10
 }
 
+// Returns a dummy 5-byte zero signature for testing, ignoring the input Wire and not performing actual cryptographic signing.
 func (testSigner) Sign(enc.Wire) ([]byte, error) {
 	return []byte{0, 0, 0, 0, 0}, nil
 }
 
+// Returns nil and an error indicating no public key is available, serving as a test implementation for scenarios where public key retrieval is not required or supported.
 func (testSigner) Public() ([]byte, error) {
 	return nil, ndn.ErrNoPubKey
 }
 
+// Constructs a Data packet with the specified name and ContentTypeBlob, using a test signer that generates placeholder signature fields, resulting in an unsigned packet with minimal signature data.
 func TestMakeDataShrink(t *testing.T) {
 	tu.SetT(t)
 	spec := spec_2022.Spec{}
@@ -156,6 +165,7 @@ func TestMakeDataShrink(t *testing.T) {
 		data.Wire.Join())
 }
 
+// This function tests the NDN Data packet parsing logic by reading various TLV-encoded Data packets (with different fields like name, content, and signature) using the 2022 specification and verifying their correctness through field checks and signature validation.
 func TestReadDataBasic(t *testing.T) {
 	tu.SetT(t)
 	spec := spec_2022.Spec{}
@@ -236,6 +246,7 @@ func TestReadDataBasic(t *testing.T) {
 	require.Equal(t, sig, data.Signature().SigValue())
 }
 
+// Verifies the correct parsing of a Data packet with metadata fields (name, content type, freshness, final block ID, and SHA-256 digest signature) and validates the signature against the covered TLV-encoded fields.
 func TestReadDataMetaInfo(t *testing.T) {
 	tu.SetT(t)
 	spec := spec_2022.Spec{}
@@ -261,6 +272,7 @@ func TestReadDataMetaInfo(t *testing.T) {
 	require.Equal(t, sig, data.Signature().SigValue())
 }
 
+// Constructs an Interest packet with a specified name and configuration parameters such as lifetime, freshness, hop limit, nonce, and forwarding hints, encoding them into the NDN TLV wire format.
 func TestMakeIntBasic(t *testing.T) {
 	tu.SetT(t)
 	spec := spec_2022.Spec{}
@@ -320,6 +332,7 @@ func TestMakeIntBasic(t *testing.T) {
 		interest.Wire.Join())
 }
 
+// Constructs and verifies an NDN Interest packet with a large (384-byte) application-specific parameter and a 4-second lifetime, ensuring correct encoding/decoding and name validation.
 func TestMakeIntLargeAppParam(t *testing.T) {
 	tu.SetT(t)
 	spec := spec_2022.Spec{}
@@ -344,6 +357,7 @@ func TestMakeIntLargeAppParam(t *testing.T) {
 	require.True(t, interest.Name().Equal(encoded.FinalName))
 }
 
+// Constructs a signed Interest packet with the given name, configuration, application-specific data, and SHA-256 signer, appending the signature hash to the final name component as per the NDN 2022 specification.
 func TestMakeIntSign(t *testing.T) {
 	tu.SetT(t)
 	spec := spec_2022.Spec{}
@@ -418,6 +432,7 @@ func TestMakeIntSign(t *testing.T) {
 		interest.Wire.Join())
 }
 
+// Tests the parsing of NDN Interest packets according to the 2022 specification, validating correct handling of name components, lifetime, nonce, hop limit, application parameters, and cryptographic signatures (including SHA-256) across multiple test cases with both valid and invalid inputs.
 func TestReadIntBasic(t *testing.T) {
 	tu.SetT(t)
 	spec := spec_2022.Spec{}
@@ -524,6 +539,7 @@ func TestReadIntBasic(t *testing.T) {
 	require.Equal(t, sig, interest.Signature().SigValue())
 }
 
+// Tests that the 2022 spec's `ReadInterest` function correctly returns errors for various malformed or invalid Interest encodings, such as incorrect TLV types, invalid length fields, and insufficient data.
 func TestReadIntErrors(t *testing.T) {
 	tu.SetT(t)
 	spec := spec_2022.Spec{}

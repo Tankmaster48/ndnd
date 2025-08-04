@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Constructs a `sec` command that serves as a group for NDN security utilities, including key generation, certificate signing, keychain management, and PEM file conversion tools.
 func CmdSec() *cobra.Command {
 	cmd := &cobra.Command{
 		GroupID: "sec",

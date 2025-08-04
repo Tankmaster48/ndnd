@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Tests the functionality of the FibStrategyTable's FindNextHopsEnc method, including inserting, removing, and querying next hops for different names, verifying longest prefix matching and pruning of entries.
 func TestFindNextHopsEncEnc_HT(t *testing.T) {
 	newFibStrategyTableHashTable(1)
 
@@ -68,6 +69,7 @@ func TestFindNextHopsEncEnc_HT(t *testing.T) {
 	assert.Equal(t, 0, len(nexthops2c))
 }
 
+// This function tests the functionality of the FibStrategyTable's strategy management operations (finding, setting, unsetting) using a hash table, verifying correct strategy inheritance, updates, and pruning behavior for hierarchical names.
 func TestFind_Set_Unset_Strategy_HT(t *testing.T) {
 	newFibStrategyTableHashTable(1)
 
@@ -104,6 +106,7 @@ func TestFind_Set_Unset_Strategy_HT(t *testing.T) {
 	assert.True(t, multicast.Equal(FibStrategyTable.FindStrategyEnc(name3)))
 }
 
+// Tests the insertion and cost update of next-hop entries in the FIB strategy table for a given name, ensuring new nexthops are added and existing ones are updated correctly.
 func TestInsertNextHopEnc_HT(t *testing.T) {
 	newFibStrategyTableHashTable(1)
 	assert.NotNil(t, FibStrategyTable)
@@ -126,6 +129,7 @@ func TestInsertNextHopEnc_HT(t *testing.T) {
 	assert.Equal(t, uint64(20), nextHops[0].Cost)
 }
 
+// Tests the `ClearNextHopsEnc` method of the FIB strategy table by verifying it removes all next hops for a given name, leaves unrelated entries untouched, and ensures only exact name matches are cleared without affecting longer prefixes.
 func TestClearNextHops_HT(t *testing.T) {
 	newFibStrategyTableHashTable(1)
 	assert.NotNil(t, FibStrategyTable)
@@ -171,6 +175,7 @@ func TestClearNextHops_HT(t *testing.T) {
 	assert.Equal(t, 1, len(nextHops))
 }
 
+// This function tests the insertion, removal, and lookup of next-hop entries in the FibStrategyTable for NDN, verifying correct behavior when adding, updating, and removing next-hop routes for specific names, including ensuring removals do not affect other name entries.
 func TestRemoveNextHopEnc_HT(t *testing.T) {
 	newFibStrategyTableHashTable(1)
 	assert.NotNil(t, FibStrategyTable)
@@ -212,6 +217,7 @@ func TestRemoveNextHopEnc_HT(t *testing.T) {
 	assert.Equal(t, 1, len(nextHops))
 }
 
+// Tests the `GetAllFIBEntries` method by constructing a hash table-based FIB strategy table, populating it with entries having different strategies and next hops, and verifying that the returned entries correctly include strategies, next hops, and exclude entries with neither.
 func TestGetAllFIBEntries_HT(t *testing.T) {
 	newFibStrategyTableHashTable(1)
 	assert.NotNil(t, FibStrategyTable)
@@ -262,6 +268,7 @@ func TestGetAllFIBEntries_HT(t *testing.T) {
 	assert.Equal(t, uint64(50), nextHops[0].Cost)
 }
 
+// Constructs a test scenario to verify that `GetAllForwardingStrategies` correctly collects all names with assigned forwarding strategies (including the root default strategy) along with their associated next-hop information, excluding names without explicitly set strategies.
 func TestGetAllForwardingStrategies_HT(t *testing.T) {
 	newFibStrategyTableHashTable(1)
 	assert.NotNil(t, FibStrategyTable)
@@ -312,6 +319,7 @@ func TestGetAllForwardingStrategies_HT(t *testing.T) {
 	assert.Equal(t, 0, len(nextHops))
 }
 
+// This function tests the hash table-based Forwarding Information Base (FIB) implementation by inserting, querying, and removing entries with various names and next-hops, verifying correct longest-prefix matching, multiple next-hop handling, and pruning behavior.
 func testFIB_HT_Details(t *testing.T, m uint16) {
 	// A test suite specific to the hash table approach
 	newFibStrategyTableHashTable(m)
@@ -462,6 +470,7 @@ func testFIB_HT_Details(t *testing.T, m uint16) {
 	strategy = FibStrategyTable.FindStrategyEnc(name1)
 	assert.Nil(t, strategy)
 }
+// This function tests the Forwarding Information Base (FIB) hashtable implementation by iterating through different `m` values (1 to 7), verifying correct behavior for real and virtual nodes under varying hashtable configurations.
 func TestFIB_HT_RealAndVirtualNodes(t *testing.T) {
 	// Hashtable specific tests, for different values of m
 	for i := 1; i < 8; i++ {

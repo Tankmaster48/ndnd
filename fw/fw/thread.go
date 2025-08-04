@@ -93,6 +93,7 @@ func NewThread(id int) *Thread {
 	return t
 }
 
+// Returns the string representation of the thread in the format 'fw-thread-%d', where %d is the thread's unique ID.
 func (t *Thread) String() string {
 	return fmt.Sprintf("fw-thread-%d", t.threadID)
 }
@@ -171,6 +172,7 @@ func (t *Thread) QueueData(data *defn.Pkt) {
 	}
 }
 
+// Processes an incoming Interest packet by validating its attributes, checking for loops, updating the PIT and Content Store, and determining forwarding actions based on FIB entries and routing strategies.
 func (t *Thread) processIncomingInterest(packet *defn.Pkt) {
 	interest := packet.L3.Interest
 	if interest == nil {
@@ -355,6 +357,7 @@ func (t *Thread) processIncomingInterest(packet *defn.Pkt) {
 	strategy.AfterReceiveInterest(packet, pitEntry, incomingFace.FaceID(), allowedNexthops)
 }
 
+// Processes an outgoing Interest packet by validating the next-hop face, preventing loops, checking hop limits, updating the PIT entry, and forwarding the packet with a generated PIT token.
 func (t *Thread) processOutgoingInterest(
 	packet *defn.Pkt,
 	pitEntry table.PitEntry,
@@ -407,6 +410,7 @@ func (t *Thread) processOutgoingInterest(
 	return true
 }
 
+// Handles cleanup of an unsatisfied Interest by adding its nonces to the dead nonce list and updating unsatisfied Interest counters for metrics tracking.
 func (t *Thread) finalizeInterest(pitEntry table.PitEntry) {
 	// Check for nonces to insert into dead nonce list
 	for _, outRecord := range pitEntry.OutRecords() {
@@ -419,6 +423,7 @@ func (t *Thread) finalizeInterest(pitEntry table.PitEntry) {
 	}
 }
 
+// Processes an incoming NDN Data packet by validating scope, updating the Content Store, matching PIT entries, and forwarding the Data to satisfy pending Interests using the appropriate strategy.
 func (t *Thread) processIncomingData(packet *defn.Pkt) {
 	data := packet.L3.Data
 	if data == nil {
@@ -531,6 +536,7 @@ func (t *Thread) processIncomingData(packet *defn.Pkt) {
 	}
 }
 
+// Processes an outgoing Data packet by validating the next-hop face, enforcing scoping rules (e.g., /localhost), updating network statistics, and forwarding the packet with its PIT token and incoming face information.
 func (t *Thread) processOutgoingData(
 	packet *defn.Pkt,
 	nexthop uint64,

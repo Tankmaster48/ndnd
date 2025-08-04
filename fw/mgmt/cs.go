@@ -22,18 +22,22 @@ type ContentStoreModule struct {
 	manager *Thread
 }
 
+// Returns the string identifier "mgmt-cs" for the ContentStoreModule.
 func (c *ContentStoreModule) String() string {
 	return "mgmt-cs"
 }
 
+// Registers the specified Thread as the manager for the ContentStoreModule.
 func (c *ContentStoreModule) registerManager(manager *Thread) {
 	c.manager = manager
 }
 
+// Returns the manager Thread associated with the ContentStoreModule.
 func (c *ContentStoreModule) getManager() *Thread {
 	return c.manager
 }
 
+// Handles incoming management Interests for the ContentStoreModule by dispatching commands (e.g., "config", "info") based on the Interest name, ensuring requests originate from the local prefix (/localhost) for security.
 func (c *ContentStoreModule) handleIncomingInterest(interest *Interest) {
 	// Only allow from /localhost
 	if !LOCAL_PREFIX.IsPrefix(interest.Name()) {
@@ -58,6 +62,7 @@ func (c *ContentStoreModule) handleIncomingInterest(interest *Interest) {
 	}
 }
 
+// Handles configuration of the Content Store by processing control interests with parameters such as capacity and operational flags, validating their correctness, applying the settings, and returning appropriate control responses.
 func (c *ContentStoreModule) config(interest *Interest) {
 	if len(interest.Name()) < len(LOCAL_PREFIX)+3 {
 		// Name not long enough to contain ControlParameters
@@ -106,6 +111,7 @@ func (c *ContentStoreModule) config(interest *Interest) {
 	})
 }
 
+// Generates a Content Store (CS) information dataset containing aggregated statistics (capacity, flags, entry count, hits, and misses) across all forwarding threads and sends it as a signed response to the provided Interest.
 func (c *ContentStoreModule) info(interest *Interest) {
 	if len(interest.Name()) > len(LOCAL_PREFIX)+2 {
 		// Ignore because contains version and/or segment components
@@ -135,6 +141,7 @@ func (c *ContentStoreModule) info(interest *Interest) {
 	c.manager.sendStatusDataset(interest, name, status.Encode())
 }
 
+// Constructs a bitmask of content store flags based on admission and serving configuration settings.
 func (c *ContentStoreModule) getFlags() uint64 {
 	flags := uint64(0)
 	if table.CfgCsAdmit() {

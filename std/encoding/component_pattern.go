@@ -40,6 +40,7 @@ type ComponentPattern interface {
 	FromMatching(m Matching) (*Component, error)
 }
 
+// Parses a string into a ComponentPattern, interpreting angle-bracket-enclosed strings with optional type=tag syntax (e.g., `<type=tag>` or `<tag>`) and falling back to regular components for non-pattern strings.
 func ComponentPatternFromStr(s string) (ComponentPattern, error) {
 	if len(s) <= 0 || s[0] != '<' {
 		return ComponentFromStr(s)
@@ -74,6 +75,7 @@ type Pattern struct {
 	Tag string
 }
 
+// Returns a string representation of the Pattern, formatting it as `<tag>`, `<conversion=tag>`, or `<type=tag>` depending on its type and registered conversion name.
 func (p Pattern) String() string {
 	if p.Typ == TypeGenericNameComponent {
 		return "<" + p.Tag + ">"
@@ -84,6 +86,7 @@ func (p Pattern) String() string {
 	}
 }
 
+// Returns a canonical string representation of the pattern, using the tag alone for generic components or the type and tag for other patterns.
 func (p Pattern) CanonicalString() string {
 	if p.Typ == TypeGenericNameComponent {
 		return "<" + p.Tag + ">"
@@ -92,10 +95,13 @@ func (p Pattern) CanonicalString() string {
 	}
 }
 
+// **Description:**  
+Returns the receiver Pattern as a ComponentPattern, enabling type conversion or interface implementation for pattern-related operations.
 func (p Pattern) ComponentPatternTrait() ComponentPattern {
 	return p
 }
 
+// Compares this Pattern with another ComponentPattern, returning -1, 0, or 1 based on type hierarchy and tag string comparison, with Pattern types considered greater than non-Pattern components.
 func (p Pattern) Compare(rhs ComponentPattern) int {
 	rp, ok := rhs.(Pattern)
 	if !ok {
@@ -116,6 +122,7 @@ func (p Pattern) Compare(rhs ComponentPattern) int {
 	return strings.Compare(p.Tag, rp.Tag)
 }
 
+// Compares two ComponentPattern instances for equality by checking if they are both Pattern (or *Pattern) and have the same Typ and Tag fields.
 func (p Pattern) Equal(rhs ComponentPattern) bool {
 	rp, ok := rhs.(Pattern)
 	if !ok {
@@ -128,11 +135,13 @@ func (p Pattern) Equal(rhs ComponentPattern) bool {
 	return p.Typ == rp.Typ && p.Tag == rp.Tag
 }
 
+// Stores the byte value of the component in the matching map under the key specified by the pattern's tag.
 func (p Pattern) Match(value Component, m Matching) {
 	m[p.Tag] = make([]byte, len(value.Val))
 	copy(m[p.Tag], value.Val)
 }
 
+// Constructs a Component using the pattern's type and the value associated with its tag from a matching result, or returns an error if the tag is not found.
 func (p Pattern) FromMatching(m Matching) (*Component, error) {
 	val, ok := m[p.Tag]
 	if !ok {
@@ -144,6 +153,7 @@ func (p Pattern) FromMatching(m Matching) (*Component, error) {
 	}, nil
 }
 
+// Returns true if the given Component has the same type as the Pattern.
 func (p Pattern) IsMatch(value Component) bool {
 	return p.Typ == value.Typ
 }

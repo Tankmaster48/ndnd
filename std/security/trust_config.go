@@ -76,6 +76,7 @@ func NewTrustConfig(keyChain ndn.KeyChain, schema ndn.TrustSchema, roots []enc.N
 	}, nil
 }
 
+// Returns the string "trust-config" as the string representation of the TrustConfig instance.
 func (tc *TrustConfig) String() string {
 	return "trust-config"
 }
@@ -364,6 +365,7 @@ func (tc *TrustConfig) Validate(args TrustConfigValidateArgs) {
 	})
 }
 
+// Validates a cross schema's authenticity, checks its validity period, ensures it authorizes the certificate for the given data, and recursively validates the cross schema itself using the trust configuration.
 func (tc *TrustConfig) validateCrossSchema(args TrustConfigValidateArgs) {
 	crossWire := args.Data.CrossSchema()
 	if crossWire == nil {

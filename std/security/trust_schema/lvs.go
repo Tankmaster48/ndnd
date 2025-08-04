@@ -21,6 +21,7 @@ type LvsSchema struct {
 
 type LvsCtx = map[uint64]enc.Component
 
+// Constructs and validates a Light Versec Schema (LVS) model from binary-encoded data, ensuring structural correctness through version checks, node-edge consistency, and constraint validation.
 func NewLvsSchema(buf []byte) (*LvsSchema, error) {
 	model, err := ParseLvsModel(enc.NewBufferView(buf), false)
 	if err != nil {
@@ -86,6 +87,7 @@ func NewLvsSchema(buf []byte) (*LvsSchema, error) {
 	return &LvsSchema{m: model}, nil
 }
 
+// Collects all LvsNode instances that match the given name according to the schema's matching rules and returns them as a slice.
 func (s *LvsSchema) MatchCollect(name enc.Name) []*LvsNode {
 	nodes := make([]*LvsNode, 0)
 	for node := range s.Match(name, nil) {
@@ -94,6 +96,7 @@ func (s *LvsSchema) MatchCollect(name enc.Name) []*LvsNode {
 	return nodes
 }
 
+// Matches an NDN name against a schema, yielding matching nodes and context mappings for tags to name components via depth-first traversal with backtracking.
 func (s *LvsSchema) Match(name enc.Name, startCtx LvsCtx) iter.Seq2[*LvsNode, LvsCtx] {
 	return func(yield func(*LvsNode, LvsCtx) bool) {
 		// Empty name never matches
@@ -204,6 +207,7 @@ func (s *LvsSchema) Match(name enc.Name, startCtx LvsCtx) iter.Seq2[*LvsNode, Lv
 	}
 }
 
+// Verifies whether the provided key is a valid signer for the given packet name according to the LvsSchema's matching rules by checking all possible name matches and signer relationships.
 func (s *LvsSchema) Check(pkt enc.Name, key enc.Name) bool {
 	for pktNode, pktCtx := range s.Match(pkt, nil) {
 		for keyNode := range s.Match(key, pktCtx) {
@@ -215,6 +219,7 @@ func (s *LvsSchema) Check(pkt enc.Name, key enc.Name) bool {
 	return false
 }
 
+// Suggests a suitable signer for the given packet by checking all combinations of identities, keys, and certificates in the keychain against the schema's constraints, returning a signer with the appropriate key locator if a match is found.
 func (s *LvsSchema) Suggest(pkt enc.Name, keychain ndn.KeyChain) ndn.Signer {
 	// O(n^7) ... but n is small
 	for pktNode, pktCtx := range s.Match(pkt, nil) {
@@ -236,6 +241,7 @@ func (s *LvsSchema) Suggest(pkt enc.Name, keychain ndn.KeyChain) ndn.Signer {
 	return nil
 }
 
+// Checks whether the given value satisfies all constraints in `consSet` by comparing against specified values, context tags, or unsupported user-defined functions, returning true only if every constraint has at least one matching option.
 func (s *LvsSchema) checkCons(
 	value enc.Component,
 	context LvsCtx,
@@ -268,6 +274,10 @@ func (s *LvsSchema) checkCons(
 	return true
 }
 
+// Checks whether the given key node's ID is listed as a valid signer in the packet node's SignCons slice.  
+
+**Explanation**:  
+This function verifies if `keyNode` is an authorized signer for `pktNode` by checking if `keyNode.Id` exists in `pktNode.SignCons`, which is presumably a list of trusted signer identifiers.
 func (s *LvsSchema) checkSigner(pktNode *LvsNode, keyNode *LvsNode) bool {
 	return slices.Contains(pktNode.SignCons, keyNode.Id)
 }

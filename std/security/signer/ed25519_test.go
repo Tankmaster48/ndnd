@@ -14,6 +14,7 @@ import (
 
 var TEST_KEY_NAME, _ = enc.NameFromStr("/KEY")
 
+// Verifies the correctness of an Ed25519 signer's configuration and its ability to generate valid signatures by checking key properties, estimated size, and successful signature verification against provided data and public key.
 func testEd25519Verify(t *testing.T, signer ndn.Signer, verifyKey []byte) bool {
 	require.Equal(t, uint(ed25519.SignatureSize), signer.EstimateSize())
 	require.Equal(t, ndn.SignatureEd25519, signer.Type())
@@ -30,6 +31,7 @@ func testEd25519Verify(t *testing.T, signer ndn.Signer, verifyKey []byte) bool {
 	return ed25519.Verify(verifyKeyBits, dataVal.Join(), sigValue)
 }
 
+// Constructs an Ed25519 signer using a predefined seed key and verifies its ability to generate a valid public key and signing capability.
 func TestEd25519SignerNew(t *testing.T) {
 	tu.SetT(t)
 
@@ -39,6 +41,7 @@ func TestEd25519SignerNew(t *testing.T) {
 	require.True(t, testEd25519Verify(t, signer, pub))
 }
 
+// Tests the Ed25519 key generation function by creating two distinct key pairs, verifying each can sign and validate with their own public keys, and ensuring they cannot validate each other's signatures.
 func TestEd25519Keygen(t *testing.T) {
 	tu.SetT(t)
 
@@ -54,6 +57,8 @@ func TestEd25519Keygen(t *testing.T) {
 	require.False(t, testEd25519Verify(t, signer2, pub1))
 }
 
+// **Function Description:**  
+Tests parsing of Ed25519 signers from a secret key, verifies the parsed signer matches the original, and ensures parsing fails when using a public key.
 func TestEd25519Parse(t *testing.T) {
 	tu.SetT(t)
 

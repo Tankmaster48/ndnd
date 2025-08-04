@@ -39,6 +39,7 @@ func MakeUDPListener(localURI *defn.URI) (*UDPListener, error) {
 	return l, nil
 }
 
+// Returns a string representation of the UDP listener, including its local URI.
 func (l *UDPListener) String() string {
 	return fmt.Sprintf("udp-listener (%s)", l.localURI)
 }
@@ -106,6 +107,7 @@ func (l *UDPListener) Run() {
 	}
 }
 
+// Closes the UDP connection and waits for the listener to fully stop, ensuring all background operations complete before returning.
 func (l *UDPListener) Close() {
 	if l.conn != nil {
 		l.conn.Close()

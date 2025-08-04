@@ -29,6 +29,7 @@ var CmdNDNd = &cobra.Command{
 	Version: utils.NDNdVersion,
 }
 
+// Initializes the NDN daemon command-line interface with grouped commands for daemons, security tools, and debug utilities, while configuring hidden flags and disabling command sorting.
 func init() {
 	cobra.EnableCommandSorting = false
 	CmdNDNd.Root().CompletionOptions.HiddenDefaultCmd = true
@@ -52,6 +53,7 @@ func init() {
 	CmdNDNd.AddCommand(tools.CmdPutChunks())
 }
 
+// Constructs the NDN Forwarding Daemon command with subcommands grouped for running the forwarder (via `run CONFIG-FILE`) and managing it (via `nfdc` control commands).
 func cmdFw() *cobra.Command {
 	cmdFw := &cobra.Command{
 		Use:   "fw",
@@ -77,6 +79,7 @@ Reference:
 	return cmdFw
 }
 
+// Constructs a cobra.Command for the NDN Distance Vector Daemon CLI, organizing subcommands into "Router Daemon" (for running the daemon) and "Router Control" (for management operations) groups.
 func cmdDv() *cobra.Command {
 	cmdDv := &cobra.Command{
 		Use:   "dv",
@@ -102,6 +105,7 @@ Reference:
 	return cmdDv
 }
 
+// Constructs the 'repo' command for managing the NDN Data Repository daemon, including the 'run' subcommand to start the daemon using a configuration file.
 func cmdRepo() *cobra.Command {
 	cmdRepo := &cobra.Command{
 		Use:     "repo",

@@ -19,6 +19,7 @@ type PutChunks struct {
 	expose bool
 }
 
+// Constructs a CLI command for publishing data under a specified name prefix in Named-Data Networking, reading input from standard input with an optional flag to register the prefix via client origin.
 func CmdPutChunks() *cobra.Command {
 	pc := PutChunks{}
 
@@ -37,10 +38,12 @@ This tool expects data from the standard input.`,
 	return cmd
 }
 
+// Returns the string representation of PutChunks, which is "put".
 func (pc *PutChunks) String() string {
 	return "put"
 }
 
+// Produces an NDN object with the specified name and content read from stdin, announces the object's prefix for retrieval, and keeps it available until an interrupt signal is received.
 func (pc *PutChunks) run(_ *cobra.Command, args []string) {
 	name, err := enc.NameFromStr(args[0])
 	if err != nil {

@@ -9,6 +9,7 @@ import (
 	"github.com/named-data/ndnd/std/ndn"
 )
 
+// Generates a versioned advertisement Data packet with a timestamped name, encoded content from the routing table, and 10-second freshness, then updates the object directory and notifies neighbors via sync interest.
 func (a *advertModule) generate() {
 	a.dv.mutex.Lock()
 	defer a.dv.mutex.Unlock()
@@ -35,6 +36,7 @@ func (a *advertModule) generate() {
 	go a.sendSyncInterest()
 }
 
+// Fetches and processes a directed advertisement from a specified neighbor using a boot time and sequence number, retrying on failure and handling the content asynchronously upon success.
 func (a *advertModule) dataFetch(nName enc.Name, bootTime uint64, seqNo uint64) {
 	a.dv.mutex.Lock()
 	defer a.dv.mutex.Unlock()

@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This function is a unit test that verifies the correct encoding and decoding of a `T1` structure, including handling of optional fields, signature inclusion/exclusion, varying wire configurations (single, empty, nil), and coverage tracking for signature-protected data.
 func TestT1(t *testing.T) {
 	tu.SetT(t)
 
@@ -153,6 +154,7 @@ func TestT1(t *testing.T) {
 
 }
 
+// This function tests the encoding and decoding of an NDN T2 packet type, verifying correct handling of name components, cryptographic digest computation, signature inclusion, and edge cases like empty/no wire data and invalid digests during marshaling/unmarshaling.
 func TestT2(t *testing.T) {
 	tu.SetT(t)
 

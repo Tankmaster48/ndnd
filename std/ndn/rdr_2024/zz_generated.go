@@ -16,6 +16,7 @@ type ManifestDigestEncoder struct {
 type ManifestDigestParsingContext struct {
 }
 
+// Initializes the encoder by calculating the total encoded length of the ManifestDigest, including 1 byte for the SegNo field, the TLV-encoded length of the segment number, and optionally 1 byte plus the TLV-encoded length and raw bytes of the digest if present.
 func (encoder *ManifestDigestEncoder) Init(value *ManifestDigest) {
 
 	l := uint(0)
@@ -30,10 +31,12 @@ func (encoder *ManifestDigestEncoder) Init(value *ManifestDigest) {
 
 }
 
+// Initializes the parsing context for processing a manifest digest, preparing it for subsequent parsing operations.
 func (context *ManifestDigestParsingContext) Init() {
 
 }
 
+// Encodes a ManifestDigest into a binary TLV (Type-Length-Value) format in the provided buffer, with type 204 for the segment number (SegNo) and type 206 for the optional digest field.
 func (encoder *ManifestDigestEncoder) EncodeInto(value *ManifestDigest, buf []byte) {
 
 	pos := uint(0)
@@ -52,6 +55,7 @@ func (encoder *ManifestDigestEncoder) EncodeInto(value *ManifestDigest, buf []by
 	}
 }
 
+// Encodes a ManifestDigest into a binary wire format using the pre-determined buffer length of the encoder.
 func (encoder *ManifestDigestEncoder) Encode(value *ManifestDigest) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -62,6 +66,7 @@ func (encoder *ManifestDigestEncoder) Encode(value *ManifestDigest) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded manifest digest from a wire format reader, extracting the segment number (type 204) and digest (type 206) fields while handling critical/non-critical fields according to the ignoreCritical flag.
 func (context *ManifestDigestParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ManifestDigest, error) {
 
 	var handled_SegNo bool = false
@@ -150,16 +155,19 @@ func (context *ManifestDigestParsingContext) Parse(reader enc.WireView, ignoreCr
 	return value, nil
 }
 
+// Encodes the ManifestDigest value into its corresponding NDN wire format representation using the ManifestDigestEncoder.
 func (value *ManifestDigest) Encode() enc.Wire {
 	encoder := ManifestDigestEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the ManifestDigest as a single byte slice by encoding its value and joining the resulting components.
 func (value *ManifestDigest) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses a ManifestDigest from the provided encoded wire format data, optionally ignoring critical parameters that cannot be processed.
 func ParseManifestDigest(reader enc.WireView, ignoreCritical bool) (*ManifestDigest, error) {
 	context := ManifestDigestParsingContext{}
 	context.Init()
@@ -178,6 +186,7 @@ type ManifestDataParsingContext struct {
 	Entries_context ManifestDigestParsingContext
 }
 
+// Initializes encoders for each entry in the manifest data and calculates the total encoded length, including TLV overhead for a TLV-based encoding scheme.
 func (encoder *ManifestDataEncoder) Init(value *ManifestData) {
 	{
 		Entries_l := len(value.Entries)
@@ -229,10 +238,12 @@ func (encoder *ManifestDataEncoder) Init(value *ManifestData) {
 
 }
 
+// Initializes the entries context within the ManifestDataParsingContext instance.
 func (context *ManifestDataParsingContext) Init() {
 	context.Entries_context.Init()
 }
 
+// Encodes the entries of a ManifestData structure into a binary buffer using TLV (Type-Length-Value) encoding, where each entry is prefixed by a type byte (202) and its encoded length.
 func (encoder *ManifestDataEncoder) EncodeInto(value *ManifestData, buf []byte) {
 
 	pos := uint(0)
@@ -264,6 +275,7 @@ func (encoder *ManifestDataEncoder) EncodeInto(value *ManifestData, buf []byte) 
 	}
 }
 
+// Serializes the provided `ManifestData` into a wire-encoded byte slice using the pre-allocated buffer size specified by the encoder's `Length` field.
 func (encoder *ManifestDataEncoder) Encode(value *ManifestData) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -274,6 +286,7 @@ func (encoder *ManifestDataEncoder) Encode(value *ManifestData) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded manifest data into a ManifestData structure, handling critical and non-critical fields according to the provided context and ignoreCritical flag.
 func (context *ManifestDataParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*ManifestData, error) {
 
 	var handled_Entries bool = false
@@ -352,16 +365,19 @@ func (context *ManifestDataParsingContext) Parse(reader enc.WireView, ignoreCrit
 	return value, nil
 }
 
+// Encodes the ManifestData into a wire format using the ManifestDataEncoder.
 func (value *ManifestData) Encode() enc.Wire {
 	encoder := ManifestDataEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Serializes the ManifestData into a byte slice by encoding its components and concatenating the results.
 func (value *ManifestData) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses encoded manifest data from the given reader into a ManifestData object, optionally ignoring critical parsing errors.
 func ParseManifestData(reader enc.WireView, ignoreCritical bool) (*ManifestData, error) {
 	context := ManifestDataParsingContext{}
 	context.Init()
@@ -377,6 +393,7 @@ type MetaDataEncoder struct {
 type MetaDataParsingContext struct {
 }
 
+// Initializes the MetaDataEncoder by calculating the total encoded length of the provided MetaData, accounting for all mandatory and optional fields using TLV (Type-Length-Value) encoding rules.
 func (encoder *MetaDataEncoder) Init(value *MetaData) {
 	if value.Name != nil {
 		encoder.Name_length = 0
@@ -433,10 +450,12 @@ func (encoder *MetaDataEncoder) Init(value *MetaData) {
 
 }
 
+// Initializes the metadata parsing context, preparing it for subsequent metadata processing operations (currently a no-op placeholder).
 func (context *MetaDataParsingContext) Init() {
 
 }
 
+// Encodes a MetaData structure into a binary buffer using NDN TLV format, including standard fields like Name and FinalBlockID, and optional metadata attributes (e.g., SegmentSize, Size, Mode) with their respective attribute numbers and variable-length numeric or byte-string values.
 func (encoder *MetaDataEncoder) EncodeInto(value *MetaData, buf []byte) {
 
 	pos := uint(0)
@@ -529,6 +548,7 @@ func (encoder *MetaDataEncoder) EncodeInto(value *MetaData, buf []byte) {
 	}
 }
 
+// Encodes the provided MetaData into a byte slice using the encoder's calculated length and returns it as a single-element enc.Wire structure.
 func (encoder *MetaDataEncoder) Encode(value *MetaData) enc.Wire {
 
 	wire := make(enc.Wire, 1)
@@ -539,6 +559,7 @@ func (encoder *MetaDataEncoder) Encode(value *MetaData) enc.Wire {
 	return wire
 }
 
+// Parses TLV-encoded metadata from a wire format reader into a MetaData object, handling known fields (e.g., Name, timestamps, file sizes) and managing unknown fields according to the ignoreCritical flag.
 func (context *MetaDataParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*MetaData, error) {
 
 	var handled_Name bool = false
@@ -820,16 +841,19 @@ func (context *MetaDataParsingContext) Parse(reader enc.WireView, ignoreCritical
 	return value, nil
 }
 
+// Encodes the MetaData into a wire format using a MetaDataEncoder for transmission or storage.
 func (value *MetaData) Encode() enc.Wire {
 	encoder := MetaDataEncoder{}
 	encoder.Init(value)
 	return encoder.Encode(value)
 }
 
+// Returns the byte representation of the MetaData by encoding its components and concatenating them into a single byte slice.
 func (value *MetaData) Bytes() []byte {
 	return value.Encode().Join()
 }
 
+// Parses encoded metadata from a wire format using a parsing context, with an option to ignore critical fields that cannot be processed.
 func ParseMetaData(reader enc.WireView, ignoreCritical bool) (*MetaData, error) {
 	context := MetaDataParsingContext{}
 	context.Init()

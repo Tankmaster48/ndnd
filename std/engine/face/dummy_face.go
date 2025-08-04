@@ -12,6 +12,7 @@ type DummyFace struct {
 	sendPkts []enc.Buffer
 }
 
+// Constructs a new DummyFace initialized with a base face (configured for dummy mode) and an empty packet buffer, used to simulate network interactions and capture outgoing packets during testing.
 func NewDummyFace() *DummyFace {
 	return &DummyFace{
 		baseFace: newBaseFace(true),
@@ -19,10 +20,12 @@ func NewDummyFace() *DummyFace {
 	}
 }
 
+// Returns the string representation of a DummyFace object, which is always "dummy-face".
 func (f *DummyFace) String() string {
 	return "dummy-face"
 }
 
+// Opens the DummyFace, returning an error if required callbacks are not set or the face is already running; marks the face as running upon successful opening.
 func (f *DummyFace) Open() error {
 	if f.onError == nil || f.onPkt == nil {
 		return fmt.Errorf("face callbacks are not set")
@@ -34,6 +37,7 @@ func (f *DummyFace) Open() error {
 	return nil
 }
 
+// Closes the face, returning an error if the face was not previously running.
 func (f *DummyFace) Close() error {
 	if !f.running.Swap(false) {
 		return fmt.Errorf("face is not running")
@@ -41,6 +45,7 @@ func (f *DummyFace) Close() error {
 	return nil
 }
 
+// Sends a packet by appending it to the face's internal packet buffer, combining multiple packet segments into a single buffer if necessary, and returns an error if the face is not running.
 func (f *DummyFace) Send(pkt enc.Wire) error {
 	if !f.running.Load() {
 		return fmt.Errorf("face is not running")

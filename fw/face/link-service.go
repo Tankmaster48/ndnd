@@ -73,6 +73,7 @@ type linkServiceBase struct {
 	nOutData      uint64
 }
 
+// Returns a string representation of the link service, including the transport name if available or the face ID otherwise.
 func (l *linkServiceBase) String() string {
 	if l.transport != nil {
 		return fmt.Sprintf("link-service (%s)", l.transport)
@@ -81,6 +82,7 @@ func (l *linkServiceBase) String() string {
 	return fmt.Sprintf("link-service (faceid=%d)", l.faceID)
 }
 
+// Sets the FaceID for the link service and its underlying transport if present.
 func (l *linkServiceBase) SetFaceID(faceID uint64) {
 	l.faceID = faceID
 	if l.transport != nil {
@@ -92,6 +94,7 @@ func (l *linkServiceBase) SetFaceID(faceID uint64) {
 // "Constructors" and threading
 //
 
+// Initializes the link service base by creating a stopped signal channel and a buffered send queue for outgoing packets.
 func (l *linkServiceBase) makeLinkServiceBase() {
 	l.stopped = make(chan bool)
 	l.sendQueue = make(chan dispatch.OutPkt, CfgFaceQueueSize())
@@ -221,6 +224,7 @@ func (l *linkServiceBase) SendPacket(out dispatch.OutPkt) {
 	}
 }
 
+// Dispatches an Interest packet to the appropriate forwarder thread by hashing its name and queuing it for processing.
 func (l *linkServiceBase) dispatchInterest(pkt *defn.Pkt) {
 	if pkt.L3.Interest == nil {
 		panic("dispatchInterest called with packet that is not Interest")
@@ -235,6 +239,7 @@ func (l *linkServiceBase) dispatchInterest(pkt *defn.Pkt) {
 	dispatch.GetFWThread(thread).QueueInterest(pkt)
 }
 
+// Dispatches incoming Data packets to the appropriate forwarding threads by either using the attached PIT token, hashing the packet name for exact matches, or using prefix-based hashing for locally generated packets without PIT tokens.
 func (l *linkServiceBase) dispatchData(pkt *defn.Pkt) {
 	if pkt.L3.Data == nil {
 		panic("dispatchData called with packet that is not Data")

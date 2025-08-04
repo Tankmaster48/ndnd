@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Constructs a name component (with appropriate type and decoded bytes) from a string representation, handling URL-encoding and special component types like version or SHA-256 digest.
 func TestComponentFromStrBasic(t *testing.T) {
 	tu.SetT(t)
 
@@ -34,6 +35,7 @@ func TestComponentFromStrBasic(t *testing.T) {
 	require.Equal(t, enc.Component{enc.TypeGenericNameComponent, []byte("")}, comp)
 }
 
+// Tests the encoding, decoding, and string representation of generic NDN name components, including URL-encoding of special characters and validation of input formats.
 func TestGenericComponent(t *testing.T) {
 	tu.SetT(t)
 
@@ -83,6 +85,7 @@ func TestGenericComponent(t *testing.T) {
 	require.Equal(t, c, c2)
 }
 
+// This function tests the encoding, decoding, and string representation of various NDN component types (e.g., implicit/parameters SHA-256 digests, integer-based components, and URL-encoded components), including validation of correct byte formatting, case-insensitive parsing, error handling for invalid inputs, and helper functions for common component types like segment, version, and timestamp.
 func TestComponentTypes(t *testing.T) {
 	tu.SetT(t)
 
@@ -150,6 +153,7 @@ func TestComponentTypes(t *testing.T) {
 	require.Equal(t, []byte("\x38\x08\x00\x37\xbb\x0d\x76\xed\x4c\x60"), enc.NewTimestampComponent(tm).Bytes())
 }
 
+// This function tests the correctness of component comparison and equality checks in Named-Data Networking (NDN) name components, ensuring they are ordered first by type and then lexicographically by value, with equality only when both type and value match.
 func TestComponentCompare(t *testing.T) {
 	tu.SetT(t)
 
@@ -188,6 +192,7 @@ func TestComponentCompare(t *testing.T) {
 	}
 }
 
+// This function tests the parsing and encoding of an NDN name with various components (including escaped characters, empty segments, and SHA-256 digest), verifying component values, structure, and correct binary serialization.
 func TestNameBasic(t *testing.T) {
 	tu.SetT(t)
 
@@ -208,6 +213,7 @@ func TestNameBasic(t *testing.T) {
 	require.Equal(t, b, name.Bytes())
 }
 
+// This function tests the conversion of a string to a Name object and back to a string, ensuring proper handling of leading/trailing slashes, special character encoding, and structure preservation.
 func TestNameString(t *testing.T) {
 	tu.SetT(t)
 
@@ -232,6 +238,7 @@ func TestNameString(t *testing.T) {
 	tester("//", "//")
 }
 
+// Tests the correctness of name equality and lexicographical ordering comparisons for NDN names by verifying expected results against all pairwise comparisons of a predefined set of name strings.
 func TestNameCompare(t *testing.T) {
 	tu.SetT(t)
 
@@ -292,6 +299,7 @@ func TestNameCompare(t *testing.T) {
 	}
 }
 
+// Tests the `IsPrefix` method for NDN names, verifying whether one name is a valid prefix of another according to NDN's hierarchical naming rules.
 func TestNameIsPrefix(t *testing.T) {
 	tu.SetT(t)
 
@@ -322,6 +330,7 @@ func TestNameIsPrefix(t *testing.T) {
 	testFalse("/C", "/21426=AA")
 }
 
+// Tests the conversion between NDN names and their TLV-encoded byte representations, verifying that encoding a name from a string produces the expected byte sequence and decoding those bytes reconstructs the original name.
 func TestNameBytes(t *testing.T) {
 	tu.SetT(t)
 
@@ -333,6 +342,7 @@ func TestNameBytes(t *testing.T) {
 	require.True(t, n.Equal(n2))
 }
 
+// This function tests the correct appending of components to an NDN Name, ensuring that the `Append` method safely handles memory allocation to prevent unintended overwrites (as seen with Go's standard `append`) while verifying the resulting name strings and underlying array allocations.
 func TestNameAppend(t *testing.T) {
 	tu.SetT(t)
 
@@ -405,6 +415,7 @@ func TestNameAppend(t *testing.T) {
 	require.True(t, unsafe.SliceData(name9) != unsafe.SliceData(name10))
 }
 
+// Verifies that the `At` method of a Name object correctly retrieves components by positive or negative indices, returning expected components or an empty component for out-of-bounds access.
 func TestNameAt(t *testing.T) {
 	tu.SetT(t)
 
@@ -421,6 +432,8 @@ func TestNameAt(t *testing.T) {
 	require.Equal(t, enc.Component{}, n.At(-5))
 }
 
+// **Function Description:**  
+Tests the `Prefix` method of the `Name` type by verifying that it correctly constructs prefixes using positive component counts (from the start) and negative indices (from the end) for a sample name `/a/b/c/d`.
 func TestNamePrefix(t *testing.T) {
 	tu.SetT(t)
 
@@ -438,6 +451,7 @@ func TestNamePrefix(t *testing.T) {
 	require.Equal(t, "/", n.Prefix(-5).String())
 }
 
+// This function tests the correctness of TLV string encoding and decoding for Name components and full Names by generating random names, converting them to and from TLV strings, and verifying round-trip equality.
 func TestNameTlvStr(t *testing.T) {
 	tu.SetT(t)
 	for _, name := range randomNames(1000, 20) {
@@ -448,6 +462,7 @@ func TestNameTlvStr(t *testing.T) {
 	}
 }
 
+// Clones a Name object constructed from the string "/a/b/c/d" and verifies that the clone has equal content but distinct memory addresses for its underlying slices and component values, ensuring a deep copy.
 func TestNameClone(t *testing.T) {
 	tu.SetT(t)
 	n := tu.NoErr(enc.NameFromStr("/a/b/c/d"))
@@ -457,6 +472,7 @@ func TestNameClone(t *testing.T) {
 	require.True(t, unsafe.SliceData(n[0].Val) != unsafe.SliceData(n2[0].Val))
 }
 
+// Verifies that the `Hash` and `PrefixHash` methods of a `Name` object generate expected cryptographic hash values for a sample name (`/a/b/c/d`) and its component-wise prefixes.
 func TestNameHash(t *testing.T) {
 	tu.SetT(t)
 

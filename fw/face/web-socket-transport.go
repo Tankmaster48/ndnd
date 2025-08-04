@@ -18,6 +18,7 @@ type WebSocketTransport struct {
 	c *websocket.Conn
 }
 
+// Constructs a WebSocket-based transport for Named Data Networking (NDN) communication, initializing remote and local URIs, determining network scope (local or non-local), and configuring transport parameters such as persistency, link kind, and maximum packet size.
 func NewWebSocketTransport(localURI *defn.URI, c *websocket.Conn) (t *WebSocketTransport) {
 	remoteURI := defn.MakeWebSocketClientFaceURI(c.RemoteAddr())
 
@@ -34,18 +35,22 @@ func NewWebSocketTransport(localURI *defn.URI, c *websocket.Conn) (t *WebSocketT
 	return t
 }
 
+// Returns a string representation of the WebSocket transport including its face ID, remote URI, and local URI.
 func (t *WebSocketTransport) String() string {
 	return fmt.Sprintf("web-socket-transport (faceid=%d remote=%s local=%s)", t.faceID, t.remoteURI, t.localURI)
 }
 
+// Returns true if the persistency is set to PersistencyOnDemand, otherwise false.
 func (t *WebSocketTransport) SetPersistency(persistency spec_mgmt.Persistency) bool {
 	return persistency == spec_mgmt.PersistencyOnDemand
 }
 
+// Returns the number of packets currently in the send queue waiting to be transmitted over the WebSocket connection.
 func (t *WebSocketTransport) GetSendQueueSize() uint64 {
 	return 0
 }
 
+// Sends a binary frame over a WebSocket connection if the transport is active and the frame size is within the MTU limit, handling errors by closing the connection and tracking total output bytes.
 func (t *WebSocketTransport) sendFrame(frame []byte) {
 	if !t.running.Load() {
 		return
@@ -66,6 +71,7 @@ func (t *WebSocketTransport) sendFrame(frame []byte) {
 	t.nOutBytes += uint64(len(frame))
 }
 
+// Handles incoming WebSocket messages by validating their type and size, processes valid binary NDN packets through the link service, and terminates the connection on errors or closure.
 func (t *WebSocketTransport) runReceive() {
 	defer t.Close()
 
@@ -97,6 +103,7 @@ func (t *WebSocketTransport) runReceive() {
 	}
 }
 
+// Closes the WebSocket transport by stopping its operation and terminating the underlying WebSocket connection.
 func (t *WebSocketTransport) Close() {
 	t.running.Store(false)
 	t.c.Close()

@@ -134,15 +134,18 @@ func AcceptUnicastTCPTransport(
 	return t, nil
 }
 
+// Returns a string representation of the UnicastTCPTransport, including its face ID, remote URI, and local URI for identification and debugging.
 func (t *UnicastTCPTransport) String() string {
 	return fmt.Sprintf("unicast-tcp-transport (faceid=%d remote=%s local=%s)", t.faceID, t.remoteURI, t.localURI)
 }
 
+// Sets the persistency level of the UnicastTCPTransport to the specified value.
 func (t *UnicastTCPTransport) SetPersistency(persistency spec_mgmt.Persistency) bool {
 	t.persistency = persistency
 	return true
 }
 
+// Returns the current size of the TCP send queue for this connection using a system call, logging a warning if unable to access the raw socket.
 func (t *UnicastTCPTransport) GetSendQueueSize() uint64 {
 	rawConn, err := t.conn.SyscallConn()
 	if err != nil {
@@ -209,6 +212,7 @@ func (t *UnicastTCPTransport) reconnect() {
 	}
 }
 
+// Sends a frame over a TCP connection if the transport is active, ensuring the frame size respects the MTU, handles errors by closing the connection, updates transmission statistics, and resets the connection's expiration time.
 func (t *UnicastTCPTransport) sendFrame(frame []byte) {
 	if !t.running.Load() {
 		return
@@ -230,6 +234,7 @@ func (t *UnicastTCPTransport) sendFrame(frame []byte) {
 	*t.expirationTime = time.Now().Add(CfgTCPLifetime())
 }
 
+// Manages a continuous receive loop for an NDN TCP transport face, processing incoming TLV-encoded packets, handling reconnections for persistent faces, and updating face state based on connection status and configured persistency.
 func (t *UnicastTCPTransport) runReceive() {
 	defer t.Close()
 

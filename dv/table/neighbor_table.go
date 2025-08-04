@@ -42,6 +42,7 @@ type NeighborState struct {
 	isFaceActive bool
 }
 
+// Constructs a new NeighborTable with the specified configuration and NFD control thread, initializing an empty map to track neighbor states.
 func NewNeighborTable(config *config.Config, nfdc *nfdc.NfdMgmtThread) *NeighborTable {
 	return &NeighborTable{
 		config:    config,
@@ -50,22 +51,27 @@ func NewNeighborTable(config *config.Config, nfdc *nfdc.NfdMgmtThread) *Neighbor
 	}
 }
 
+// Returns the string "dv-neighbors" as a human-readable identifier for the neighbor table in the context of distance vector routing.
 func (nt *NeighborTable) String() string {
 	return "dv-neighbors"
 }
 
+// Returns the number of neighbors in the NeighborTable.
 func (nt *NeighborTable) Size() int {
 	return len(nt.neighbors)
 }
 
+// Returns the neighbor state associated with the given name by hashing it.
 func (nt *NeighborTable) Get(name enc.Name) *NeighborState {
 	return nt.GetH(name.Hash())
 }
 
+// Retrieves the neighbor's state from the neighbor table using the provided name hash.
 func (nt *NeighborTable) GetH(nameHash uint64) *NeighborState {
 	return nt.neighbors[nameHash]
 }
 
+// Adds a neighbor to the NeighborTable with the given name, initializing its state with default values for advertisement sequence, last seen time, and face ID, and returns the created NeighborState.
 func (nt *NeighborTable) Add(name enc.Name) *NeighborState {
 	neighbor := &NeighborState{
 		nt: nt,
@@ -81,6 +87,7 @@ func (nt *NeighborTable) Add(name enc.Name) *NeighborState {
 	return neighbor
 }
 
+// Removes the neighbor entry associated with the given name from the table, deleting it if present.
 func (nt *NeighborTable) Remove(name enc.Name) {
 	hash := name.Hash()
 	if ns := nt.GetH(hash); ns != nil {
@@ -89,6 +96,7 @@ func (nt *NeighborTable) Remove(name enc.Name) {
 	delete(nt.neighbors, hash)
 }
 
+// Returns a slice containing all NeighborState entries currently stored in the neighbor table.
 func (nt *NeighborTable) GetAll() []*NeighborState {
 	neighbors := make([]*NeighborState, 0, len(nt.neighbors))
 	for _, neighbor := range nt.neighbors {
@@ -97,6 +105,7 @@ func (nt *NeighborTable) GetAll() []*NeighborState {
 	return neighbors
 }
 
+// "Returns true if the neighbor has not been seen for longer than the configured router dead interval."
 func (ns *NeighborState) IsDead() bool {
 	return time.Since(ns.lastSeen) > ns.nt.config.RouterDeadInterval()
 }
@@ -136,6 +145,7 @@ func (ns *NeighborState) delete() {
 	ns.isFaceActive = false
 }
 
+// Constructs a local data packet name by combining the LOCALHOP prefix, the neighbor's name components, and a "DV" keyword component for data verification.
 func (ns *NeighborState) localRoute() enc.Name {
 	return enc.LOCALHOP.
 		Append(ns.Name...).

@@ -11,6 +11,7 @@ type TLNum uint64
 // Nat is a TLV natural number
 type Nat uint64
 
+// Returns the number of bytes required to encode the TLNum value according to NDN's variable-length numeric encoding rules, where smaller values use fewer bytes (1, 3, 5, or 9 bytes total).
 func (v TLNum) EncodingLength() int {
 	switch x := uint64(v); {
 	case x <= 0xfc:
@@ -24,6 +25,7 @@ func (v TLNum) EncodingLength() int {
 	}
 }
 
+// Encodes a variable-length unsigned integer (TLNum) into the provided buffer using NDN TLV format, returning the number of bytes written based on the value's size.
 func (v TLNum) EncodeInto(buf Buffer) int {
 	switch x := uint64(v); {
 	case x <= 0xfc:
@@ -95,6 +97,7 @@ func (r *WireView) ReadTLNum() (val TLNum, err error) {
 	return
 }
 
+// Returns the number of bytes required to encode the Nat value as a variable-length unsigned integer, using the smallest possible size (1, 2, 4, or 8 bytes) based on its numeric range.
 func (v Nat) EncodingLength() int {
 	switch x := uint64(v); {
 	case x <= 0xff:
@@ -108,6 +111,7 @@ func (v Nat) EncodingLength() int {
 	}
 }
 
+// Encodes a Nat (natural number) into a byte buffer using variable-length big-endian encoding, writing the minimal number of bytes required (1-8) based on the value's magnitude and returning the number of bytes written.
 func (v Nat) EncodeInto(buf Buffer) int {
 	switch x := uint64(v); {
 	case x <= 0xff:
@@ -125,12 +129,14 @@ func (v Nat) EncodeInto(buf Buffer) int {
 	}
 }
 
+// Returns the byte representation of the Nat value by encoding it into a newly allocated byte slice of appropriate length.
 func (v Nat) Bytes() []byte {
 	buf := make([]byte, v.EncodingLength())
 	v.EncodeInto(buf)
 	return buf
 }
 
+// Parses a variable-length natural number (1, 2, 4, or 8 bytes) from a big-endian byte buffer, returning the parsed value, original buffer length, and any error.
 func ParseNat(buf Buffer) (val Nat, pos int, err error) {
 	switch pos = len(buf); pos {
 	case 1:
@@ -172,6 +178,7 @@ func ShrinkLength(buf Buffer, shrink int) Buffer {
 	}
 }
 
+// Returns true if the given rune is an uppercase or lowercase English letter.
 func IsAlphabet(r rune) bool {
 	return ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z')
 }

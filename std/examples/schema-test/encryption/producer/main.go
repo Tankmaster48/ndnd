@@ -65,6 +65,7 @@ const SchemaJson = `{
 }`
 const HmacKey = "Hello, World!"
 
+// Serves an encrypted data packet under the `/example/schema/encryptionApp/randomData` prefix using a schema-defined key and timestamp versioning, responding to NDN Interests with HMAC-protected, time-stamped encrypted content.
 func main() {
 	// Setup schema tree
 	tree := schema.CreateFromJson(SchemaJson, map[string]any{

@@ -30,6 +30,7 @@ type PolicyDesc struct {
 var NodeRegister map[string]*NodeImplDesc
 var PolicyRegister map[string]*PolicyImplDesc
 
+// Registers a NodeImpl descriptor under the specified class name, panicking if the class name is already registered.
 func RegisterNodeImpl(desc *NodeImplDesc) {
 	name := desc.ClassName
 	if _, ok := NodeRegister[name]; ok {
@@ -38,6 +39,7 @@ func RegisterNodeImpl(desc *NodeImplDesc) {
 	NodeRegister[name] = desc
 }
 
+// Registers a policy implementation descriptor under a unique class name, panicking if the class name is already registered.
 func RegisterPolicyImpl(desc *PolicyImplDesc) {
 	name := desc.ClassName
 	if _, ok := PolicyRegister[name]; ok {
@@ -46,6 +48,7 @@ func RegisterPolicyImpl(desc *PolicyImplDesc) {
 	PolicyRegister[name] = desc
 }
 
+// Instantiates a map of event listeners by resolving named callback references from the provided environment, panicking if any required callbacks are missing.
 func instantiateEvents(events map[string]ListenerList, env map[string]any) map[string][]Callback {
 	ret := make(map[string][]Callback, len(events))
 	for k, lst := range events {
@@ -61,6 +64,7 @@ func instantiateEvents(events map[string]ListenerList, env map[string]any) map[s
 	return ret
 }
 
+// Instantiates attributes by substituting $-prefixed variables in nested maps and lists with corresponding values from the environment, recursively resolving all references.
 func instantiateAttrs(attrs map[string]any, env map[string]any) map[string]any {
 	var handleList func([]any) []any
 	var handleMap func(map[string]any) map[string]any
@@ -102,6 +106,7 @@ func instantiateAttrs(attrs map[string]any, env map[string]any) map[string]any {
 	return handleMap(attrs)
 }
 
+// Instantiates a NDN schema tree by creating nodes and policies defined in the schema description, applying attributes and event callbacks evaluated with the provided environment, and linking policies to their target nodes.
 func (sd *SchemaDesc) Instantiate(environment map[string]any) *Tree {
 	// Events must be Callbacks
 	// Attrs has nested maps that needs to be handled

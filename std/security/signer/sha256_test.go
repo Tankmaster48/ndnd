@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Tests the SHA-256 signer implementation by creating a signer instance, signing a fixed data payload, and asserting the expected signature type, size, and byte value.
 func TestSha256Signer(t *testing.T) {
 	tu.SetT(t)
 

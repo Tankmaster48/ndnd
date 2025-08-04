@@ -28,6 +28,7 @@ type T1ParsingContext struct {
 	sigCovered enc.Wire
 }
 
+// Initializes the T1Encoder with calculated lengths and wire format offsets for encoding a T1 structure, accounting for optional fields (H2, H3), variable-length string slices (C), and signature data.
 func (encoder *T1Encoder) Init(value *T1) {
 
 	if value.C != nil {
@@ -102,12 +103,14 @@ func (encoder *T1Encoder) Init(value *T1) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the `sigCovered` field as an empty byte slice to store signature-covered data during parsing.
 func (context *T1ParsingContext) Init() {
 
 	context.sigCovered = make(enc.Wire, 0)
 
 }
 
+// Encodes a T1 data structure into a wire format, handling required/optional fields, sequences of elements, and signature coverage tracking for cryptographic operations.
 func (encoder *T1Encoder) EncodeInto(value *T1, wire enc.Wire) {
 
 	wireIdx := 0
@@ -195,6 +198,7 @@ func (encoder *T1Encoder) EncodeInto(value *T1, wire enc.Wire) {
 	}
 }
 
+// Encodes a T1 value into a structured byte slice layout defined by the encoder's wire plan, returning a segmented wire representation.
 func (encoder *T1Encoder) Encode(value *T1) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -214,6 +218,7 @@ func (encoder *T1Encoder) Encode(value *T1) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded T1 structure, processing fields in a defined order (H1, sigCoverStart, H2, C, Sig, sigCovered, H3), managing signature-coverage tracking, and enforcing presence of required fields unless critical fields are skipped with ignoreCritical.
 func (context *T1ParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*T1, error) {
 
 	var handled_H1 bool = false
@@ -434,6 +439,7 @@ type T2ParsingContext struct {
 	sigCovered     enc.Wire
 }
 
+// Initializes the T2Encoder with the given T2 structure, calculates encoding lengths and offsets for name components, content (C), and signature (Sig), and prepares a wire encoding plan for TLV-based serialization.
 func (encoder *T2Encoder) Init(value *T2) {
 	encoder.Name_wireIdx = -1
 	encoder.Name_length = 0
@@ -516,12 +522,14 @@ func (encoder *T2Encoder) Init(value *T2) {
 	encoder.wirePlan = wirePlan
 }
 
+// Initializes the parsing context by resetting the signature-covered data to an empty encoded structure.
 func (context *T2ParsingContext) Init() {
 
 	context.sigCovered = make(enc.Wire, 0)
 
 }
 
+// Encodes a T2 data structure into NDN wire format, handling signature coverage tracking for Name, Content, and Signature fields while managing wire buffer indices and positions for subsequent signing/digest computation.
 func (encoder *T2Encoder) EncodeInto(value *T2, wire enc.Wire) {
 
 	wireIdx := 0
@@ -615,6 +623,7 @@ func (encoder *T2Encoder) EncodeInto(value *T2, wire enc.Wire) {
 
 }
 
+// Encodes a T2 value into a byte buffer partitioned according to the encoder's wire plan and returns the resulting wire segments.
 func (encoder *T2Encoder) Encode(value *T2) enc.Wire {
 	total := uint(0)
 	for _, l := range encoder.wirePlan {
@@ -634,6 +643,7 @@ func (encoder *T2Encoder) Encode(value *T2) enc.Wire {
 	return wire
 }
 
+// Parses a TLV-encoded NDN data structure into a T2 object, handling fields like Name, Content (C), and Signature (Sig), while tracking signature-covered regions for cryptographic verification.
 func (context *T2ParsingContext) Parse(reader enc.WireView, ignoreCritical bool) (*T2, error) {
 
 	var handled_Name bool = false

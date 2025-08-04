@@ -87,10 +87,12 @@ var msgList []string
 var dataLock sync.Mutex
 var nodeId string
 
+// Handles HTTP requests by writing the contents of `homeHtml` to the response, serving as the homepage for the web server.
 func homePage(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(homeHtml))
 }
 
+// This function continuously reads WebSocket messages, processes them through a synchronization node to generate sequenced acknowledgments, logs the received data with node-specific metadata, and echoes the formatted messages back to the client while handling connection errors and concurrency safely.
 func wsReader() {
 	running := true
 	for running {
@@ -117,6 +119,7 @@ func wsReader() {
 	}
 }
 
+// Upgrades an HTTP connection to a WebSocket, maintains a single active connection by closing subsequent ones, sends stored messages to the client, and processes incoming WebSocket messages.
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
@@ -147,11 +150,13 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	wsReader()
 }
 
+// Registers HTTP request handlers for the root (`"/"`) and WebSocket (`"/ws"`) endpoints, associating them with the `homePage` and `wsEndpoint` handler functions respectively.
 func setupRoutes() {
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/ws", wsEndpoint)
 }
 
+// Initializes an NDN node with a schema-based chat application, serving HTTP/WS interfaces on a specified port, and synchronizing data using HMAC-secured schemas while broadcasting received messages via WebSocket.
 func main() {
 	// Note: remember to ` nfdc strategy set /example/schema /localhost/nfd/strategy/multicast `
 	log.Default().SetLevel(log.LevelError)

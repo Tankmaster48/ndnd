@@ -30,6 +30,7 @@ const (
 	SignatureEmptyTest       SigType = 200
 )
 
+// Returns the human-readable name of the signature type (e.g., "Sha256WithRsa") corresponding to the given SigType value, or "Unknown" for unrecognized values.
 func (t SigType) String() string {
 	switch t {
 	case SignatureNone:
@@ -74,6 +75,7 @@ const (
 	InterestResultError
 )
 
+// Returns a human-readable string representing the outcome of an Interest, such as "Data" for successful retrieval or "Timeout" for a timeout, with "Unknown" for unhandled cases.
 func (r InterestResult) String() string {
 	switch r {
 	case InterestResultNone:

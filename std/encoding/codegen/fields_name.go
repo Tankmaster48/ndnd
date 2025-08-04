@@ -10,6 +10,7 @@ type NameField struct {
 	BaseTlvField
 }
 
+// Constructs a new NameField TLV field with the given name and type number for use in NDN data structures.
 func NewNameField(name string, typeNum uint64, _ string, _ *TlvModel) (TlvField, error) {
 	return &NameField{
 		BaseTlvField: BaseTlvField{
@@ -19,10 +20,12 @@ func NewNameField(name string, typeNum uint64, _ string, _ *TlvModel) (TlvField,
 	}, nil
 }
 
+// Generates a struct field declaration for the length of the name field as an unsigned integer, used in TLV encoding of NDN packets.
 func (f *NameField) GenEncoderStruct() (string, error) {
 	return fmt.Sprintf("%s_length uint", f.name), nil
 }
 
+// Generates Go code to initialize an encoder for a NameField by calculating the total length of its components by summing each component's encoding length.
 func (f *NameField) GenInitEncoder() (string, error) {
 	var g strErrBuf
 	const Temp = `if value.{{.}} != nil {
@@ -37,6 +40,7 @@ func (f *NameField) GenInitEncoder() (string, error) {
 	return g.output()
 }
 
+// Generates code to calculate the total encoding length for a non-nil field by summing the TLV type number length and the variable-length natural number encoding of the field's length in NDN.
 func (f *NameField) GenEncodingLength() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("if value.%s != nil {", f.name)
@@ -47,10 +51,12 @@ func (f *NameField) GenEncodingLength() (string, error) {
 	return g.output()
 }
 
+// Generates the wire encoding plan for the NameField by returning its encoded length as a string representation.
 func (f *NameField) GenEncodingWirePlan() (string, error) {
 	return f.GenEncodingLength()
 }
 
+// Generates Go code to encode a variable-length array field (e.g., Name components) into a TLV-encoded NDN packet by writing the type, length, and sequentially encoding each array element.
 func (f *NameField) GenEncodeInto() (string, error) {
 	g := strErrBuf{}
 	g.printlnf("if value.%s != nil {", f.name)
@@ -63,6 +69,7 @@ func (f *NameField) GenEncodeInto() (string, error) {
 	return g.output()
 }
 
+// Generates code to read a Name component from a reader into a struct field using a delegate.
 func (f *NameField) GenReadFrom() (string, error) {
 	const Temp = `
 		delegate:=reader.Delegate(int(l))
@@ -74,6 +81,7 @@ func (f *NameField) GenReadFrom() (string, error) {
 	return g.output()
 }
 
+// Generates a code snippet that assigns `nil` to the struct field specified by the `NameField`'s name, effectively skipping its processing in the `value` struct.
 func (f *NameField) GenSkipProcess() (string, error) {
 	return "value." + f.name + " = nil", nil
 }

@@ -25,6 +25,7 @@ type svsDataState struct {
 	SnapBlock int
 }
 
+// Constructs an immutable object name by concatenating the group prefix, node components, a timestamp component from the boot value, and a sequence number component.
 func (s *SvsALO) objectName(node enc.Name, boot uint64, seq uint64) enc.Name {
 	return s.GroupPrefix().
 		Append(node...).
@@ -33,6 +34,7 @@ func (s *SvsALO) objectName(node enc.Name, boot uint64, seq uint64) enc.Name {
 		WithVersion(enc.VersionImmutable)
 }
 
+// Produces a sequenced data object with the given content, updates internal state vectors to track the new sequence number, and notifies the snapshot strategy of the publication.
 func (s *SvsALO) produceObject(content enc.Wire) (enc.Name, enc.Wire, error) {
 	// This instance owns the underlying SVS instance.
 	// So we can be sure that the sequence number does not

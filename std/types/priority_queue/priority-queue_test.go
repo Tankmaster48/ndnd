@@ -7,6 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// This function tests the basic operations of a priority queue by adding elements with varying priorities, verifying the queue length, and ensuring elements are popped in ascending priority order (lowest numerical priority first). 
+
+Example: Validates that a priority queue correctly adds, peeks, and removes elements based on their assigned priorities.
 func TestBasics(t *testing.T) {
 	q := priority_queue.New[int, int]()
 	assert.Equal(t, 0, q.Len())

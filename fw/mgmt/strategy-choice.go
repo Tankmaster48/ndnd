@@ -21,18 +21,22 @@ type StrategyChoiceModule struct {
 	manager *Thread
 }
 
+// Returns the string "mgmt-strategy" as the identifier for the management strategy module.
 func (s *StrategyChoiceModule) String() string {
 	return "mgmt-strategy"
 }
 
+// Registers the provided Thread instance as the manager for this StrategyChoiceModule, establishing a reference for future interactions.
 func (s *StrategyChoiceModule) registerManager(manager *Thread) {
 	s.manager = manager
 }
 
+// Returns the Thread manager associated with this StrategyChoiceModule instance.
 func (s *StrategyChoiceModule) getManager() *Thread {
 	return s.manager
 }
 
+// Handles incoming strategy management Interests by validating they originate from the local host, then dispatching "set", "unset", or "list" commands to configure or query strategy choices, or returning an error for unknown commands.
 func (s *StrategyChoiceModule) handleIncomingInterest(interest *Interest) {
 	// Only allow from /localhost
 	if !LOCAL_PREFIX.IsPrefix(interest.Name()) {
@@ -55,6 +59,7 @@ func (s *StrategyChoiceModule) handleIncomingInterest(interest *Interest) {
 	}
 }
 
+// Sets the forwarding strategy for a given name in the FIB based on control parameters in an Interest, validating strategy name, version, and availability before applying the configuration.
 func (s *StrategyChoiceModule) set(interest *Interest) {
 	if len(interest.Name()) < len(LOCAL_PREFIX)+3 {
 		s.manager.sendCtrlResp(interest, 400, "ControlParameters is incorrect", nil)
@@ -136,6 +141,7 @@ func (s *StrategyChoiceModule) set(interest *Interest) {
 	core.Log.Info(s, "Set strategy", "name", params.Name, "strategy", params.Strategy.Name)
 }
 
+// Handles an Interest request to remove a strategy configuration for a specified name by validating the input parameters, decoding the control parameters, and unsetting the corresponding strategy entry in the FIB strategy table.
 func (s *StrategyChoiceModule) unset(interest *Interest) {
 	if len(interest.Name()) < len(LOCAL_PREFIX)+3 {
 		s.manager.sendCtrlResp(interest, 400, "ControlParameters is incorrect", nil)
@@ -164,6 +170,7 @@ func (s *StrategyChoiceModule) unset(interest *Interest) {
 	s.manager.sendCtrlResp(interest, 200, "OK", &mgmt.ControlArgs{Name: params.Name})
 }
 
+// Constructs and sends a response Data packet listing all configured forwarding strategies by encoding them into a StrategyChoiceMsg, triggered by an Interest with a name matching the strategy-choice list endpoint.
 func (s *StrategyChoiceModule) list(interest *Interest) {
 	if len(interest.Name()) > len(LOCAL_PREFIX)+2 {
 		// Ignore because contains version and/or segment components

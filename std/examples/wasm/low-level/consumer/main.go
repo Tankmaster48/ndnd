@@ -15,6 +15,7 @@ import (
 	"github.com/named-data/ndnd/std/utils"
 )
 
+// Sends an NDN Interest packet with a timestamped name and freshness requirements over a WebSocket connection, then handles the response (NACK, timeout, or Data) with custom logic.
 func main() {
 	app := engine.NewBasicEngine(face.NewWasmWsFace("wss://suns.cs.ucla.edu/ws/", false))
 	err := app.Start()

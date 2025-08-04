@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This function tests the functionality of a dummy clock by constructing a timer initialized to the Unix epoch, then verifying that moving it forward by specified durations correctly updates the current time.
 func TestClock(t *testing.T) {
 	tu.SetT(t)
 
@@ -20,6 +21,7 @@ func TestClock(t *testing.T) {
 	require.Equal(t, tu.NoErr(time.Parse(time.RFC3339, "1970-01-01T00:01:00Z")), tm.Now())
 }
 
+// This function tests the scheduling and execution of timed callbacks using a mock timer, verifying that callbacks are triggered in the correct order after their specified delays when simulated time is advanced.
 func TestSchedule(t *testing.T) {
 	tu.SetT(t)
 
@@ -49,6 +51,7 @@ func TestSchedule(t *testing.T) {
 	require.Equal(t, []int{1, 2, 3}, lst)
 }
 
+// Tests the cancellation functionality of a timer scheduler by verifying that scheduled tasks are prevented from executing after cancellation and that non-canceled tasks proceed as expected.
 func TestCancel(t *testing.T) {
 	tu.SetT(t)
 

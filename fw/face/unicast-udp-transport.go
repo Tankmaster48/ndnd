@@ -94,15 +94,18 @@ func MakeUnicastUDPTransport(
 	return t, nil
 }
 
+// Returns a string representation of the UnicastUDPTransport containing its face ID, remote URI, and local URI in the format "unicast-udp-transport (face=ID remote=ADDR local=ADDR)".
 func (t *UnicastUDPTransport) String() string {
 	return fmt.Sprintf("unicast-udp-transport (face=%d remote=%s local=%s)", t.faceID, t.remoteURI, t.localURI)
 }
 
+// Sets the persistency level of the UnicastUDPTransport to the specified value.
 func (t *UnicastUDPTransport) SetPersistency(persistency spec_mgmt.Persistency) bool {
 	t.persistency = persistency
 	return true
 }
 
+// Returns the current size of the send queue for the UDP socket, using a system call to retrieve the socket's queued data size and logging any errors encountered during the process.
 func (t *UnicastUDPTransport) GetSendQueueSize() uint64 {
 	rawConn, err := t.conn.SyscallConn()
 	if err != nil {
@@ -111,6 +114,7 @@ func (t *UnicastUDPTransport) GetSendQueueSize() uint64 {
 	return impl.SyscallGetSocketSendQueueSize(rawConn)
 }
 
+// Sends a UDP frame over the transport if running, enforces MTU limits, handles transmission errors by closing the face, and updates byte counters and expiration time for active connections.
 func (t *UnicastUDPTransport) sendFrame(frame []byte) {
 	if !t.running.Load() {
 		return
@@ -133,6 +137,7 @@ func (t *UnicastUDPTransport) sendFrame(frame []byte) {
 	*t.expirationTime = time.Now().Add(CfgUDPLifetime())
 }
 
+// This function runs a UDP receiver loop for the UnicastUDPTransport, processing incoming NDN packets by updating byte counters, resetting the transport's expiration time, and forwarding frames to the link service, while handling UDP-specific errors and marking the face down on unrecoverable failures.
 func (t *UnicastUDPTransport) runReceive() {
 	defer t.Close()
 
@@ -151,6 +156,7 @@ func (t *UnicastUDPTransport) runReceive() {
 	}
 }
 
+// Closes the transport's UDP connection and atomically marks the transport as stopped, ensuring the operation occurs only if the transport was previously running.
 func (t *UnicastUDPTransport) Close() {
 	if t.running.Swap(false) {
 		t.conn.Close()

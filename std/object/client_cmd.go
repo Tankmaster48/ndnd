@@ -11,6 +11,7 @@ import (
 
 // This whole module will change from the current ugly design.
 
+// Registers a command handler that processes NDN Interest packets with application parameters, validates the enclosed command data, and executes the provided handler to generate a signed response Data packet.
 func (c *Client) AttachCommandHandler(
 	handlerName enc.Name,
 	handler func(enc.Name, enc.Wire, func(enc.Wire) error),
@@ -59,10 +60,12 @@ func (c *Client) AttachCommandHandler(
 	})
 }
 
+// Detaches the command handler associated with the given name from the client's engine, returning an error if detachment fails.
 func (c *Client) DetachCommandHandler(name enc.Name) error {
 	return c.engine.DetachHandler(name)
 }
 
+// Sends a signed command as a Data packet via an Interest to the specified destination, expecting a validated response, and invokes the provided callback with the result or an error.
 func (c *Client) ExpressCommand(dest enc.Name, name enc.Name, cmd enc.Wire, callback func(enc.Wire, error)) {
 	signer := c.SuggestSigner(name)
 	if signer == nil {

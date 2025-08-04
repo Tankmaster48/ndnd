@@ -13,6 +13,10 @@ var RouteFlagList = map[RouteFlag]string{
 	RouteFlagCapture:      "capture",
 }
 
+// Returns the human-readable name of the RouteFlag if it exists in the predefined RouteFlagList, otherwise returns "unknown".  
+
+**Explanation:**  
+This `String()` method converts a `RouteFlag` enum value to its corresponding string representation by looking it up in `RouteFlagList`, which maps valid flag values to their names. If the value is not found in the list, it returns `"unknown"`.
 func (v RouteFlag) String() string {
 	if s, ok := RouteFlagList[v]; ok {
 		return s
@@ -20,6 +24,7 @@ func (v RouteFlag) String() string {
 	return "unknown"
 }
 
+// Returns true if the specified RouteFlag is set within the provided bitmask flags.
 func (v RouteFlag) IsSet(flags uint64) bool {
 	return uint64(v)&flags != 0
 }
@@ -46,6 +51,7 @@ var RouteOriginList = map[RouteOrigin]string{
 	RouteOriginAutoconf:  "autoconf",
 }
 
+// Returns the string representation of the RouteOrigin value by looking it up in RouteOriginList, or "unknown" if the value is not present in the map.
 func (v RouteOrigin) String() string {
 	if s, ok := RouteOriginList[v]; ok {
 		return s

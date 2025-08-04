@@ -15,6 +15,7 @@ type WebSocketFace struct {
 	conn *websocket.Conn
 }
 
+// Constructs a WebSocketFace with the given URL and local boolean indicating whether it is a local face.
 func NewWebSocketFace(url string, local bool) *WebSocketFace {
 	return &WebSocketFace{
 		baseFace: newBaseFace(local),
@@ -22,10 +23,12 @@ func NewWebSocketFace(url string, local bool) *WebSocketFace {
 	}
 }
 
+// Returns a string representation of the WebSocketFace, including its associated URL, for formatting or logging purposes.
 func (f *WebSocketFace) String() string {
 	return fmt.Sprintf("websocket-face (%s)", f.url)
 }
 
+// Opens a WebSocket connection to the specified URL, verifies required callbacks are set, and initializes the face for communication by starting a goroutine to receive packets.
 func (f *WebSocketFace) Open() error {
 	if f.IsRunning() {
 		return fmt.Errorf("face is already running")
@@ -47,6 +50,7 @@ func (f *WebSocketFace) Open() error {
 	return nil
 }
 
+// Closes the WebSocket connection if the face state is successfully transitioned to closed.
 func (f *WebSocketFace) Close() error {
 	if f.setStateClosed() {
 		return f.conn.Close()
@@ -55,6 +59,7 @@ func (f *WebSocketFace) Close() error {
 	return nil
 }
 
+// Sends a wire-encoded packet over the WebSocket connection if the face is running, returning an error if the face is not active.
 func (f *WebSocketFace) Send(pkt enc.Wire) error {
 	if !f.IsRunning() {
 		return fmt.Errorf("face is not running")
@@ -63,6 +68,7 @@ func (f *WebSocketFace) Send(pkt enc.Wire) error {
 	return f.conn.WriteMessage(websocket.BinaryMessage, pkt.Join())
 }
 
+// Receives and processes incoming WebSocket binary messages as NDN packets until the face stops running or an error occurs, transitioning the face to a down state upon completion or error.
 func (f *WebSocketFace) receive() {
 	defer f.setStateDown()
 

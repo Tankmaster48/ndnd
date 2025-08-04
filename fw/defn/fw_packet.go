@@ -108,10 +108,12 @@ type FwCachePolicy struct {
 	CachePolicyType uint64 `tlv:"0x0335"`
 }
 
+// Returns the name associated with this forwarding Interest.
 func (p *FwInterest) Name() enc.Name {
 	return p.NameV
 }
 
+// Returns the optional lifetime duration of the Interest, representing the maximum time it remains valid before retransmission.
 func (p *FwInterest) Lifetime() optional.Optional[time.Duration] {
 	return p.InterestLifetimeV
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Tests the correctness of `baseFibStrategyEntry` getter methods by constructing an instance with a specific name, strategy, and next hops, then asserting that the getters return the expected values.
 func TestFibStrategyEntryGetters(t *testing.T) {
 	name, _ := enc.NameFromStr("/something")
 

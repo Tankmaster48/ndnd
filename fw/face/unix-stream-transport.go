@@ -41,6 +41,7 @@ func MakeUnixStreamTransport(remoteURI *defn.URI, localURI *defn.URI, conn net.C
 	return t, nil
 }
 
+// Returns a string representation of the Unix stream transport including its face ID, remote URI, and local URI.
 func (t *UnixStreamTransport) String() string {
 	return fmt.Sprintf("unix-stream-transport (faceid=%d remote=%s local=%s)", t.faceID, t.remoteURI, t.localURI)
 }
@@ -68,6 +69,7 @@ func (t *UnixStreamTransport) GetSendQueueSize() uint64 {
 	return impl.SyscallGetSocketSendQueueSize(rawConn)
 }
 
+// Sends a data frame over the Unix stream transport, enforces MTU size limits, handles transmission errors by closing the connection, and updates the total transmitted byte count on success.
 func (t *UnixStreamTransport) sendFrame(frame []byte) {
 	if !t.running.Load() {
 		return
@@ -88,6 +90,7 @@ func (t *UnixStreamTransport) sendFrame(frame []byte) {
 	t.nOutBytes += uint64(len(frame))
 }
 
+// Receives and processes incoming NDN TLV-encoded frames from a Unix stream socket connection, updating byte counters and handling each frame via the link service, while logging errors if reading fails.
 func (t *UnixStreamTransport) runReceive() {
 	defer t.Close()
 
@@ -101,6 +104,7 @@ func (t *UnixStreamTransport) runReceive() {
 	}
 }
 
+// Closes the Unix stream transport, closing the underlying connection only if the transport was previously running, and ensuring it cannot be reused.
 func (t *UnixStreamTransport) Close() {
 	if t.running.Swap(false) {
 		t.conn.Close()

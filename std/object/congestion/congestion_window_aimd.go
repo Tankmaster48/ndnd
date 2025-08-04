@@ -23,6 +23,7 @@ type AIMDCongestionWindow struct {
 
 // TODO: should we bundle the parameters into an AIMDOption struct?
 
+// Constructs a new AIMD congestion control window with the specified initial window size, defaulting to maximum slow start threshold, standard AI/MD coefficients, and other predefined behavior.
 func NewAIMDCongestionWindow(cwnd int) *AIMDCongestionWindow {
 	return &AIMDCongestionWindow{
 		window: float64(cwnd),
@@ -41,6 +42,7 @@ func (cw *AIMDCongestionWindow) String() string {
 	return "aimd-congestion-window"
 }
 
+// Returns the current congestion window size as an integer, using a read lock to ensure thread-safe access to the window value.
 func (cw *AIMDCongestionWindow) Size() int {
 	cw.mutex.RLock()
 	defer cw.mutex.RUnlock()
@@ -48,6 +50,7 @@ func (cw *AIMDCongestionWindow) Size() int {
 	return int(cw.window)
 }
 
+// Increases the congestion window additively during slow start (when below the threshold) and conservatively during congestion avoidance (when above the threshold) to manage network load.
 func (cw *AIMDCongestionWindow) IncreaseWindow() {
 	cw.mutex.Lock()
 
@@ -62,6 +65,7 @@ func (cw *AIMDCongestionWindow) IncreaseWindow() {
 	log.Debug(cw, "Window size changes", "window", cw.window)
 }
 
+// Decreases the congestion window using a multiplicative decrease factor, setting the new window size to either the calculated slow start threshold or the initial window size based on the reset flag.
 func (cw *AIMDCongestionWindow) DecreaseWindow() {
 	cw.mutex.Lock()
 
@@ -78,6 +82,7 @@ func (cw *AIMDCongestionWindow) DecreaseWindow() {
 	log.Debug(cw, "Window size changes", "window", cw.window)
 }
 
+// Handles congestion signals by increasing the congestion window on successful data delivery (`SigData`) and decreasing it on packet loss or network congestion (`SigLoss`, `SigCongest`).
 func (cw *AIMDCongestionWindow) HandleSignal(signal CongestionSignal) {
 	switch signal {
 	case SigData:

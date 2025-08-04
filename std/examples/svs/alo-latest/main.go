@@ -15,6 +15,7 @@ import (
 	ndn_sync "github.com/named-data/ndnd/std/sync"
 )
 
+// This function implements an NDN SVS ALO (Synchronized Versioned State) chat node that joins a sync group, publishes user-input messages, and manages synchronized state updates with snapshot-based synchronization to ensure efficient state propagation.
 func main() {
 	// This example shows how to use the SVS ALO with the SnapshotNodeLatest.
 	//

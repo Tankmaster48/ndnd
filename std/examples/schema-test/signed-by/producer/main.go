@@ -109,6 +109,7 @@ const (
 	}`
 )
 
+// Initializes a Named Data Networking (NDN) producer node with HMAC-based cryptographic keys, enrolls it under a trust anchor, and serves schema-defined data packets signed by the producer key at the `/example/schema/signedBy` prefix.
 func main() {
 	nodeId := fmt.Sprintf("node-%d", rand.Int())
 	prefix, _ := enc.NameFromStr("/example/schema/signedBy")

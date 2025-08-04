@@ -25,18 +25,22 @@ type RIBModule struct {
 	manager *Thread
 }
 
+// Returns the string representation of the RIBModule, which is "mgmt-rib".
 func (r *RIBModule) String() string {
 	return "mgmt-rib"
 }
 
+// Sets the manager for the RIBModule to the specified Thread instance.
 func (r *RIBModule) registerManager(manager *Thread) {
 	r.manager = manager
 }
 
+// Returns the manager thread associated with this RIBModule instance.
 func (r *RIBModule) getManager() *Thread {
 	return r.manager
 }
 
+// Routes incoming Interest packets to specific RIBModule handler methods (register, unregister, announce, list) based on the verb component in the Interest's name, or returns an error for unknown verbs.
 func (r *RIBModule) handleIncomingInterest(interest *Interest) {
 	// Dispatch by verb
 	verb := interest.Name()[len(LOCAL_PREFIX)+1].String()
@@ -55,6 +59,7 @@ func (r *RIBModule) handleIncomingInterest(interest *Interest) {
 	}
 }
 
+// Registers a new route in the Routing Information Base (RIB) based on control parameters from an Interest, validating inputs and adding the route with specified attributes like face ID, origin, cost, and expiration.
 func (r *RIBModule) register(interest *Interest) {
 	if len(interest.Name()) < len(LOCAL_PREFIX)+3 {
 		r.manager.sendCtrlResp(interest, 400, "ControlParameters is incorrect", nil)
@@ -118,6 +123,7 @@ func (r *RIBModule) register(interest *Interest) {
 	r.manager.sendCtrlResp(interest, 200, "OK", responseParams)
 }
 
+// Handles an unregistration request by removing a route from the RIB based on control parameters in the Interest, sending a 200 OK response upon successful removal.
 func (r *RIBModule) unregister(interest *Interest) {
 	if len(interest.Name()) < len(LOCAL_PREFIX)+3 {
 		r.manager.sendCtrlResp(interest, 400, "ControlParameters is incorrect", nil)
@@ -152,6 +158,7 @@ func (r *RIBModule) unregister(interest *Interest) {
 	core.Log.Info(r, "Removed route", "name", params.Name, "faceid", faceID, "origin", origin)
 }
 
+// Handles an Interest for prefix announcement by validating its name structure and app parameters, but currently returns a "not implemented" error.
 func (r *RIBModule) announce(interest *Interest) {
 	if len(interest.Name()) != len(LOCAL_PREFIX)+3 || interest.Name()[len(LOCAL_PREFIX)+2].Typ != enc.TypeParametersSha256DigestComponent {
 		r.manager.sendCtrlResp(interest, 400, "Name is incorrect", nil)
@@ -176,6 +183,7 @@ func (r *RIBModule) announce(interest *Interest) {
 	r.manager.sendCtrlResp(interest, 501, "PrefixAnnouncement not implemented yet", nil)
 }
 
+// Handles an Interest request to retrieve the current Routing Information Base (RIB) entries by compiling all RIB routes into a structured management dataset, encoding it, and responding with a signed Data packet containing the RIB status information.
 func (r *RIBModule) list(interest *Interest) {
 	if len(interest.Name()) > len(LOCAL_PREFIX)+2 {
 		// Ignore because contains version and/or segment components

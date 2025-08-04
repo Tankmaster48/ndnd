@@ -21,18 +21,22 @@ type FIBModule struct {
 	manager *Thread
 }
 
+// Returns a string representation of the FIB module, identifying it as 'mgmt-fib'.
 func (f *FIBModule) String() string {
 	return "mgmt-fib"
 }
 
+// Registers the provided Thread instance as the manager for the FIB module to coordinate operations.
 func (f *FIBModule) registerManager(manager *Thread) {
 	f.manager = manager
 }
 
+// Returns the manager Thread associated with this FIB module instance.
 func (f *FIBModule) getManager() *Thread {
 	return f.manager
 }
 
+// Handles incoming FIB management Interests originating from the localhost namespace by dispatching add-nexthop, remove-nexthop, or list operations based on the Interest's name components.
 func (f *FIBModule) handleIncomingInterest(interest *Interest) {
 	// Only allow from /localhost
 	if !LOCAL_PREFIX.IsPrefix(interest.Name()) {
@@ -55,6 +59,7 @@ func (f *FIBModule) handleIncomingInterest(interest *Interest) {
 	}
 }
 
+// Adds a next-hop entry to the FIB for the specified name, associating it with a face ID and optional cost, after validating control parameters and face existence.
 func (f *FIBModule) add(interest *Interest) {
 	if len(interest.Name()) < len(LOCAL_PREFIX)+3 {
 		f.manager.sendCtrlResp(interest, 400, "ControlParameters is incorrect", nil)
@@ -93,6 +98,7 @@ func (f *FIBModule) add(interest *Interest) {
 	})
 }
 
+// Handles a control plane request to remove a specific next-hop entry from the Forwarding Information Base (FIB) for a given name and face ID, validating the input and responding with appropriate status.
 func (f *FIBModule) remove(interest *Interest) {
 	if len(interest.Name()) < len(LOCAL_PREFIX)+3 {
 		f.manager.sendCtrlResp(interest, 400, "ControlParameters is incorrect", nil)
@@ -124,6 +130,7 @@ func (f *FIBModule) remove(interest *Interest) {
 	})
 }
 
+// Generates and sends a dataset containing all Forwarding Information Base (FIB) entries with their associated next-hop face IDs and costs in response to a management Interest.
 func (f *FIBModule) list(interest *Interest) {
 	if len(interest.Name()) > len(LOCAL_PREFIX)+2 {
 		// Ignore because contains version and/or segment components

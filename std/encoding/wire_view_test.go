@@ -19,6 +19,7 @@ var FrTestWire = enc.Wire{
 	[]byte{0x0e, 0x0f},
 }
 
+// Constructs a WireView with test data containing bytes 1-15 and verifies sequential byte reading, position tracking, and EOF detection.
 func TestWireViewReadByte(t *testing.T) {
 	tu.SetT(t)
 
@@ -34,6 +35,7 @@ func TestWireViewReadByte(t *testing.T) {
 	require.True(t, r.IsEOF())
 }
 
+// This function tests the `ReadFull` method of a `WireView` by reading data from a predefined binary wire format, verifying correct byte sequences, EOF detection, and error handling when attempting to read beyond available data.
 func TestWireViewReadFull(t *testing.T) {
 	tu.SetT(t)
 
@@ -65,6 +67,7 @@ func TestWireViewReadFull(t *testing.T) {
 	require.Equal(t, enc.ErrBufferOverflow, err)
 }
 
+// Tests the `Skip` method of the `WireView` struct by advancing the read position through a predefined test data slice, verifying correct position updates, successful skips, and error handling when skipping beyond available data.
 func TestWireViewSkip(t *testing.T) {
 	tu.SetT(t)
 
@@ -100,6 +103,7 @@ func TestWireViewSkip(t *testing.T) {
 	require.Error(t, r1.Skip(4))
 }
 
+// Tests the functionality of the WireView's ReadWire method by reading and validating wire-encoded byte slices, skipping bytes, and checking for EOF and buffer overflow errors.
 func TestWireViewReadWire(t *testing.T) {
 	tu.SetT(t)
 
@@ -139,6 +143,7 @@ func TestWireViewReadWire(t *testing.T) {
 	require.Equal(t, enc.ErrBufferOverflow, err)
 }
 
+// Validates the correct behavior of the `Delegate` method in creating sub-views of a `WireView` with independent position tracking, ensuring proper handling of reads, skips, and bounds checking within allocated byte ranges.
 func TestWireViewDelegate(t *testing.T) {
 	tu.SetT(t)
 
@@ -213,6 +218,7 @@ func TestWireViewDelegate(t *testing.T) {
 	require.Error(t, r4.Skip(1))
 }
 
+// Tests the `CopyN` method of `WireView` by verifying correct byte copying, EOF handling, and buffer overflow errors when copying data from a predefined byte sequence.
 func TestWireViewCopyN(t *testing.T) {
 	tu.SetT(t)
 
@@ -246,6 +252,7 @@ func TestWireViewCopyN(t *testing.T) {
 	require.Equal(t, enc.ErrBufferOverflow, err)
 }
 
+// This function tests the `ReadBuf` method of the `WireView` type in the NDN Go codebase by verifying correct byte reading, position tracking, EOF detection, and error handling when reading beyond available data.
 func TestWireViewReadBuf(t *testing.T) {
 	tu.SetT(t)
 
@@ -285,6 +292,7 @@ func TestWireViewReadBuf(t *testing.T) {
 	require.Nil(t, buf)
 }
 
+// Creates a new WireView representing a specific byte range from the original test data, splitting into non-contiguous segments as needed and returning an empty Wire for invalid or out-of-bound ranges.
 func TestWireViewRange(t *testing.T) {
 	tu.SetT(t)
 

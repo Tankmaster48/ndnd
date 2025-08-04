@@ -13,6 +13,7 @@ type NamePattern []ComponentPattern
 
 const TypeName TLNum = 0x07
 
+// Constructs a canonical string representation of a Name, with each component separated by slashes and ensuring a trailing slash if the final component is empty.
 func (n Name) String() string {
 	sb := strings.Builder{}
 	for i, c := range n {
@@ -28,6 +29,7 @@ func (n Name) String() string {
 	return sb.String()
 }
 
+// Constructs the URI string representation of a NamePattern, appending a trailing slash if the final component is an empty generic component.
 func (n NamePattern) String() string {
 	ret := ""
 	for _, c := range n {
@@ -276,6 +278,7 @@ func (n Name) Append(rest ...Component) Name {
 	return ret
 }
 
+// Compares two Names lexicographically by their components, returning -1 if the receiver is less, 1 if greater, or 0 if equal, with shorter names considered less when components match up to the shorter length.
 func (n Name) Compare(rhs Name) int {
 	for i := 0; i < min(len(n), len(rhs)); i++ {
 		if ret := n[i].Compare(rhs[i]); ret != 0 {
@@ -292,6 +295,7 @@ func (n Name) Compare(rhs Name) int {
 	}
 }
 
+// Compares two NamePattern instances lexicographically by iterating through their components in order, returning the result of the first differing component comparison, or a value based on length if all compared components are equal (-1 if left is shorter, 1 if longer, 0 if same length).
 func (n NamePattern) Compare(rhs NamePattern) int {
 	for i := 0; i < min(len(n), len(rhs)); i++ {
 		if ret := n[i].Compare(rhs[i]); ret != 0 {
@@ -308,6 +312,7 @@ func (n NamePattern) Compare(rhs NamePattern) int {
 	}
 }
 
+// Compares two Name instances for equality by checking if they have the same length and each component is equal, with optimizations for identical references or empty names.
 func (n Name) Equal(rhs Name) bool {
 	if len(n) != len(rhs) {
 		return false
@@ -323,6 +328,7 @@ func (n Name) Equal(rhs Name) bool {
 	return true
 }
 
+// Compares two NamePattern instances for equality by checking that they have the same length and all corresponding name components are equal.
 func (n NamePattern) Equal(rhs NamePattern) bool {
 	if len(n) != len(rhs) {
 		return false
@@ -335,6 +341,7 @@ func (n NamePattern) Equal(rhs NamePattern) bool {
 	return true
 }
 
+// Returns true if the receiver Name is a prefix of the given Name, meaning all components of the receiver match the corresponding components of the input Name up to the receiver's length, and the receiver is not longer than the input Name.
 func (n Name) IsPrefix(rhs Name) bool {
 	if len(n) > len(rhs) {
 		return false
@@ -347,6 +354,7 @@ func (n Name) IsPrefix(rhs Name) bool {
 	return true
 }
 
+// Returns true if the NamePattern n is a prefix of the NamePattern rhs, by comparing each component in sequence up to the length of n.
 func (n NamePattern) IsPrefix(rhs NamePattern) bool {
 	if len(n) > len(rhs) {
 		return false
@@ -359,12 +367,14 @@ func (n NamePattern) IsPrefix(rhs NamePattern) bool {
 	return true
 }
 
+// Matches the given name against the NamePattern by applying each component's matching rules using the provided Matching parameters.
 func (n NamePattern) Match(name Name, m Matching) {
 	for i, c := range n {
 		c.Match(name[i], m)
 	}
 }
 
+// Constructs a Name by expanding each component of the NamePattern using the provided Matching data.
 func (n NamePattern) FromMatching(m Matching) (Name, error) {
 	ret := make(Name, len(n))
 	for i, c := range n {
@@ -377,6 +387,7 @@ func (n NamePattern) FromMatching(m Matching) (Name, error) {
 	return ret, nil
 }
 
+// Appends a SHA-256 digest component computed from `rawData` to the name if it does not already end with an implicit digest component, returning a new name with the digest component included.
 func (n Name) ToFullName(rawData Wire) Name {
 	if n.At(-1).Typ == TypeImplicitSha256DigestComponent {
 		return n

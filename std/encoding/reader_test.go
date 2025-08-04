@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This function tests the correctness of `WireReader` and `BufferReader` implementations by verifying their behavior for reading, skipping, ranging, and error handling against a concatenated byte buffer, ensuring both readers produce consistent results.
 func TestBasic(t *testing.T) {
 	tu.SetT(t)
 

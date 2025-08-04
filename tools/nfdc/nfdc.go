@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Constructs a list of Cobra commands for managing Named Data Networking (NDN) components such as faces, routes, and strategies via the command line.
 func Cmds() []*cobra.Command {
 	t := Tool{}
 	cmd := func(mod string, cmd string, defaults []string) func(*cobra.Command, []string) {
@@ -91,6 +92,7 @@ type Tool struct {
 	engine ndn.Engine
 }
 
+// Initializes and starts the tool's engine if not already running, using a default face, and exits on failure.
 func (t *Tool) Start() {
 	if t.engine != nil {
 		return
@@ -105,10 +107,12 @@ func (t *Tool) Start() {
 	}
 }
 
+// Stops the engine associated with the tool.
 func (t *Tool) Stop() {
 	t.engine.Stop()
 }
 
+// Constructs and returns an NDN Name representing the localhost NFD prefix by combining the localhost component and a generic "nfd" component.
 func (t *Tool) Prefix() enc.Name {
 	return enc.Name{
 		enc.LOCALHOST,

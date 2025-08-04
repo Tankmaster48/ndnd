@@ -192,25 +192,31 @@ func (bpe *basePitEntry) EncName() enc.Name {
 	return bpe.encname
 }
 
+// Returns whether this PIT entry can be considered a prefix for matching subsequent Interests.
 func (bpe *basePitEntry) CanBePrefix() bool {
 	return bpe.canBePrefix
 }
 
+// Returns whether the entry must be fresh, indicating the consumer requires the latest content not from cache.
 func (bpe *basePitEntry) MustBeFresh() bool {
 	return bpe.mustBeFresh
 }
+// Returns the new forwarding hint associated with this PIT entry.
 func (bpe *basePitEntry) ForwardingHintNew() enc.Name {
 	return bpe.forwardingHintNew
 }
 
+// Returns the map of incoming records associated with this PIT entry, keyed by interface ID.
 func (bpe *basePitEntry) InRecords() map[uint64]*PitInRecord {
 	return bpe.inRecords
 }
 
+// Returns the map of outgoing records for this PIT entry, indexed by face ID.
 func (bpe *basePitEntry) OutRecords() map[uint64]*PitOutRecord {
 	return bpe.outRecords
 }
 
+// Removes the in-record associated with the specified face ID from the PIT entry, returning it to a memory pool for reuse and deleting the entry from the map.
 func (bpe *basePitEntry) RemoveInRecord(face uint64) {
 	if record, ok := bpe.inRecords[face]; ok {
 		PitCsPools.PitInRecord.Put(record)
@@ -218,6 +224,7 @@ func (bpe *basePitEntry) RemoveInRecord(face uint64) {
 	}
 }
 
+// Removes the outgoing record associated with the given face ID from the PIT entry by returning it to an object pool and deleting the corresponding map entry.
 func (bpe *basePitEntry) RemoveOutRecord(face uint64) {
 	if record, ok := bpe.outRecords[face]; ok {
 		PitCsPools.PitOutRecord.Put(record)
@@ -241,34 +248,42 @@ func (bpe *basePitEntry) ClearOutRecords() {
 	clear(bpe.outRecords)
 }
 
+// Returns the expiration time of the PIT entry, indicating when the Interest is no longer valid.
 func (bpe *basePitEntry) ExpirationTime() time.Time {
 	return bpe.expirationTime
 }
 
+// Sets the expiration time of the PIT entry to the specified time.
 func (bpe *basePitEntry) setExpirationTime(t time.Time) {
 	bpe.expirationTime = t
 }
 
+// Returns whether this PIT entry has been satisfied by the receipt of the corresponding data.
 func (bpe *basePitEntry) Satisfied() bool {
 	return bpe.satisfied
 }
 
+// Sets the satisfied status of this basePitEntry to indicate whether the corresponding Interest has been fulfilled.
 func (bpe *basePitEntry) SetSatisfied(isSatisfied bool) {
 	bpe.satisfied = isSatisfied
 }
 
+// "Returns the unique token associated with this PIT entry, used to identify and track the corresponding Interest in the network."
 func (bpe *basePitEntry) Token() uint32 {
 	return bpe.token
 }
 
+// Returns the index value associated with the Content Store entry.
 func (bce *baseCsEntry) Index() uint64 {
 	return bce.index
 }
 
+// Returns the time at which this Content Store entry becomes stale.
 func (bce *baseCsEntry) StaleTime() time.Time {
 	return bce.staleTime
 }
 
+// Copies the wire-encoded data from the entry, parses it into a forwardable Data packet structure, and returns both the parsed Data and a duplicated byte slice of the original wire encoding.
 func (bce *baseCsEntry) Copy() (*defn.FwData, []byte, error) {
 	wire := make([]byte, len(bce.wire))
 	copy(wire, bce.wire)

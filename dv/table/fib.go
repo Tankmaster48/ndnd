@@ -47,6 +47,7 @@ type Fib struct {
 	mark     map[uint64]bool
 }
 
+// Constructs a new Fib instance with the provided configuration and NFD management thread, initializing internal maps for name entries, prefix routes, and marking flags.
 func NewFib(config *config.Config, nfdc *nfdc.NfdMgmtThread) *Fib {
 	return &Fib{
 		config:   config,
@@ -57,14 +58,17 @@ func NewFib(config *config.Config, nfdc *nfdc.NfdMgmtThread) *Fib {
 	}
 }
 
+// Returns the number of entries in the Forwarding Information Base (FIB).
 func (fib *Fib) Size() int {
 	return len(fib.prefixes)
 }
 
+// Updates the Forwarding Information Base (FIB) entries for the specified name using the provided entries, returning true if the update was successful.
 func (fib *Fib) Update(name enc.Name, newEntries []FibEntry) bool {
 	return fib.UpdateH(name.Hash(), name, newEntries)
 }
 
+// Updates the Forwarding Information Base (FIB) for a given name by merging new routing entries, adjusting face costs, and synchronizing with the NFD RIB, returning true if the prefix remains registered or false if all routes are removed.
 func (fib *Fib) UpdateH(nameH uint64, name enc.Name, newEntries []FibEntry) bool {
 	if _, ok := fib.names[nameH]; !ok {
 		fib.names[nameH] = name
@@ -156,16 +160,19 @@ func (fib *Fib) UpdateH(nameH uint64, name enc.Name, newEntries []FibEntry) bool
 	}
 }
 
+// Marks the specified name as true in the Fib's internal mark map.
 func (fib *Fib) MarkH(name uint64) {
 	fib.mark[name] = true
 }
 
+// Removes all entries from the FIB's mark map, unmarking all previously marked entries.
 func (fib *Fib) UnmarkAll() {
 	for hash := range fib.mark {
 		delete(fib.mark, hash)
 	}
 }
 
+// Removes unmarked entries from the Forwarding Information Base (FIB) by updating their associated next-hop information to nil.
 func (fib *Fib) RemoveUnmarked() {
 	for nh := range fib.prefixes {
 		if !fib.mark[nh] {

@@ -23,18 +23,22 @@ func NewKeyChainMem(pubStore ndn.Store) ndn.KeyChain {
 	}
 }
 
+// Returns the string representation "keychain-mem" for the KeyChainMem instance when converted to a string.
 func (kc *KeyChainMem) String() string {
 	return "keychain-mem"
 }
 
+// Returns the public key store managed by the key chain for accessing and managing cryptographic keys.
 func (kc *KeyChainMem) Store() ndn.Store {
 	return kc.pubStore
 }
 
+// Returns the slice of identities managed by the key chain.
 func (kc *KeyChainMem) Identities() []ndn.KeyChainIdentity {
 	return kc.identities
 }
 
+// Returns the KeyChainIdentity with the specified name if it exists in the key chain, otherwise returns nil.
 func (kc *KeyChainMem) IdentityByName(name enc.Name) ndn.KeyChainIdentity {
 	for _, id := range kc.identities {
 		if id.Name().Equal(name) {
@@ -44,6 +48,7 @@ func (kc *KeyChainMem) IdentityByName(name enc.Name) ndn.KeyChainIdentity {
 	return nil
 }
 
+// Inserts a cryptographic signer into the key chain under its associated identity, attaching any existing certificates and ensuring no duplicate keys are added.
 func (kc *KeyChainMem) InsertKey(signer ndn.Signer) error {
 	// Get key name
 	keyName := signer.KeyName()
@@ -81,6 +86,7 @@ func (kc *KeyChainMem) InsertKey(signer ndn.Signer) error {
 	return nil
 }
 
+// Inserts a key certificate into the key chain after validating its content type, name structure, and expiration, and updates associated identities.
 func (kc *KeyChainMem) InsertCert(wire []byte) error {
 	data, _, err := spec.Spec{}.ReadData(enc.NewBufferView(wire))
 	if err != nil {

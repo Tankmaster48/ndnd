@@ -70,22 +70,27 @@ func NewKeyChainDir(path string, pubStore ndn.Store) (ndn.KeyChain, error) {
 	return kc, nil
 }
 
+// Returns a string representation of the KeyChainDir instance, including its associated path in the format "keychain-dir (path)".
 func (kc *KeyChainDir) String() string {
 	return fmt.Sprintf("keychain-dir (%s)", kc.path)
 }
 
+// Returns the underlying storage implementation used by the key chain.
 func (kc *KeyChainDir) Store() ndn.Store {
 	return kc.mem.Store()
 }
 
+// Returns the list of identities managed by the key chain.
 func (kc *KeyChainDir) Identities() []ndn.KeyChainIdentity {
 	return kc.mem.Identities()
 }
 
+// Returns the key chain identity associated with the specified name.
 func (kc *KeyChainDir) IdentityByName(name enc.Name) ndn.KeyChainIdentity {
 	return kc.mem.IdentityByName(name)
 }
 
+// Inserts a signer's key into the keychain's in-memory storage and persists it to a file with the designated key file extension.
 func (kc *KeyChainDir) InsertKey(signer ndn.Signer) error {
 	err := kc.mem.InsertKey(signer)
 	if err != nil {
@@ -100,6 +105,7 @@ func (kc *KeyChainDir) InsertKey(signer ndn.Signer) error {
 	return kc.writeFile(secret.Join(), EXT_KEY)
 }
 
+// Inserts a certificate into the keychain's memory and writes it to a persistent file with the certificate file extension.
 func (kc *KeyChainDir) InsertCert(wire []byte) error {
 	err := kc.mem.InsertCert(wire)
 	if err != nil {
@@ -109,6 +115,7 @@ func (kc *KeyChainDir) InsertCert(wire []byte) error {
 	return kc.writeFile(wire, EXT_CERT)
 }
 
+// Writes PEM-encoded key material to a file in the keychain directory, using a SHA-256 hash of the data as the filename to ensure uniqueness and secure storage with 0600 permissions.
 func (kc *KeyChainDir) writeFile(wire []byte, ext string) error {
 	hash := sha256.Sum256(wire)
 	filename := hex.EncodeToString(hash[:])

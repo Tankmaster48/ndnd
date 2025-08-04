@@ -23,15 +23,18 @@ type Multicast struct {
 	StrategyBase
 }
 
+// Registers the Multicast strategy with version 1, adding its constructor to the initialization list and mapping it to the "multicast" name in the strategy version registry.
 func init() {
 	strategyInit = append(strategyInit, func() Strategy { return &Multicast{} })
 	StrategyVersions["multicast"] = []uint64{1}
 }
 
+// Initializes the base multicast forwarding strategy with the specified thread, naming it "multicast" and using version 1.
 func (s *Multicast) Instantiate(fwThread *Thread) {
 	s.NewStrategyBase(fwThread, "multicast", 1)
 }
 
+// Handles a Content Store hit by logging the event and sending the cached Data packet to the faces specified in the PIT entry, indicating the Content Store as the source (0).
 func (s *Multicast) AfterContentStoreHit(
 	packet *defn.Pkt,
 	pitEntry table.PitEntry,
@@ -41,6 +44,7 @@ func (s *Multicast) AfterContentStoreHit(
 	s.SendData(packet, pitEntry, inFace, 0) // 0 indicates ContentStore is source
 }
 
+// Forwards the received Data packet to all faces listed in the PIT entry's incoming records to satisfy pending Interests in a multicast scenario.
 func (s *Multicast) AfterReceiveData(
 	packet *defn.Pkt,
 	pitEntry table.PitEntry,
@@ -53,6 +57,7 @@ func (s *Multicast) AfterReceiveData(
 	}
 }
 
+// Suppresses retransmitted Interests with differing nonces within the suppression interval and forwards new Interests to all nexthops in a multicast scenario.
 func (s *Multicast) AfterReceiveInterest(
 	packet *defn.Pkt,
 	pitEntry table.PitEntry,
@@ -82,6 +87,7 @@ func (s *Multicast) AfterReceiveInterest(
 	}
 }
 
+// This function is a no-op in the Multicast strategy, serving as a placeholder for pre-satisfaction logic that is unnecessary for multicast interest handling.
 func (s *Multicast) BeforeSatisfyInterest(pitEntry table.PitEntry, inFace uint64) {
 	// This does nothing in Multicast
 }

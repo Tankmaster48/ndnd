@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Signs and verifies a cross-schema Data packet with specified validity periods and content rules, ensuring correct name formatting, content encoding, and signature validation.
 func TestSignCrossSchema(t *testing.T) {
 	tu.SetT(t)
 

@@ -42,6 +42,7 @@ const SchemaJson = `{
   ]
 }`
 
+// Sets up an NDN schema-based application to fetch time-parameterized data from a network prefix and handles the response outcomes (NACK, timeout, cancellation, or data retrieval).
 func main() {
 	// Setup schema tree
 	tree := schema.CreateFromJson(SchemaJson, map[string]any{

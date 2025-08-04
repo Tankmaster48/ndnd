@@ -18,14 +18,17 @@ type keyChainKey struct {
 	latestCertVer uint64
 }
 
+// Returns the name of the key associated with this key chain entry.
 func (k *keyChainKey) KeyName() enc.Name {
 	return k.signer.KeyName()
 }
 
+// Returns the cryptographic signer associated with this key for signing NDN data packets.
 func (k *keyChainKey) Signer() ndn.Signer {
 	return k.signer
 }
 
+// Returns the slice of unique certificate names associated with this key.
 func (k *keyChainKey) UniqueCerts() []enc.Name {
 	return k.uniqueCerts
 }
@@ -55,14 +58,17 @@ type keyChainIdentity struct {
 	keyList []ndn.KeyChainKey
 }
 
+// Returns the NDN name associated with this identity in the key chain.
 func (id *keyChainIdentity) Name() enc.Name {
 	return id.name
 }
 
+// Returns the list of keys associated with this identity in the key chain.
 func (id *keyChainIdentity) Keys() []ndn.KeyChainKey {
 	return id.keyList
 }
 
+// Inserts a certificate with the given name into the appropriate key under this identity if the certificate name is prefixed by the identity's name and a key's name, then sorts the identity's keys.
 func (id *keyChainIdentity) insertCert(name enc.Name) {
 	if !id.Name().IsPrefix(name) {
 		return
@@ -75,6 +81,7 @@ func (id *keyChainIdentity) insertCert(name enc.Name) {
 	}
 }
 
+// Sorts the identity's key list in descending order based on the latest certificate version of each key.
 func (id *keyChainIdentity) sort() {
 	sort.Slice(id.keyList, func(i, j int) bool {
 		return id.keyList[i].(*keyChainKey).latestCertVer >

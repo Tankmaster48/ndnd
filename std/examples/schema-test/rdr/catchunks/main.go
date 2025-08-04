@@ -56,6 +56,7 @@ const SchemaJson = `{
   ]
 }`
 
+// Initializes an NDN consumer application using a JSON schema to fetch data from the network, attaching the schema to a forwarding engine and processing the retrieval result with status handling.
 func main() {
 	// Setup schema tree
 	tree := schema.CreateFromJson(SchemaJson, map[string]any{

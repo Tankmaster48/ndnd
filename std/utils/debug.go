@@ -6,6 +6,7 @@ import (
 	"runtime"
 )
 
+// Prints the stack traces of all currently running goroutines to standard error for debugging purposes.
 func PrintStackTrace() {
 	buf := make([]byte, 1<<20)
 	stacklen := runtime.Stack(buf, true)

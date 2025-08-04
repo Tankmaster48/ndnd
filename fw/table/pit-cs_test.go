@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Constructs a basePitEntry with predefined fields and verifies that all getter methods return the expected values for each field.
 func TestBasePitEntryGetters(t *testing.T) {
 	name, _ := enc.NameFromStr("/something")
 	currTime := time.Now()
@@ -35,6 +36,7 @@ func TestBasePitEntryGetters(t *testing.T) {
 	assert.Equal(t, bpe.Token(), uint32(1234))
 }
 
+// Tests the correct initialization and modification of a base PIT entry's fields, specifically verifying that `setExpirationTime` and `SetSatisfied` methods update their respective values as expected.
 func TestBasePitEntrySetters(t *testing.T) {
 	name, _ := enc.NameFromStr("/something")
 	currTime := time.Now()
@@ -56,6 +58,9 @@ func TestBasePitEntrySetters(t *testing.T) {
 	assert.Equal(t, bpe.Satisfied(), false)
 }
 
+// This function clears all incoming records from a PIT (Pending Interest Table) entry, effectively removing all stored incoming interest identifiers.  
+
+**Example:** Clears all incoming records from a PIT entry.
 func TestClearInRecords(t *testing.T) {
 	inrecord1 := PitInRecord{}
 	inrecord2 := PitInRecord{}
@@ -71,6 +76,7 @@ func TestClearInRecords(t *testing.T) {
 	assert.Equal(t, len(bpe.InRecords()), 0)
 }
 
+// Clears all existing out records from the PIT entry, resulting in an empty collection of out records.
 func TestClearOutRecords(t *testing.T) {
 	outrecord1 := PitOutRecord{}
 	outrecord2 := PitOutRecord{}
@@ -86,6 +92,7 @@ func TestClearOutRecords(t *testing.T) {
 	assert.Equal(t, len(bpe.OutRecords()), 0)
 }
 
+// Manages insertion or updating of incoming Interest records in a PIT entry, tracking per-face identifiers, nonces, and PIT tokens while returning whether the entry already existed and its prior nonce value if updated.
 func TestInsertInRecord(t *testing.T) {
 	// Case 1: interest does not already exist in basePitEntry.inRecords
 	name, _ := enc.NameFromStr("/something")
@@ -147,6 +154,7 @@ func TestInsertInRecord(t *testing.T) {
 	// of time.Now()
 }
 
+// Tests the getters and copy method of `baseCsEntry` to ensure correct retrieval of index, stale time, and wire data.
 func TestBaseCsEntryGetters(t *testing.T) {
 	name, _ := enc.NameFromStr("/ndn/edu/ucla/ping/123")
 	currTime := time.Now()

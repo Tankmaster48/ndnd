@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Executes an NDN management command with specified module, command, and arguments, merging default values with user-provided key-value parameters and outputting the structured response.
 func (t *Tool) ExecCmd(_ *cobra.Command, mod string, cmd string, args []string, defaults []string) {
 	t.Start()
 	defer t.Stop()
@@ -55,6 +56,7 @@ func (t *Tool) ExecCmd(_ *cobra.Command, mod string, cmd string, args []string, 
 	}
 }
 
+// Handles conversion of face URIs to face IDs by querying existing faces or creating new ones when necessary, depending on the command and module context.
 func (n *Tool) preprocessArg(
 	ctrlArgs *mgmt.ControlArgs,
 	mod string, cmd string,
@@ -142,6 +144,7 @@ func (n *Tool) preprocessArg(
 	return key, val
 }
 
+// Parses and validates command-line key-value arguments into a `ControlArgs` struct for management commands, handling type conversion and error checking for face, route, and strategy parameters.
 func (n *Tool) convCmdArg(ctrlArgs *mgmt.ControlArgs, key string, val string) {
 	// helper function to parse uint64 values
 	parseUint := func(val string) uint64 {
@@ -203,6 +206,7 @@ func (n *Tool) convCmdArg(ctrlArgs *mgmt.ControlArgs, key string, val string) {
 	}
 }
 
+// Prints a ControlResponse's status code, status text, and sorted parameters, converting specific fields like FacePersistency and Origin to human-readable strings.
 func (n *Tool) printCtrlResponse(res *mgmt.ControlResponse) {
 	// print status code and text
 	fmt.Printf("Status=%d (%s)\n", res.Val.StatusCode, res.Val.StatusText)

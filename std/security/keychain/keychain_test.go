@@ -41,6 +41,7 @@ Z27QIGFgKR4LEuflvnSZZGFRKFxTUF5S2f/ZO/4B4NoxrF1ZOHD9NCWTkwI=
 var CERT_ROOT_NAME, _ = enc.NameFromStr("/ndn/KEY/%27%C4%B2%2A%9F%7B%81%27/ndn/v=1651246789556")
 var KEY_ALICE_NAME, _ = enc.NameFromStr("/ndn/alice/KEY/X%DC%B6%FAg%29%A4%82")
 
+// Generates and returns a signed certificate using the provided signer, with test issuer ID and a validity period of one year from the current time.
 func signCert(t *testing.T, signer ndn.Signer) []byte {
 	certData, _, _ := spec.Spec{}.ReadData(enc.NewWireView(
 		tu.NoErr(sig.MarshalSecret(signer))))
@@ -55,6 +56,7 @@ func signCert(t *testing.T, signer ndn.Signer) []byte {
 	return cert.Join()
 }
 
+// This function tests the in-memory KeyChain functionality by verifying key insertion, certificate management, identity handling, and error cases for the Named-Data Networking Go implementation.
 func TestKeyChainMem(t *testing.T) {
 	tu.SetT(t)
 
@@ -134,6 +136,7 @@ func TestKeyChainMem(t *testing.T) {
 	require.Equal(t, certRoot, data)
 }
 
+// Tests the creation of a KeyChain from a directory by loading a root certificate into a memory store and verifying an identity with a corresponding key is correctly initialized without storing the key in the memory store.
 func TestKeyChainDir(t *testing.T) {
 	tu.SetT(t)
 

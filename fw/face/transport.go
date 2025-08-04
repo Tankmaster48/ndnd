@@ -67,6 +67,7 @@ type transportBase struct {
 	nOutBytes uint64
 }
 
+// Initializes the transportBase instance with specified remote and local URIs, persistency, scope, link type, and MTU values for transport configuration.
 func (t *transportBase) makeTransportBase(
 	remoteURI *defn.URI,
 	localURI *defn.URI,
@@ -88,10 +89,12 @@ func (t *transportBase) makeTransportBase(
 // Setters
 //
 
+// Sets the face ID of the transport to the specified value.
 func (t *transportBase) setFaceID(faceID uint64) {
 	t.faceID = faceID
 }
 
+// Sets the link service for the transport, enabling it to utilize the provided `LinkService` implementation for network communication.
 func (t *transportBase) setLinkService(linkService LinkService) {
 	t.linkService = linkService
 }
@@ -100,30 +103,37 @@ func (t *transportBase) setLinkService(linkService LinkService) {
 // Getters
 //
 
+// Returns the local URI associated with the transport instance.
 func (t *transportBase) LocalURI() *defn.URI {
 	return t.localURI
 }
 
+// Returns the remote URI associated with the transport connection.
 func (t *transportBase) RemoteURI() *defn.URI {
 	return t.remoteURI
 }
 
+// Returns the persistency setting of the transport.
 func (t *transportBase) Persistency() spec_mgmt.Persistency {
 	return t.persistency
 }
 
+// Returns the current scope of the transport base.
 func (t *transportBase) Scope() defn.Scope {
 	return t.scope
 }
 
+// Returns the link type of the transport as a `defn.LinkType` value.
 func (t *transportBase) LinkType() defn.LinkType {
 	return t.linkType
 }
 
+// Returns the maximum transmission unit (MTU) size for the transport.
 func (t *transportBase) MTU() int {
 	return t.mtu
 }
 
+// Sets the Maximum Transmission Unit (MTU) for the transport, specifying the maximum size of data packets that can be transmitted.
 func (t *transportBase) SetMTU(mtu int) {
 	t.mtu = mtu
 }
@@ -137,10 +147,12 @@ func (t *transportBase) ExpirationPeriod() time.Duration {
 	return time.Until(*t.expirationTime)
 }
 
+// Returns the unique identifier of the face associated with this transport.
 func (t *transportBase) FaceID() uint64 {
 	return t.faceID
 }
 
+// Returns whether the transport is currently running.
 func (t *transportBase) IsRunning() bool {
 	return t.running.Load()
 }
@@ -149,10 +161,12 @@ func (t *transportBase) IsRunning() bool {
 // Counters
 //
 
+// Returns the total number of bytes received by the transport.
 func (t *transportBase) NInBytes() uint64 {
 	return t.nInBytes
 }
 
+// Returns the total number of bytes transmitted by this transport as a 64-bit unsigned integer.
 func (t *transportBase) NOutBytes() uint64 {
 	return t.nOutBytes
 }

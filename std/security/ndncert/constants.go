@@ -23,6 +23,7 @@ type ErrSignerProbeMismatch struct {
 	Suggested []enc.Name
 }
 
+// Returns an error message indicating that the provided signer does not match any CA suggestion, including the specified key name.
 func (e ErrSignerProbeMismatch) Error() string {
 	return "provided signer does not match any CA suggestion: " + e.KeyName.String()
 }

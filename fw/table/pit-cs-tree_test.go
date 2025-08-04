@@ -34,10 +34,12 @@ var VALID_DATA_2 = []byte{
 	0x7d, 0xa9, 0x20, 0xea, 0x8b, 0xda, 0xf6, 0x13, 0xed,
 }
 
+// Constructs an unsigned FwData object with the specified name and no content.
 func makeData(name enc.Name) *defn.FwData {
 	return &defn.FwData{NameV: name}
 }
 
+// Constructs an FwInterest with the given name and a randomly generated nonce.
 func makeInterest(name enc.Name) *defn.FwInterest {
 	return &defn.FwInterest{
 		NameV:  name,
@@ -45,10 +47,12 @@ func makeInterest(name enc.Name) *defn.FwInterest {
 	}
 }
 
+// Sets the ContentStore's replacement policy to the specified string (e.g., "LRU", "FIFO").
 func setReplacementPolicy(policy string) {
 	core.C.Tables.ContentStore.ReplacementPolicy = policy
 }
 
+// Constructs a new PIT/CS tree with LRU replacement policy and verifies its initial empty state by asserting zero size and nil search results for all lookup operations.
 func TestNewPitCSTree(t *testing.T) {
 	setReplacementPolicy("lru")
 	pitCS := NewPitCS(func(PitEntry) {})
@@ -85,6 +89,7 @@ func TestNewPitCSTree(t *testing.T) {
 	assert.Nil(t, csEntry)
 }
 
+// Tests that the `IsCsAdmitting` method of a `PitCS` instance correctly reflects the global cache admission configuration setting.
 func TestIsCsAdmitting(t *testing.T) {
 	setReplacementPolicy("lru")
 	CfgSetCsAdmit(false)
@@ -99,6 +104,8 @@ func TestIsCsAdmitting(t *testing.T) {
 	assert.Equal(t, CfgCsAdmit(), true)
 }
 
+// **Description:**  
+Tests that the `IsCsServing` method of `PitCS` correctly reflects the CS (Content Store) serving configuration state set via `CfgSetCsServe`, ensuring new `PitCS` instances inherit the current configuration value.
 func TestIsCsServing(t *testing.T) {
 	setReplacementPolicy("lru")
 	CfgSetCsServe(false)
@@ -113,6 +120,7 @@ func TestIsCsServing(t *testing.T) {
 	assert.Equal(t, CfgCsServe(), true)
 }
 
+// Tests the `InsertInterest` method of the `PitCS` structure by verifying correct creation, updating, duplicate detection, and management of PIT entries under various scenarios, including nonces, prefixes, and distinct interests.
 func TestInsertInterest(t *testing.T) {
 	setReplacementPolicy("lru")
 
@@ -254,6 +262,7 @@ func TestInsertInterest(t *testing.T) {
 	assert.Equal(t, pitCS.PitSize(), 2)
 }
 
+// Tests the `RemoveInterest` functionality of a PIT (Pending Interest Table) by verifying correct removal of interests under various scenarios, including single entries, multiple entries under the same name, and entries within hierarchical name structures, ensuring accurate PIT size updates.
 func TestRemoveInterest(t *testing.T) {
 	setReplacementPolicy("lru")
 
@@ -309,6 +318,7 @@ func TestRemoveInterest(t *testing.T) {
 	assert.Equal(t, pitCS.PitSize(), 2)
 }
 
+// Tests the `FindInterestExactMatchEnc` method of the PIT/CS structure by verifying that it correctly retrieves an interest entry only when the queried interest's name, flags (CanBePrefix, MustBeFresh), and forwarding hint exactly match an existing entry, and returns nil for non-matching names, prefixes, or longer names.
 func TestFindInterestExactMatch(t *testing.T) {
 	setReplacementPolicy("lru")
 
@@ -351,6 +361,7 @@ func TestFindInterestExactMatch(t *testing.T) {
 	assert.Nil(t, pitEntryNil)
 }
 
+// Finds all PIT entries with interests that are hierarchical prefixes of the provided Data packet's name.
 func TestFindInterestPrefixMatchByData(t *testing.T) {
 	setReplacementPolicy("lru")
 
@@ -397,6 +408,7 @@ func TestFindInterestPrefixMatchByData(t *testing.T) {
 	assert.Equal(t, len(pitEntries), 2)
 }
 
+// Tests the insertion and updating of out-records in a PIT entry, verifying correct handling of new entries, nonce updates for existing faces, and creation of new entries for different faces under an LRU replacement policy.
 func TestInsertOutRecord(t *testing.T) {
 	setReplacementPolicy("lru")
 
@@ -429,6 +441,7 @@ func TestInsertOutRecord(t *testing.T) {
 	assert.True(t, outRecord.LatestNonce == interest.NonceV.Unwrap())
 }
 
+// This function tests the insertion, updating, and retrieval of out-records in a PIT (Pending Interest Table) entry, verifying that out-records are correctly added for new faces, updated with the latest nonce for existing faces, and returned in a sorted order by face ID.
 func TestGetOutRecords(t *testing.T) {
 	setReplacementPolicy("lru")
 
@@ -482,6 +495,7 @@ func TestGetOutRecords(t *testing.T) {
 	assert.True(t, outRecords[1].LatestNonce == interest.NonceV.Unwrap())
 }
 
+// Tests the correctness of the `FindMatchingDataFromCS` method in a PIT Content Store (CS) by verifying data entry insertion, name-based matching (with and without `CanBePrefix`), cache size management, and LRU eviction behavior.
 func FindMatchingDataFromCS(t *testing.T) {
 	setReplacementPolicy("lru")
 	CfgSetCsCapacity(1024)
