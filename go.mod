@@ -1,4 +1,4 @@
-module github.com/named-data/ndnd
+module github.com/Tankmaster48/ndnd
 
 go 1.23.0
 
