@@ -1,4 +1,4 @@
-module github.com/Tankmaster48/ndnd
+module github.com/Tankmaster48/ndnd_doc
 
 go 1.23.0
 
